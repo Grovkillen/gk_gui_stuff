@@ -1,0 +1,13 @@
+/* gk_gui_stuff report_clarity. Logical properties only (environment manifest 5.22); neutral colours until
+   theme_engine's palette tokens exist. Three kinds of columns, three looks: statuses, sums, everything. */
+table.issue-report-detailed tr.gk-gui-stuff-rep-groups th { font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; border-block-end: 0; }
+table.issue-report-detailed .gk-gui-stuff-rep-first { border-inline-start: 2px solid var(--oc-gray-5); }
+table.issue-report-detailed .gk-gui-stuff-rep-sum { background: var(--oc-gray-1); font-style: italic; }
+table.issue-report-detailed .gk-gui-stuff-rep-total { background: var(--oc-gray-2); font-weight: bold; border-inline-start: 4px double var(--oc-gray-6); }
+table.issue-report-detailed th.gk-gui-stuff-rep-closed { color: var(--oc-gray-6); }
+table.issue-report-detailed .gk-gui-stuff-rep-note { display: block; font-size: 0.8em; font-weight: normal; font-style: normal; color: var(--oc-gray-6);
+  white-space: normal; max-inline-size: 16em; margin-inline: auto; }
+.gk-gui-stuff-rep-chart-head { margin-block: 1.5em 0.3em; }
+.gk-gui-stuff-rep-chart-head h3 { margin-block-end: 0.2em; }
+.gk-gui-stuff-rep-chart-head p { margin-block: 0; color: var(--oc-gray-7); }
+@media print { .gk-gui-stuff-rep-chart-head { display: none; } }

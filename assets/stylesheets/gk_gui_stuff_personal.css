@@ -1,0 +1,7 @@
+.gk-gui-stuff-count { display: inline-block; min-inline-size: 1.4em; padding-inline: 5px; margin-inline-start: 4px; border-radius: 9px; text-align: center;
+  font-size: .8em; font-weight: bold; line-height: 1.5; color: var(--oc-white, #ffffff); background: var(--oc-red-7, #f03e3e); vertical-align: middle; inset-block-end: 0; }
+.gk-gui-stuff-count-info { color: var(--oc-gray-8, #343a40); background: var(--oc-gray-2, #e9ecef); font-weight: normal; }
+#account .dropdown-trigger .gk-gui-stuff-count { margin-inline-start: 2px; }
+.gk-gui-stuff-personal-box ul { list-style: none; padding-inline-start: 0; margin-block: 4px 12px; }
+.gk-gui-stuff-personal-box li { margin-block: 3px; }
+.gk-gui-stuff-personal-block td.gk-gui-stuff-personal-n { text-align: end; inline-size: 4em; }

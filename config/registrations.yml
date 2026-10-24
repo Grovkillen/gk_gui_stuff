@@ -1,0 +1,73 @@
+# config/registrations.yml: vad pluginet lägger i de gemensamma lagren
+# (miljömanifestet 8.1). Tomma listor betyder ingenting där; nycklarna
+# får inte saknas. En kontrollerad utskrift av det koden registrerar:
+# init.rb och extensions/gk_gui_stuff/ är källan, och varje rad pekar
+# på något som finns (T-REG). Det som bara är planerat står inte här
+# förrän det är byggt.
+permissions: []
+menu:                   # rader i trepunktsmenyn (GkGuiStuff::Menu.register i init.rb)
+  - {key: history, section: show, context: [issue], label: gk_gui_stuff_menu_history, kind: action}
+  - {key: fullscreen, section: show, context: [issue, issue_list, project, wiki_page, version, other], label: gk_gui_stuff_menu_fullscreen, kind: action}
+  - {key: collapse_all, section: show, context: [issue], label: gk_gui_stuff_sec_close_all, kind: action, placement: out}
+drawer: []
+notices: []
+banners:
+  - {key: login_warning, level: notice, contexts: [any], condition: anonymous, animation: setting}   # desktop under toppmenyn, telefon i utfällda menyn
+waves:                  # vågens ord för core:s formulär som inte sparar (GkGuiStuff::WaveForms); spara och ta bort säger vågen själv
+  - {key: save, word: gk_gui_stuff_wave_saving, done: gk_gui_stuff_wave_saved}
+  - {key: delete, word: gk_gui_stuff_wave_deleting, done: gk_gui_stuff_wave_deleted}
+  - {key: login, match: '/login(\?|$)', word: gk_gui_stuff_wave_logging_in, done: gk_gui_stuff_wave_logged_in}
+  - {key: account_mail, match: '/account/(lost_password|register|activation_email)', word: gk_gui_stuff_wave_sending, done: gk_gui_stuff_wave_sent}
+  - {key: test_email, match: '/admin/test_email', word: gk_gui_stuff_wave_sending, done: gk_gui_stuff_wave_sent}
+  - {key: default_configuration, match: '/admin/default_configuration', word: gk_gui_stuff_wave_reading_in, done: gk_gui_stuff_wave_read_in}
+  - {key: imports, match: '/imports(/|$)', word: gk_gui_stuff_wave_importing, done: gk_gui_stuff_wave_imported}
+surfaces: []
+color_roles:            # theme_engine and the palette give the colour (--gk-role-<group>-<key>)
+  - {key: parent_row, group: ui, label: label_gk_gui_stuff_mod_parent_link}   # parent_link: the parent issue's row in the box of related issues
+records:
+  targets:
+    - {key: gui_feature, model: GkGuiStuffFeature}          # en funktion under Administration, Funktioner
+  note_kinds: []
+  event_kinds:
+    - {key: gui_feature_switched, target: gui_feature, label: label_gk_gui_stuff_event_feature_switched}
+    - {key: gui_choice_changed, target: user, label: label_gk_gui_stuff_event_choice_changed}
+  link_kinds: []
+strings:
+  terms: []
+text_levels: []
+templates:
+  kinds: []
+scenario_steps: []
+jobs: []
+corners: []             # gui_stuff corner (hörnvik): {key, context, source, level}
+timeline: []
+queries: []
+folds:                  # fäll ihop (gk_gui_stuff_fold.js); gränserna står under Värden: höjden i px och antalet bilagor
+  - {key: long_fields, label: gk_gui_stuff_fold_more}
+  - {key: notes_collapse, label: gk_gui_stuff_fold_more}
+  - {key: private_notes_collapse, label: gk_gui_stuff_fold_private}
+  - {key: code_blocks, label: gk_gui_stuff_fold_more}
+  - {key: attachments_collapse, label: gk_gui_stuff_fold_files}
+copies:                 # kopiera (gk_gui_stuff_copy.js)
+  - {key: mailto_copy, label: gk_gui_stuff_copy_address}
+  - {key: inline_copy, label: gk_gui_stuff_copy_click}
+  - {key: code_copy, label: gk_gui_stuff_copy_code}
+view_states:
+  - {key: fullscreen, context: any, values: [off, on], default: off, label: label_gk_gui_stuff_mod_fullscreen}
+  - {key: calendar_compact, context: calendar, values: [off, on], default: off, label: label_gk_gui_stuff_mod_calendar_compact, storage: preference}   # core:s inställningar, gk_gui_stuff_calendar_compact
+decorations: []
+content_transforms:
+  - {key: branch_jump, selector: "h1 .breadcrumbs .separator", print: strip}   # separatorn blir knapp som visar grenen av projektträdet
+  - {key: arrows, print: keep}                                                 # <-->, --> och <-- som pilar, aldrig i kod
+toolbar: []
+forms: []
+revisioned: []
+locked: []
+ribbons: []
+triggers: []
+trigger_actions: []
+gis_layers: []
+gis_columns: []
+disk_areas: []
+appearances: {}
+access_items: []

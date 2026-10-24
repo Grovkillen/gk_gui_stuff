@@ -1,0 +1,13 @@
+<%# Mina sidor on Mitt konto where the account is no dropdown (compat's account_dropdown): drawn at the page's foot and moved to the top of the sidebar by
+    gk_gui_stuff_personal.js; the counts are painted from the page's data %>
+<% rows = summary[:rows] %>
+<% if rows.present? %>
+<div id="gk-gui-stuff-personal-box" class="gk-gui-stuff-personal-box">
+  <h3><%= l(:label_gk_gui_stuff_personal) %></h3>
+  <ul class="gk-gui-stuff-personal-list">
+    <% rows.each do |r| %>
+      <li><%= link_to(r[:icon] ? sprite_icon(r[:icon], r[:label]) : r[:label], r[:path], class: [('icon' if r[:icon]), r[:css]].compact.join(' ').presence, data: { gk_gui_stuff_personal_key: r[:key] }) %></li>
+    <% end %>
+  </ul>
+</div>
+<% end %>

@@ -1,0 +1,15 @@
+/* gk_gui_stuff collapse_all: sections of the issue page that fold under their own label */
+.gk-gui-stuff-sec-toggle { border: 0; background: none; padding-block: 0; padding-inline: 0 0.25em; margin: 0; cursor: pointer; color: inherit; font: inherit; vertical-align: middle; line-height: 1; }
+.gk-gui-stuff-sec-toggle .gk-gui-stuff-sec-chev { display: inline-block; transition: transform 0.15s; }
+.gk-gui-stuff-sec-closed .gk-gui-stuff-sec-toggle .gk-gui-stuff-sec-chev, .gk-gui-stuff-sec-label.gk-gui-stuff-sec-closed .gk-gui-stuff-sec-chev { transform: rotate(-90deg); }
+.gk-gui-stuff-sec-labelled { cursor: pointer; }
+.gk-gui-stuff-sec-closed > .gk-gui-stuff-sec-body { display: none !important; }
+.gk-gui-stuff-sec-label { margin: 0.4em 0; }
+/* a plugin's section after its line: the line is the separator, never a border of its own as well */
+.gk-gui-stuff-sec-moved { border-block-start: 0 !important; margin-block-start: 0 !important; padding-block-start: 0 !important; }
+div.attributes.gk-gui-stuff-sec-hidden { display: none !important; }
+/* "Nothing here yet." under an open section: a quiet line, not core's big yellow box for an empty list */
+.gk-gui-stuff-sec-empty.nodata { background: none; border: 0; border-radius: 0; margin-block: 2px 6px; padding-block: 0; padding-inline: 0; text-align: start; font-size: 0.9em; font-style: italic; color: var(--oc-gray-6); }
+a.gk-gui-stuff-sec-all { cursor: pointer; }
+@media print { .gk-gui-stuff-sec-closed > .gk-gui-stuff-sec-body, div.attributes.gk-gui-stuff-sec-hidden { display: revert !important; } .gk-gui-stuff-sec-toggle, a.gk-gui-stuff-sec-all { display: none; } }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-sec-toggle .gk-gui-stuff-sec-chev { transition: none; } }

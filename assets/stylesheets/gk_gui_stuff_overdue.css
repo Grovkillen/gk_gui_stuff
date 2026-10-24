@@ -1,0 +1,9 @@
+/* gk_gui_stuff overdue_mark: core's class overdue drawn, and the optional gk-gui-stuff-due-soon. Only loaded when the
+   module is on for the person, so the class alone never draws anything. */
+tr.issue.overdue > td:first-child { box-shadow: inset 4px 0 0 var(--gk-gui-stuff-overdue, var(--oc-red-8)); }
+tr.issue.gk-gui-stuff-due-soon > td:first-child { box-shadow: inset 4px 0 0 var(--gk-gui-stuff-due-soon, var(--oc-yellow-8)); }
+tr.issue.overdue > td.due_date { color: var(--gk-gui-stuff-overdue-text, var(--oc-red-9)); font-weight: bold; }
+tr.issue.gk-gui-stuff-due-soon > td.due_date { color: var(--gk-gui-stuff-due-soon-text, var(--oc-orange-9)); }
+div.issue.overdue .due-date .value { color: var(--gk-gui-stuff-overdue-text, var(--oc-red-9)); font-weight: bold; }
+div.issue.gk-gui-stuff-due-soon .due-date .value { color: var(--gk-gui-stuff-due-soon-text, var(--oc-orange-9)); font-weight: bold; }
+@media print { tr.issue > td:first-child { box-shadow: none !important; } }

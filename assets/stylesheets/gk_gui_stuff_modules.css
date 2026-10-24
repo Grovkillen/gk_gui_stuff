@@ -1,0 +1,120 @@
+/* gk_gui_stuff: the small modules (kernel notice, fold, copy, time, issue, history, footer, login warning).
+   Logical properties; nothing folded and no buttons in print. */
+/* the whisper ("Kodblock kopierat"): small, dark, dim; nothing to click, nothing counting */
+.gk-gui-stuff-notice { position: fixed; inset-block-end: calc(28px + var(--gk-gui-stuff-savebar-size, 0px)); inset-inline-start: 50%; transform: translateX(-50%) translateY(6px); background: rgba(var(--oc-gray-9-rgb), .78); color: var(--oc-gray-1);
+  padding-block: 5px; padding-inline: 12px; border-radius: 999px; font-size: .88em; letter-spacing: .01em; opacity: 0; pointer-events: none;
+  transition: opacity .18s, transform .18s; z-index: 1000; max-inline-size: 80vw; backdrop-filter: blur(2px); white-space: nowrap; }
+.gk-gui-stuff-notice-on { opacity: 1; transform: translateX(-50%) translateY(0); }
+.gk-gui-stuff-offscreen { position: fixed; inset-block-start: -1000px; }
+
+.gk-gui-stuff-fold { overflow: hidden; position: relative; }
+/* the shade at the fold: a darkening laid over the block, so it is the block's own background in a darker tone
+   whatever that background is, in every theme, light or dark */
+.gk-gui-stuff-fold:not(.gk-gui-stuff-fold-closed)::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 22px; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(var(--oc-black-rgb),0), rgba(var(--oc-black-rgb),.2)); }
+.gk-gui-stuff-fold-btn { display: block; margin-block: 4px 8px; padding-block: 2px; padding-inline: 8px; font-size: .9em; cursor: pointer;
+  background: transparent; border: 1px solid var(--oc-gray-4); border-radius: 3px; color: inherit; }
+.gk-gui-stuff-fold-btn:hover, .gk-gui-stuff-fold-btn:focus-visible { border-color: var(--oc-gray-6); }
+.gk-gui-stuff-fold-row { display: none !important; }
+/* the button as a bar on the block's lower edge */
+.gk-gui-stuff-fold-host { margin-block-end: 0 !important; border-end-start-radius: 0 !important; border-end-end-radius: 0 !important; }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar { display: block; box-sizing: border-box; inline-size: -moz-available; inline-size: -webkit-fill-available; inline-size: stretch; margin-block-start: 0; padding-block: 3px; text-align: center;
+  border: 0; border-block-start: 1px dashed var(--oc-gray-4); border-radius: 0 0 4px 4px; background: rgba(var(--oc-black-rgb),.03); }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar-framed { border: 1px solid var(--oc-gray-4); border-block-start-style: dashed; }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar::before { content: "\25BE\00A0"; }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar[aria-expanded="true"]::before { content: "\25B4\00A0"; }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:hover, .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:focus-visible { background: rgba(var(--oc-black-rgb),.08); }
+
+.gk-gui-stuff-copy-btn { margin-inline-start: 4px; padding: 0 4px; border: 0; background: transparent; cursor: pointer; color: inherit; opacity: .55; font-size: .95em; }
+.gk-gui-stuff-copy-btn:hover, .gk-gui-stuff-copy-btn:focus-visible { opacity: 1; }
+/* core's copy button on a code block: always there, not only under the pointer */
+div.pre-wrapper a.copy-pre-content-link.gk-gui-stuff-copy-pre { visibility: visible !important; opacity: .6 !important; display: inline-block !important; cursor: pointer; z-index: 2; }
+div.pre-wrapper:hover a.copy-pre-content-link.gk-gui-stuff-copy-pre, div.pre-wrapper a.copy-pre-content-link.gk-gui-stuff-copy-pre:focus-visible { opacity: 1 !important; }
+.gk-gui-stuff-copy-code { cursor: copy; }
+.gk-gui-stuff-copy-code:hover, .gk-gui-stuff-copy-code:focus-visible { outline: 1px dashed var(--oc-gray-6); outline-offset: 1px; }
+
+.gk-gui-stuff-week { margin-inline-start: 6px; color: var(--oc-gray-6); font-size: .9em; white-space: nowrap; }
+.gk-gui-stuff-quick-done { margin-inline-start: 6px; }
+.gk-gui-stuff-parent { margin-block: 0 8px; background-color: var(--gk-role-ui-parent-row, transparent); }
+
+#top-menu li.gk-gui-stuff-history { position: relative; }
+/* core lays the top menu's lists out in a row: this one is a column, one page per line, and scrolls when long */
+#top-menu ul.gk-gui-stuff-history-list { position: absolute; inset-block-start: 100%; inset-inline-start: 0; z-index: 900; display: block; inline-size: max-content;
+  min-inline-size: 280px; max-inline-size: min(460px, calc(100vw - 24px)); max-block-size: 70vh; overflow-y: auto; margin: 0; padding-block: 4px; padding-inline: 0;
+  list-style: none; background: var(--oc-white); border: 1px solid var(--oc-gray-4); box-shadow: 0 2px 6px rgba(var(--oc-black-rgb),.2); }
+#top-menu ul.gk-gui-stuff-history-list[hidden] { display: none; }
+#top-menu ul.gk-gui-stuff-history-list > li { float: none; display: block; inline-size: auto; margin: 0; padding: 0; }
+#top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a { display: block; padding-block: 5px; padding-inline: 12px; color: var(--oc-gray-9); font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a:hover, #top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a:focus { background: var(--oc-blue-0); color: var(--oc-gray-9); text-decoration: none; }
+.gk-gui-stuff-history-empty { padding-block: 4px; padding-inline: 10px; color: var(--oc-gray-6); }
+
+.gk-gui-stuff-footer-text { text-align: center; padding-block: 6px; color: var(--oc-gray-6); font-size: .9em; }
+
+.gk-gui-stuff-lw-banner { position: relative; background: var(--oc-yellow-1); color: var(--oc-pink-9); border-block-end: 1px solid var(--oc-yellow-3); padding-block: 8px; padding-inline: 14px 40px; }
+.gk-gui-stuff-lw-close { position: absolute; inset-inline-end: 8px; inset-block-start: 4px; border: 0; background: transparent; font-size: 1.3em; cursor: pointer; color: inherit; line-height: 1; }
+.gk-gui-stuff-lw-ring { outline: 2px solid var(--oc-yellow-7); outline-offset: -2px; border-radius: 3px; }
+/* phone: the banner fixed above core's fixed header (under the instance band where it is), and the header with the
+   page moves down by its height */
+.gk-gui-stuff-lw-banner.gk-gui-stuff-lw-phone { position: fixed; inset-block-start: var(--gk-gui-stuff-band-h, 0px); inset-inline: 0; z-index: 10000; }
+html.gk-gui-stuff-lw-phone-on #header { inset-block-start: calc(var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
+html.gk-gui-stuff-lw-phone-on #main { padding-block-start: calc(64px + var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
+html.gk-gui-stuff-lw-phone-on div#sticky-issue-header { inset-block-start: calc(64px + var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
+@keyframes gk-gui-stuff-lw-pulse { 0% { box-shadow: 0 0 0 0 rgba(var(--oc-yellow-7-rgb),.8); } 100% { box-shadow: 0 0 0 12px rgba(var(--oc-yellow-7-rgb),0); } }
+.gk-gui-stuff-lw-pulse { animation: gk-gui-stuff-lw-pulse 1.2s ease-out 3; }
+.gk-gui-stuff-lw-pulse.gk-gui-stuff-lw-endless { animation-iteration-count: infinite; }
+.gk-gui-stuff-lw-arrow { position: absolute; inset-block-start: 0; font-size: 16px; line-height: 20px; opacity: 0; transform: rotate(var(--gk-gui-stuff-lw-angle, -90deg)); }
+@keyframes gk-gui-stuff-lw-nudge { 0% { opacity: 1; transform: rotate(var(--gk-gui-stuff-lw-angle, -90deg)) translateX(0); } 50% { opacity: 1; transform: rotate(var(--gk-gui-stuff-lw-angle, -90deg)) translateX(5px); }
+  100% { opacity: 1; transform: rotate(var(--gk-gui-stuff-lw-angle, -90deg)) translateX(0); } }
+@keyframes gk-gui-stuff-lw-fade { from { opacity: 1; } to { opacity: 0; } }
+.gk-gui-stuff-lw-arrow.gk-gui-stuff-lw-run { animation: gk-gui-stuff-lw-nudge 1.2s ease-in-out 3, gk-gui-stuff-lw-fade .6s linear 3.6s 1 forwards; }
+.gk-gui-stuff-lw-endless .gk-gui-stuff-lw-arrow.gk-gui-stuff-lw-run { animation: gk-gui-stuff-lw-nudge 1.2s ease-in-out infinite; }
+.gk-gui-stuff-lw-login { padding-block: 10px; padding-inline: 12px; font-weight: bold; }
+.gk-gui-stuff-lw-arrow-h { margin-inline-end: 8px; }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-lw-pulse, .gk-gui-stuff-lw-arrow { animation: none !important; } }
+
+@media print {
+  .gk-gui-stuff-fold { max-block-size: none !important; overflow: visible; }
+  .gk-gui-stuff-fold::after { display: none !important; }
+  .gk-gui-stuff-fold-row { display: revert !important; }
+  .gk-gui-stuff-fold-btn, .gk-gui-stuff-copy-btn, .gk-gui-stuff-copy-pre, .gk-gui-stuff-week, .gk-gui-stuff-quick-done, .gk-gui-stuff-history, .gk-gui-stuff-lw, .gk-gui-stuff-notice { display: none !important; }
+}
+
+/* flash_timeout: the countdown circle and the cross on core's green message */
+.gk-gui-stuff-flash { position: relative; padding-inline-end: 70px !important; transition: opacity .3s; }
+.gk-gui-stuff-flash-out { opacity: 0; }
+.gk-gui-stuff-flash-tools { position: absolute; inset-inline-end: 8px; inset-block-start: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 4px; }
+.gk-gui-stuff-flash-count { position: relative; inline-size: 26px; block-size: 26px; padding: 0; border: 0; background: transparent; cursor: pointer; color: inherit; }
+.gk-gui-stuff-flash-count > svg { position: absolute; inset: 0; }
+.gk-gui-stuff-flash-ring { stroke: currentColor; opacity: .2; }
+.gk-gui-stuff-flash-arc { stroke: currentColor; transition: stroke-dashoffset .1s linear; }
+.gk-gui-stuff-flash-mark { position: relative; font-size: 10px; line-height: 26px; font-weight: bold; }
+.gk-gui-stuff-flash-paused .gk-gui-stuff-flash-arc { opacity: .45; }
+.gk-gui-stuff-flash-close { border: 0; background: transparent; cursor: pointer; color: inherit; font-size: 1.3em; line-height: 1; padding-inline: 4px; }
+/* core moves the icon of a message box into its margin (div.flash svg.icon-svg, -26px); the cross and the pause sign
+   are icons of their own beside the circle, not the box's icon */
+div.flash .gk-gui-stuff-flash-tools svg.icon-svg { margin-inline: 0; }
+@media print { .gk-gui-stuff-flash-tools { display: none; } }
+
+/* icons from gk_icons inside the modules' own buttons */
+.gk-gui-stuff-icon { stroke: currentColor; fill: none; stroke-width: 2; vertical-align: -0.2em; }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-icon::before { content: none !important; }
+.gk-gui-stuff-flash-mark .gk-gui-stuff-icon { vertical-align: -0.1em; }
+/* user_status: the dot after a person's name; the colours are roles from Open Color (compat fills them in for 6.x) */
+.gk-gui-stuff-status { cursor: pointer; display: inline-block; inline-size: 0.55em; block-size: 0.55em; margin-block: 0; margin-inline: 0.3em 0.2em; border-radius: 50%; vertical-align: 0.1em;
+  background: var(--oc-gray-5, #adb5bd); box-shadow: 0 0 0 1px rgba(var(--oc-white-rgb), 0.8); }
+.gk-gui-stuff-status-active { background: var(--oc-green-6, #40c057); }
+.gk-gui-stuff-status-idle { background: var(--oc-yellow-6, #fab005); }
+.gk-gui-stuff-status-away { background: var(--oc-gray-5, #adb5bd); }
+.gk-gui-stuff-status-absent { background: var(--oc-violet-5, #845ef7); }
+.gk-gui-stuff-status-busy { background: var(--oc-red-6, #fa5252); }
+
+/* image_crop: the stage where a square part of a picture is chosen */
+.gk-gui-stuff-crop-stage { margin: 0.5em 0; }
+.gk-gui-stuff-crop-stage canvas { display: block; max-inline-size: 100%; background: var(--oc-gray-1, #f1f3f5); border: 1px solid var(--oc-gray-4, #ced4da); cursor: move; touch-action: none; }
+.gk-gui-stuff-crop-stage canvas:focus-visible { outline: 2px solid var(--oc-blue-6, #228be6); outline-offset: 2px; }
+.gk-gui-stuff-crop-stage input[type=range] { display: block; inline-size: 320px; max-inline-size: 100%; margin-block: 0.4em; margin-inline: 0; }
+
+/* openers: the button beside a field's text version; the content in the surface fills it */
+.gk-gui-stuff-opener-button { margin-block-start: 4px; cursor: pointer; }
+.gk-gui-stuff-opener-body { block-size: 100%; display: flex; flex-direction: column; }
+.gk-gui-stuff-opener-body > * { flex: 1; min-block-size: 0; }

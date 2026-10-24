@@ -1,0 +1,16 @@
+/* gk_gui_stuff row menu (gk_gui_stuff_row_menu.js): the look of core's context menu (context_menu.css, which a GK
+   page does not load), under a class of its own so that core's #context-menu and its script are never touched. */
+table.gk-gui-stuff-rowmenu-on .gk-gui-stuff-rowmenu-moved { display: none !important; }
+table.gk-gui-stuff-rowmenu-on tr.gk-gui-stuff-rowmenu-row > td { background-color: var(--oc-blue-0, #e7f5ff); }
+.gk-gui-stuff-rowmenu { position: absolute; z-index: 40; font-size: 0.9em; }
+.gk-gui-stuff-rowmenu ul, .gk-gui-stuff-rowmenu li, .gk-gui-stuff-rowmenu a { margin: 0; padding: 0; border: 0; }
+.gk-gui-stuff-rowmenu ul {
+  min-inline-size: 150px; max-inline-size: 300px; border: 1px solid var(--oc-gray-4, #ced4da); background-color: var(--oc-white, #fff);
+  list-style: none; padding: 2px; border-radius: 2px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); outline: 0;
+}
+.gk-gui-stuff-rowmenu li { position: relative; padding: 1px; border: 1px solid transparent; display: flex; }
+.gk-gui-stuff-rowmenu li > a { flex-grow: 1; text-decoration: none !important; padding-block: 2px; padding-inline: 8px; display: flex; align-items: center; gap: 4px; }
+.gk-gui-stuff-rowmenu li:hover, .gk-gui-stuff-rowmenu li:focus-within { border-color: var(--oc-blue-8, #1971c2); background-color: var(--oc-blue-0, #e7f5ff); border-radius: 3px; }
+.gk-gui-stuff-rowmenu a:hover, .gk-gui-stuff-rowmenu a:focus { color: var(--oc-blue-9, #1864ab); outline: 0; }
+.gk-gui-stuff-rowmenu a.disabled, .gk-gui-stuff-rowmenu a.disabled:hover { color: var(--oc-gray-5, #adb5bd); cursor: default; }
+@media print { .gk-gui-stuff-rowmenu, .gk-gui-stuff-rowmenu-btn { display: none !important; } table.gk-gui-stuff-rowmenu-on .gk-gui-stuff-rowmenu-moved { display: revert !important; } }

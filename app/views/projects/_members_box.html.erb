@@ -1,0 +1,14 @@
+<%# Overrides core's projects/_members_box (documented in plugins/gui_stuff, Core-patchar; core has no hook in the
+    box). Module members_by_group: a person who is a member only through a group is not listed; the group is, with
+    its role, and its card on hover says who is in it. With the module off for the viewer the box is core's own,
+    line for line. %>
+  <% mod = GkGuiStuff::Registry.find('members_by_group') %>
+  <% by_role = mod && GkGuiStuff::Switches.on_for?(mod) ? GkGuiStuff::Members.direct_by_role(@project) : @principals_by_role %>
+  <% if by_role.any? %>
+  <div class="members box">
+    <h3 class="icon icon-group"><%= sprite_icon('group', l(:label_member_plural)) %></h3>
+    <% by_role.keys.sort.each do |role| %>
+      <p><span class="label"><%= role %>:</span> <%= by_role[role].sort.collect{|p| link_to_principal(p, :class => p.is_a?(Group) ? 'icon icon-group' : nil)}.join(", ").html_safe %></p>
+    <% end %>
+  </div>
+  <% end %>

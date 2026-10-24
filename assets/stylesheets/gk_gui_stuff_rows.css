@@ -1,0 +1,9 @@
+/* gk_gui_stuff row editor (gk_gui_stuff_rows.js): core's handle, delete and add links; only what core has no rule for. */
+[data-gk-gui-rows] .gk-gui-stuff-row-handle { cursor: move; touch-action: none; margin-inline-end: 4px; }
+[data-gk-gui-rows] .gk-gui-stuff-row-handle:focus-visible { outline: 2px solid var(--oc-blue-6, #228be6); outline-offset: 1px; }
+[data-gk-gui-rows] .gk-gui-stuff-row-remove { margin-inline-start: 4px; }
+[data-gk-gui-rows] .gk-gui-stuff-row-remove.disabled { opacity: 0.4; pointer-events: none; }
+[data-gk-gui-rows] .gk-gui-stuff-row-dragging { opacity: 0.6; background-color: var(--oc-gray-1, #f1f3f5); }
+[data-gk-gui-rows] .gk-gui-stuff-row-gone { display: none; }
+p.gk-gui-stuff-rows-add { margin-block: 6px; }
+@media print { [data-gk-gui-rows] .gk-gui-stuff-row-handle, [data-gk-gui-rows] .gk-gui-stuff-row-remove, p.gk-gui-stuff-rows-add { display: none; } }

@@ -1,0 +1,26 @@
+<%# The block Mina sidor on Min sida: in every version the person's own pages from the same register, with their
+    counts, the ones that wait first %>
+<% if defined?(GkGuiStuff::Personal) && GkGuiStuff::Personal.any? %>
+<% s = GkGuiStuff::Personal.summary(User.current) %>
+<% rows = s[:rows].each_with_index.sort_by { |r, i| [r[:waits] && r[:n].to_i.positive? ? 0 : 1, i] }.map(&:first) %>
+<h3><%= l(:label_gk_gui_stuff_personal) %></h3>
+<% if rows.blank? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+<table class="list gk-gui-stuff-personal-block">
+  <tbody>
+  <% rows.each do |r| %>
+    <tr class="<%= cycle('odd', 'even') %>">
+      <td class="name"><%= link_to(r[:icon] ? sprite_icon(r[:icon], r[:label]) : r[:label], r[:path], class: (r[:icon] ? 'icon' : nil)) %></td>
+      <td class="count gk-gui-stuff-personal-n">
+        <% if s[:mode] != 'none' && r[:n].present? && (r[:n].to_i.positive? || s[:mode] == 'zero') %>
+          <% text = s[:split] && r[:shared].to_i.positive? ? "#{r[:own]}+#{r[:shared]}" : r[:n].to_s %>
+          <span class="badge <%= r[:waits] ? 'gk-gui-stuff-count' : 'gk-gui-stuff-count gk-gui-stuff-count-info' %>"><%= text %></span>
+        <% end %>
+      </td>
+    </tr>
+  <% end %>
+  </tbody>
+</table>
+<% end %>
+<% end %>

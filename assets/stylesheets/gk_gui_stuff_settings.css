@@ -1,0 +1,34 @@
+/* gk_gui_stuff sticky_save, settings_frame and attachment_sizes (gk_gui_stuff_settings.js). Core's buttons, legends
+   and colours; the bar is the only surface of its own. */
+.gk-gui-stuff-savebar {
+  position: fixed; inset-block-end: 0; z-index: 1800; box-sizing: border-box;
+  background-color: var(--oc-gray-1, #f1f3f5); border-block-start: 1px solid var(--oc-gray-4, #ced4da); box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.08);
+}
+.gk-gui-stuff-savebar[hidden] { display: none; }
+.gk-gui-stuff-savebar-inner { box-sizing: border-box; padding-block: 6px; padding-inline: 10px; }
+.gk-gui-stuff-savebar-inner input { margin: 0; }
+/* what stands at the bottom of the window stands above the bar */
+html.gk-gui-stuff-savebar-on #content { padding-block-end: calc(var(--gk-gui-stuff-savebar-size, 0px) + 8px); }
+
+/* settings_frame: boxes that fold under their heading, a search above them */
+.gk-gui-stuff-sf-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-block: 0 8px; }
+.gk-gui-stuff-sf-input { inline-size: min(26em, 100%); }
+.gk-gui-stuff-sf-count { color: var(--oc-gray-6, #868e96); font-size: 0.9em; }
+.gk-gui-stuff-sf-bar .gk-gui-stuff-sf-count:not(:empty) { margin-inline-end: 8px; }
+a.gk-gui-stuff-sf-all { cursor: pointer; }
+fieldset.gk-gui-stuff-sf-section > legend.gk-gui-stuff-sf-legend { cursor: pointer; }
+fieldset.gk-gui-stuff-sf-section > legend.gk-gui-stuff-sf-legend:focus-visible { outline: 2px solid var(--oc-blue-6, #228be6); outline-offset: 2px; }
+.gk-gui-stuff-sf-chev { display: inline-flex; vertical-align: middle; margin-inline-end: 2px; }
+fieldset.gk-gui-stuff-sf-section.collapsed { padding-block-end: 0; }
+.gk-gui-stuff-sf-body[hidden] { display: none; }
+.gk-gui-stuff-sf-miss { display: none !important; }
+/* the change log: one part per version, its heading as core's */
+details.gk-gui-stuff-sf-version > summary { cursor: pointer; }
+details.gk-gui-stuff-sf-version > summary > h2 { display: inline; }
+details.gk-gui-stuff-sf-version + details.gk-gui-stuff-sf-version { margin-block-start: 6px; }
+
+/* attachment_sizes: the quick choices after core's unit */
+.gk-gui-stuff-sizes { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-inline-start: 8px; vertical-align: middle; }
+button.gk-gui-stuff-size { cursor: pointer; }
+button.gk-gui-stuff-size[aria-pressed="true"] { font-weight: bold; border-color: var(--oc-blue-6, #228be6); }
+@media print { .gk-gui-stuff-savebar, .gk-gui-stuff-sf-bar, .gk-gui-stuff-sizes { display: none !important; } .gk-gui-stuff-sf-body[hidden] { display: block; } }

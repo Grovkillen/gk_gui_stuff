@@ -1,0 +1,95 @@
+<%# The person's own choices. %>
+<h2><%= l(:label_gk_gui_stuff_my) %></h2>
+<% sw = GkGuiStuff::Switches %>
+<% data = @row.data %>
+<% if sw.instance_core_like? %><p class="warning"><%= l(:text_gk_gui_stuff_instance_core_like) %></p><% end %>
+<%= form_tag({ action: 'update' }, method: :post) do %>
+  <div class="box tabular">
+    <p><label for="core_like"><%= l(:label_gk_gui_stuff_core_like_me) %></label>
+      <% if sw.user_core_like_allowed? %>
+        <%= check_box_tag 'core_like', '1', data['core_like'].to_s == '1' %>
+      <% else %><em><%= l(:text_gk_gui_stuff_not_released) %></em><% end %>
+      <em class="info"><%= l(:text_gk_gui_stuff_core_like_me) %></em></p>
+    <%# The counter at the name, as one number or own and shared apart %>
+    <p><label for="count_mode"><%= l(:label_gk_gui_stuff_count_mode) %></label>
+      <%= select_tag 'count_mode', options_for_select(GkGuiStuff::Personal::COUNT_MODES.map { |m| [l("label_gk_gui_stuff_count_mode_#{m}"), m] }, data['count_mode'].presence || 'waiting'), id: 'count_mode' %>
+      <em class="info"><%= l(:text_gk_gui_stuff_count_mode) %></em></p>
+    <p><label for="count_split"><%= l(:label_gk_gui_stuff_count_split) %></label>
+      <%= hidden_field_tag 'count_split', '0', id: nil %>
+      <%= check_box_tag 'count_split', '1', data['count_split'].to_s == '1', id: 'count_split' %>
+      <em class="info"><%= l(:text_gk_gui_stuff_count_split) %></em></p>
+  </div>
+  <%# The modules the person may switch off, as in the plugin's Configure: the name and its explanation, the box at the
+      top of its own column %>
+  <%= content_tag(:style, ['table.gk-gui-stuff-my-modules td.active { vertical-align: top; text-align: center; inline-size: 6em; }',
+                           'table.gk-gui-stuff-my-modules td.name { text-align: start; }'].join("\n")) %>
+  <%# the tables' headings follow their columns: each as the cell under it (start, centre or end) %>
+  <%= javascript_tag(<<~JS)
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('#content table.list').forEach(function (t) {
+        var row = t.tBodies[0] && t.tBodies[0].rows[0];
+        if (!row || !t.tHead || !t.tHead.rows[0]) return;
+        Array.prototype.forEach.call(t.tHead.rows[0].cells, function (th, i) { if (row.cells[i]) th.style.textAlign = window.getComputedStyle(row.cells[i]).textAlign; });
+      });
+    });
+  JS
+  %>
+  <fieldset class="box"><legend><%= l(:label_gk_gui_stuff_modules) %></legend>
+    <table class="list gk-gui-stuff-my-modules">
+      <thead><tr><th><%= l(:label_gk_gui_stuff_module) %></th><th><%= l(:field_active) %></th></tr></thead>
+      <tbody>
+      <% sw.optional.each do |m| %>
+        <tr>
+          <td class="name"><label for="modules_<%= m.key %>"><strong><%= l(m.label_key) %></strong></label><br><em class="info"><%= l(m.text_key) %></em></td>
+          <td class="active"><%= hidden_field_tag "modules[#{m.key}]", '0', id: nil %>
+            <%= check_box_tag "modules[#{m.key}]", '1', (data['modules'] || {})[m.key].to_s != '0', id: "modules_#{m.key}" %></td>
+        </tr>
+      <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+  <%# Each button out among the page's links or in the three-dot menu, as the person chooses %>
+  <% if GkGuiStuff::Menu.on_for? && GkGuiStuff::Menu.all.present? %>
+  <fieldset class="box"><legend><%= l(:label_gk_gui_stuff_my_placements) %></legend>
+    <p><em class="info"><%= l(:text_gk_gui_stuff_my_placements) %></em></p>
+    <%# icons by area: the project tabs, the issue page's buttons, other pages' (Menu::ICON_AREAS); the labels in a
+        column of their own and the lists in line, as core's forms %>
+    <div class="tabular">
+    <% GkGuiStuff::Menu::ICON_AREAS.each do |area| %>
+    <% aa = GkGuiStuff::Menu.admin_icons(area) || 'core' %>
+    <p><label for="gk-gui-stuff-my-icons-<%= area %>"><%= l(:"label_gk_gui_stuff_icons_#{area}") %></label>
+      <%= select_tag "icons_#{area}", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_placement_#{aa}")), '']] + GkGuiStuff::Menu::ICON_MODES.map { |m| [l(:"label_gk_gui_stuff_placement_#{m}"), m] }, data["icons_#{area}"].to_s), id: "gk-gui-stuff-my-icons-#{area}" %></p>
+    <% end %>
+    <% GkGuiStuff::Menu::LAYOUT.each do |key, values| %>
+    <% al = GkGuiStuff::Menu.admin_layout(key) || values.first %>
+    <p><label for="gk-gui-stuff-my-layout-<%= key %>"><%= l(:"label_gk_gui_stuff_layout_#{key}") %></label>
+      <%= select_tag "layout_#{key}", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_layout_#{key}_#{al}")), '']] + values.map { |v| [l(:"label_gk_gui_stuff_layout_#{key}_#{v}"), v] }, data["layout_#{key}"].to_s), id: "gk-gui-stuff-my-layout-#{key}" %></p>
+    <% end %>
+    </div>
+    <table class="list gk-gui-stuff-placements">
+      <thead><tr><th><%= l(:label_gk_gui_stuff_button) %></th><th><%= l(:label_gk_gui_stuff_where_shown) %></th><th><%= l(:label_gk_gui_stuff_placement) %></th></tr></thead>
+      <tbody>
+      <% own = data['placements'].is_a?(Hash) ? data['placements'] : {} %>
+      <% GkGuiStuff::Menu.all.values.sort_by { |r| [r.contexts.first.to_s, r.order] }.each do |r| %>
+        <% label = r.name ? l(r.name) : (r.label.respond_to?(:call) ? r.key : l(r.label, count: 'N', project: '')) %>
+        <% default = GkGuiStuff::Menu.placement(r, area: GkGuiStuff::Menu.area_of(r.contexts)) %>
+        <tr><td class="name"><%= sprite_icon(r.icon) if r.icon.is_a?(String) %> <%= label %></td>
+          <td class="text where_shown"><%= r.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
+          <td class="placement"><%= select_tag "placements[#{r.key}]", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}")), '']] +
+                GkGuiStuff::Menu::PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] }, own[r.key].to_s), id: nil, 'aria-label': label %></td></tr>
+      <% end %>
+      <%# core's own buttons: as Redmine, icon and text, or the icon only (Menu::CORE_BUTTONS) %>
+      <% GkGuiStuff::Menu::CORE_BUTTONS.each do |b| %>
+        <% default = GkGuiStuff::Menu.core_placement(b, area: GkGuiStuff::Menu.area_of(b.contexts)) %>
+        <tr><td class="name"><%= sprite_icon(b.icon) %> <%= GkGuiStuff::Menu.core_label(b) %></td>
+          <td class="text where_shown"><%= b.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
+          <td class="placement"><%= select_tag "placements[#{b.key}]", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}")), '']] +
+                GkGuiStuff::Menu::CORE_PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] }, own[b.key].to_s), id: nil, 'aria-label': GkGuiStuff::Menu.core_label(b) %></td></tr>
+      <% end %>
+      </tbody>
+    </table>
+  </fieldset>
+  <% end %>
+  <p><%= submit_tag l(:button_save) %> <%= link_to l(:button_back), my_account_path %></p>
+<% end %>
+<% html_title l(:label_gk_gui_stuff_my) %>

@@ -1,0 +1,23 @@
+<%# core_stuff's modules that change how core looks: listed here, switched in core_stuff (GkGuiStuff::CoreStuffLooks).
+    The caller gives the heading; nothing is drawn without core_stuff. %>
+<% looks = GkGuiStuff::CoreStuffLooks.items %>
+<% if looks.present? %>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_core_stuff_looks) %></em></p>
+  <%# the row menu's list; the link to core_stuff is the row's one action and stays in it (keep) %>
+  <table class="list gk-gui-stuff-core-stuff-looks" data-gk-gui-filter="off" data-gk-gui-rowmenu>
+    <thead><tr><th><%= l(:field_name) %></th><th><%= l(:field_status) %></th><th></th></tr></thead>
+    <tbody>
+    <% looks.each do |m| %>
+      <tr>
+        <td class="name"><%= m[:label] %></td>
+        <td class="status">
+          <% if m[:in_core] %><%= l(:text_gk_gui_stuff_core_stuff_in_core) %>
+          <% else %><span class="badge <%= m[:on] ? 'badge-status-closed' : 'badge-status-locked' %> gk-gui-stuff-feature-state gk-gui-stuff-feature-state-<%= m[:on] ? 'on' : 'off' %>"><%= m[:on] ? l(:label_gk_gui_stuff_feature_on) : l(:label_gk_gui_stuff_feature_off) %></span><% end %>
+        </td>
+        <td class="buttons"><%= link_to l(:label_gk_gui_stuff_core_stuff_open), plugin_settings_path('gk_core_stuff', anchor: "gk-find=#{m[:label]}"), data: { gk_gui_row_action: 'keep' } %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+  <%= gk_gui_stuff_row_menu %>
+<% end %>

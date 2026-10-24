@@ -1,0 +1,32 @@
+/* gk_gui_stuff calendar_compact: the calendar's compact view, chosen beside core's (class gk-gui-stuff-cal-compact on
+   core's ul.cal). The days are as wide as in core's view: a day's long line never widens its column (minmax(0, 1fr)
+   instead of core's 1fr, which gives way to the widest unbroken line). Each issue is one line, "#12 Subject" cut with
+   an ellipsis at the day's edge (gk-gui-stuff-cal-line, drawn by the script); core's own text in the box is left out
+   here and stays for core's view. Core's tip shows tracker and whole subject when the pointer rests on the line. The
+   day's number stands at the end of the first line, and a day is as high as its entries. Colours, icons and markup
+   stay core's. */
+ul.cal.gk-gui-stuff-cal-compact { grid-template-columns: 2rem repeat(7, minmax(0, 1fr)); }
+ul.cal.gk-gui-stuff-cal-compact > li { min-inline-size: 0; }
+ul.cal.gk-gui-stuff-cal-compact .calbody { min-block-size: 2.4em; padding: 1px; }
+ul.cal.gk-gui-stuff-cal-compact .calbody p.day-num { float: inline-end; margin: 0; padding-inline: 2px 1px; font-size: 1em; line-height: 1.3; }
+ul.cal.gk-gui-stuff-cal-compact .calbody .day-value { inline-size: 1.3em; block-size: 1.3em; }
+ul.cal.gk-gui-stuff-cal-compact .calbody > div.issue,
+ul.cal.gk-gui-stuff-cal-compact .calbody > span.icon {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin: 0 0 1px;
+  padding-block: 1px;
+  padding-inline: 3px;
+  line-height: 1.3;
+  white-space: nowrap;
+  min-inline-size: 0;
+}
+ul.cal.gk-gui-stuff-cal-compact .calbody > span.icon { overflow: hidden; text-overflow: ellipsis; display: block; }
+ul.cal.gk-gui-stuff-cal-compact .calbody > div.issue > .gk-gui-stuff-cal-line { flex: 1 1 auto; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ul.cal.gk-gui-stuff-cal-compact .calbody > div.issue > .gk-gui-stuff-cal-line .gk-gui-stuff-cal-no { font-weight: bold; }
+ul.cal.gk-gui-stuff-cal-compact .calbody > div.issue > a:not(.gk-gui-stuff-cal-line),
+ul.cal.gk-gui-stuff-cal-compact .calbody > div.issue > .gk-gui-stuff-cal-text { display: none; }
+ul.cal.gk-gui-stuff-cal-compact .calbody > div.issue > .icon-svg { flex: none; }
+/* core's view: the compact line is not there */
+ul.cal:not(.gk-gui-stuff-cal-compact) .gk-gui-stuff-cal-line { display: none; }

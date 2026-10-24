@@ -1,0 +1,16 @@
+/* gk_gui_stuff Administration > Funktioner: one table per plugin. The tables share their column widths, so the
+   sections line up under each other; only the description takes what is left. A function that is on is a filled
+   badge in core's green, one that is off keeps core's grey outline. */
+table.list.gk-gui-stuff-features { table-layout: fixed; }
+table.list.gk-gui-stuff-features col.name { inline-size: 16rem; }
+table.list.gk-gui-stuff-features col.default { inline-size: 7rem; }
+table.list.gk-gui-stuff-features col.status { inline-size: 6rem; }
+table.list.gk-gui-stuff-features col.buttons { inline-size: 19rem; }
+table.list.gk-gui-stuff-features td { overflow-wrap: anywhere; }
+/* the reason and the button start at the same place in every table, whatever follows them in the row */
+table.list.gk-gui-stuff-features td.buttons { text-align: start; }
+table.list.gk-gui-stuff-features .gk-gui-stuff-feature-state-on {
+  color: var(--oc-white);
+  background: var(--oc-green-8);
+  border-color: var(--oc-green-8);
+}

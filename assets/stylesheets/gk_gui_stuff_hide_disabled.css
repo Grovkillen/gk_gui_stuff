@@ -1,0 +1,3 @@
+/* gk_gui_stuff hide_disabled: an action that may not be used (core draws it dimmed, a.disabled) is not shown at all in
+   the issue list's context menu; with the module off it stays dimmed, with its tooltip */
+#context-menu li:has(> a.disabled) { display: none; }

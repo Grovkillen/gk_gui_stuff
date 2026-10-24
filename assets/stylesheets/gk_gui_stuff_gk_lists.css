@@ -1,0 +1,4 @@
+/* gk_gui_stuff GK lists: the lists on GK's own pages (a controller named gk_*) read as core's lists do: names and texts
+   at the start, and so are the columns of projects and people (project, author, user, holder, owner, organization),
+   their headings too. Core's own pages are left as core draws them. */
+table.list :is(td, th):is(.project, .author, .user, .holder, .owner, .organization) { text-align: start; }

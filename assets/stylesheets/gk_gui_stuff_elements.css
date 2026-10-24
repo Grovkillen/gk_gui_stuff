@@ -1,0 +1,237 @@
+/* gk_gui_stuff: the shared elements and their first users. */
+
+/* instance band: where one is. Not closable, also on the login page, also in print for a drill. */
+.gk-gui-stuff-instance { text-align: center; font-size: 12px; line-height: 18px; letter-spacing: .08em; text-transform: uppercase; font-weight: bold;
+  color: #fff; background: #6b4fa0; }
+.gk-gui-stuff-instance-dev, .gk-gui-stuff-instance-development { background: #1f6f8b; }
+.gk-gui-stuff-instance-test { background: #9a6700; }
+.gk-gui-stuff-instance-drill { background: repeating-linear-gradient(45deg, #b3261e, #b3261e 10px, #8c1d18 10px, #8c1d18 20px); }
+.gk-gui-stuff-instance-copy { border: 0; background: transparent; color: inherit; font: inherit; font-weight: normal; letter-spacing: 0; text-transform: none; margin-inline-start: 8px; padding-inline: 4px;
+  opacity: .9; cursor: copy; border-radius: 3px; }
+.gk-gui-stuff-instance-copy:hover, .gk-gui-stuff-instance-copy:focus-visible { background: rgba(255,255,255,.2); opacity: 1; }
+.gk-gui-stuff-instance small { font-weight: normal; letter-spacing: 0; text-transform: none; margin-inline-start: 8px; opacity: .9; }
+/* Phone layout: core's header is fixed with no place of its own, so it stays where the band left it, and the band in
+   the flow scrolls away and leaves the page showing above the header. Where the band is, it stands fixed at the top
+   on one line, and what core places below its fixed header moves down by the band's height (--gk-gui-stuff-band-h,
+   also read by the login warning's phone banner). Core's opened menu (as high as #wrapper, and the page cannot
+   scroll while it is open) stands fixed under the band, as high as the window, and scrolls by itself. */
+@media screen and (max-width: 899px) {
+  body:has(> .gk-gui-stuff-instance) { --gk-gui-stuff-band-h: 18px; }
+  body > .gk-gui-stuff-instance { position: fixed; inset-block-start: 0; inset-inline: 0; z-index: 10001; block-size: 18px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  body:has(> .gk-gui-stuff-instance) #header { inset-block-start: calc(var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
+  body:has(> .gk-gui-stuff-instance) #main { padding-block-start: calc(64px + var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
+  body:has(> .gk-gui-stuff-instance) div#sticky-issue-header { inset-block-start: calc(64px + var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
+  html.flyout-is-active body:has(> .gk-gui-stuff-instance) .flyout-menu { position: fixed; inset-block: var(--gk-gui-stuff-band-h) 0;
+    inset-inline-end: 0; block-size: auto; overflow-y: auto; overscroll-behavior: contain; }
+}
+
+/* surface */
+.gk-gui-stuff-surface-open { overflow: hidden; }
+.gk-gui-stuff-surface-back { position: fixed; inset: 0; z-index: 2000; background: rgba(var(--oc-gray-9-rgb), .62); display: flex; align-items: center; justify-content: center; }
+.gk-gui-stuff-surface { background: var(--oc-white); color: var(--oc-gray-9); border-radius: 6px; box-shadow: 0 10px 40px rgba(var(--oc-black-rgb),.4); display: flex; flex-direction: column;
+  inline-size: min(520px, calc(100vw - 24px)); max-block-size: calc(100vh - 24px); }
+.gk-gui-stuff-surface-large .gk-gui-stuff-surface { inline-size: 90vw; block-size: 90vh; }
+.gk-gui-stuff-surface-full .gk-gui-stuff-surface { inline-size: 100vw; block-size: 100vh; max-block-size: 100vh; border-radius: 0; }
+.gk-gui-stuff-surface-palette { align-items: flex-start; background: rgba(var(--oc-gray-9-rgb), .25); }
+.gk-gui-stuff-surface-palette .gk-gui-stuff-surface { margin-block-start: 8vh; inline-size: min(640px, calc(100vw - 24px)); max-block-size: 70vh; }
+.gk-gui-stuff-surface-head { display: flex; align-items: center; gap: 8px; padding-block: 8px; padding-inline: 14px 8px; border-block-end: 1px solid var(--oc-gray-3); }
+.gk-gui-stuff-surface-title { flex: 1; margin: 0; font-size: 1.05em; border: 0; padding: 0; }
+.gk-gui-stuff-surface-buttons { display: flex; gap: 6px; }
+.gk-gui-stuff-surface-close { border: 0; background: transparent; font-size: 1.5em; line-height: 1; cursor: pointer; color: inherit; padding-inline: 6px; }
+.gk-gui-stuff-surface-body { padding: 14px; overflow: auto; flex: 1; }
+.gk-gui-stuff-surface-foot { display: flex; gap: 8px; padding-block: 10px; padding-inline: 14px; border-block-start: 1px solid var(--oc-gray-3); }
+.gk-gui-stuff-surface-foot .gk-gui-stuff-btn-primary { margin-inline-start: auto; }
+.gk-gui-stuff-btn { padding-block: 4px; padding-inline: 10px; border: 1px solid var(--oc-gray-4); border-radius: 3px; background: var(--oc-gray-0); color: var(--oc-gray-9); cursor: pointer; font: inherit; }
+.gk-gui-stuff-btn:hover, .gk-gui-stuff-btn:focus-visible { border-color: var(--oc-gray-6); }
+.gk-gui-stuff-btn-primary { background: var(--oc-blue-7); border-color: var(--oc-blue-7); color: var(--oc-white); }
+@media (max-width: 899px) { .gk-gui-stuff-surface-back:not(.gk-gui-stuff-surface-palette) .gk-gui-stuff-surface { inline-size: 100vw; block-size: 100vh; max-block-size: 100vh; border-radius: 0; } }
+
+/* notices; above the sticky Save bar while it shows (sticky_save sets its height) */
+.gk-gui-stuff-notices { position: fixed; inset-block-end: calc(16px + var(--gk-gui-stuff-savebar-size, 0px)); inset-inline-end: 16px; z-index: 1900; display: flex; flex-direction: column; gap: 8px; max-inline-size: min(380px, calc(100vw - 32px)); }
+.gk-gui-stuff-note { display: flex; align-items: center; gap: 8px; background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--oc-gray-4); border-inline-start: 5px solid var(--oc-blue-6);
+  border-radius: 4px; padding-block: 8px; padding-inline: 10px 6px; box-shadow: 0 3px 12px rgba(var(--oc-black-rgb),.2); }
+.gk-gui-stuff-note-mark { font-weight: bold; min-inline-size: 1.4em; text-align: center; border: 1px solid currentColor; border-radius: 50%; line-height: 1.3em; font-size: .85em; }
+.gk-gui-stuff-note-text { flex: 1; line-height: 1.35; }
+.gk-gui-stuff-note-mark, .gk-gui-stuff-note-buttons { flex: none; align-self: center; }
+.gk-gui-stuff-note-buttons { display: flex; gap: 4px; align-items: center; }
+.gk-gui-stuff-note-close { border: 0; background: transparent; cursor: pointer; font-size: 1.2em; color: inherit; }
+.gk-gui-stuff-note-notice { border-inline-start-color: var(--oc-green-8); }
+.gk-gui-stuff-note-warning { border-inline-start-color: var(--oc-yellow-8); border-inline-start-style: double; }
+.gk-gui-stuff-note-alarm { border-inline-start-color: var(--oc-red-8); border-inline-start-width: 8px; }
+.gk-gui-stuff-note-critical { border: 2px solid var(--oc-red-9); border-inline-start-width: 10px; }
+.gk-gui-stuff-note-warning .gk-gui-stuff-note-mark, .gk-gui-stuff-note-alarm .gk-gui-stuff-note-mark, .gk-gui-stuff-note-critical .gk-gui-stuff-note-mark { border-radius: 2px; }
+/* an icon is its own mark: no ring around it (the ring is for the character drawn without icons), in the level's colour */
+.gk-gui-stuff-note-mark:has(svg) { border: 0; min-inline-size: 0; line-height: 0; color: var(--oc-blue-7); }
+.gk-gui-stuff-note-notice .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-green-8); }
+.gk-gui-stuff-note-warning .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-yellow-8); }
+.gk-gui-stuff-note-alarm .gk-gui-stuff-note-mark:has(svg), .gk-gui-stuff-note-critical .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-red-8); }
+.gk-gui-stuff-note-mark svg.gk-gui-stuff-icon { stroke: currentColor; vertical-align: 0; }
+
+/* wave: never takes the pointer or the keyboard */
+.gk-gui-stuff-wave { position: fixed; inset: 0; z-index: 2100; pointer-events: none; opacity: 0; transition: opacity .35s ease; display: flex; align-items: center; justify-content: center; }
+.gk-gui-stuff-wave-on { opacity: 1; transition-duration: .12s; }
+.gk-gui-stuff-wave-instant { transition: none !important; }
+.gk-gui-stuff-wave-backdrop, .gk-gui-stuff-wave-motion { position: absolute; inset: 0; }
+.gk-gui-stuff-wave-backdrop { background: var(--oc-green-9); transition: background-color .45s ease-out; }
+.gk-gui-stuff-wave-text { position: relative; text-align: center; color: var(--oc-white); transition: color .3s linear; text-shadow: 0 1px 3px rgba(var(--oc-black-rgb),.35); }
+.gk-gui-stuff-wave-word { font-size: clamp(36px, 9vw, 120px); font-weight: 800; letter-spacing: .06em; line-height: 1; }
+.gk-gui-stuff-wave-text { position: relative; }
+/* the small line hangs under the word, so the word never moves when the line comes */
+.gk-gui-stuff-wave-line { position: absolute; inset-inline: -50vw; inset-block-start: 100%; margin-block-start: 10px; font-size: 1.05em; }
+.gk-gui-stuff-wave-waiting .gk-gui-stuff-wave-backdrop { background: var(--oc-green-6); }
+.gk-gui-stuff-wave-error .gk-gui-stuff-wave-backdrop { background: var(--oc-red-9); }
+.gk-gui-stuff-wave-loading .gk-gui-stuff-wave-backdrop { background: var(--oc-gray-9); }
+.gk-gui-stuff-flash-waved { display: none; }
+
+/* banner: a row in the page */
+.gk-gui-stuff-banner { display: flex; align-items: center; gap: 10px; margin-block-end: 10px; padding-block: 8px; padding-inline: 12px; border: 1px solid var(--oc-blue-3);
+  border-inline-start: 5px solid var(--oc-blue-6); background: var(--oc-blue-0); color: var(--oc-blue-9); border-radius: 3px; }
+.gk-gui-stuff-banner-text { flex: 1; }
+.gk-gui-stuff-banner-notice { border-color: var(--oc-green-3); border-inline-start-color: var(--oc-green-8); background: var(--oc-green-1); color: var(--oc-green-9); }
+.gk-gui-stuff-banner-warning { border-color: var(--oc-yellow-3); border-inline-start: 5px double var(--oc-yellow-8); background: var(--oc-yellow-1); color: var(--oc-pink-9); }
+.gk-gui-stuff-banner-alarm, .gk-gui-stuff-banner-critical { border-color: var(--oc-red-3); border-inline-start: 8px solid var(--oc-red-8); background: var(--oc-red-1); color: var(--oc-pink-9); }
+.gk-gui-stuff-banner-close { border: 0; background: transparent; cursor: pointer; font-size: 1.2em; color: inherit; }
+
+/* ribbon: a state, in the corner of the page */
+.gk-gui-stuff-ribbon-host { position: relative; }
+.gk-gui-stuff-ribbon-frame { position: absolute; inset-block-start: 0; inset-inline-end: 0; inline-size: 260px; block-size: 260px; overflow: hidden; pointer-events: none; z-index: 50; }
+.gk-gui-stuff-ribbon { position: absolute; transform: rotate(45deg); text-align: center; background: var(--oc-gray-8); color: var(--oc-white); padding-block: 5px; pointer-events: auto;
+  text-decoration: none; box-shadow: 0 1px 4px rgba(var(--oc-black-rgb),.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gk-gui-stuff-ribbon-word { display: block; font-weight: 800; letter-spacing: .1em; }
+.gk-gui-stuff-ribbon-line { display: block; font-size: .8em; opacity: .9; }
+
+/* corner: the fold */
+.gk-gui-stuff-corner-host { position: relative; }
+/* the fold stands in the start corner of the page (left in a left-to-right language), so that it never covers the
+   page's own buttons and the three-dot menu at the end; it pulses twice when it comes */
+.gk-gui-stuff-corner { position: absolute; inset-block-start: 0; inset-inline-start: 0; z-index: 60; }
+.gk-gui-stuff-corner-fold { position: absolute; inset-block-start: 0; inset-inline-start: 0; inline-size: 56px; block-size: 56px; border: 0; padding: 0; cursor: pointer;
+  background: linear-gradient(135deg, var(--oc-blue-6) 0 50%, transparent 50%); color: var(--oc-white); }
+.gk-gui-stuff-corner-notice .gk-gui-stuff-corner-fold { background: linear-gradient(135deg, var(--oc-yellow-8) 0 50%, transparent 50%); }
+/* the count's middle on the triangle's own middle, a third of the 56 px in from the corner (18.7 px each way) */
+.gk-gui-stuff-corner-count { position: absolute; inset-block-start: 10px; inset-inline-start: 9px; line-height: 18px; font-weight: bold; min-inline-size: 1.4em; text-align: center; }
+.gk-gui-stuff-corner-notice .gk-gui-stuff-corner-count { outline: 2px solid var(--oc-white); border-radius: 50%; }
+.gk-gui-stuff-corner-card { position: absolute; inset-block-start: 40px; inset-inline-start: 8px; inline-size: min(420px, 80vw); background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--oc-gray-4);
+  border-radius: 4px; box-shadow: 0 3px 12px rgba(var(--oc-black-rgb),.2); padding: 10px 12px; }
+/* an unseen strip from the card up to the fold: the pointer may pass over the row of buttons above the card
+   (Ändra, Kopiera) on its way down without the card going away */
+.gk-gui-stuff-corner-card::before { content: ""; position: absolute; inset-inline: 0; inset-block-end: 100%; block-size: 44px; }
+.gk-gui-stuff-corner-card ul { margin-block: 6px; padding-inline-start: 18px; max-block-size: 40vh; overflow: auto; }
+.gk-gui-stuff-corner-buttons { display: flex; gap: 6px; justify-content: flex-start; }
+@keyframes gk-gui-stuff-corner-pulse { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(34, 139, 230, .8)); } 50% { transform: scale(1.12); filter: drop-shadow(0 0 8px rgba(34, 139, 230, .8)); } 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(34, 139, 230, 0)); } }
+.gk-gui-stuff-corner-fold.gk-gui-stuff-corner-new { transform-origin: 0 0; animation: gk-gui-stuff-corner-pulse .9s ease-in-out 2; }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-corner-fold.gk-gui-stuff-corner-new { animation: none; } }
+
+/* palette */
+.gk-gui-stuff-palette-input { inline-size: 100%; box-sizing: border-box; font-size: 1.1em; padding: 8px; }
+.gk-gui-stuff-palette-list { list-style: none; margin-block: 8px 0; margin-inline: 0; padding: 0; max-block-size: 50vh; overflow: auto; }
+.gk-gui-stuff-palette-item { padding-block: 5px; padding-inline: 8px; cursor: pointer; border-inline-start: 3px solid transparent; }
+.gk-gui-stuff-palette-item:hover { background: var(--oc-gray-1); }
+.gk-gui-stuff-palette-at { background: var(--oc-blue-0); border-inline-start-color: var(--oc-blue-7); }
+.gk-gui-stuff-palette-label { display: block; font-weight: 600; }
+.gk-gui-stuff-palette-hint { display: block; color: var(--oc-gray-6); font-size: .9em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.gk-gui-stuff-palette-empty { color: var(--oc-gray-6); padding: 8px; }
+.gk-gui-stuff-hn-at { outline: 3px solid var(--oc-blue-7); outline-offset: 4px; transition: outline-color 1.2s; }
+
+/* drawer */
+.gk-gui-stuff-drawer { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 1800; background: var(--oc-white); color: var(--oc-gray-9); border-block-start: 2px solid var(--oc-gray-6); box-shadow: 0 -3px 12px rgba(var(--oc-black-rgb),.2);
+  display: flex; flex-direction: column; block-size: 24vh; }
+.gk-gui-stuff-drawer[data-size="half"] { block-size: 50vh; }
+.gk-gui-stuff-drawer[data-size="full"] { block-size: calc(100vh - 40px); }
+.gk-gui-stuff-drawer-min { block-size: auto !important; }
+.gk-gui-stuff-drawer-min .gk-gui-stuff-drawer-body { display: none; }
+.gk-gui-stuff-drawer-tabs { display: flex; align-items: stretch; gap: 2px; background: var(--oc-gray-1); padding-inline: 6px; }
+.gk-gui-stuff-drawer-tab { display: flex; align-items: center; border-block-start: 3px solid var(--oc-gray-5); background: var(--oc-gray-2); }
+.gk-gui-stuff-drawer-tab-on { background: var(--oc-white); border-block-start-color: var(--oc-blue-7); }
+.gk-gui-stuff-drawer-name, .gk-gui-stuff-drawer-x, .gk-gui-stuff-drawer-size, .gk-gui-stuff-drawer-close { border: 0; background: transparent; cursor: pointer; color: inherit; font: inherit; padding-block: 5px; padding-inline: 8px; }
+.gk-gui-stuff-drawer-size { margin-inline-start: auto; }
+.gk-gui-stuff-drawer-dot .gk-gui-stuff-drawer-name::after { content: ""; display: inline-block; inline-size: .5em; block-size: .5em; border-radius: 50%; margin-inline-start: 6px; vertical-align: .1em; background: var(--oc-green-8); }
+.gk-gui-stuff-drawer-count { background: var(--oc-gray-8); color: var(--oc-white); border-radius: 9px; padding-inline: 6px; font-size: .8em; }
+@keyframes gk-gui-stuff-drawer-blink { 50% { background: var(--oc-yellow-3); } }
+.gk-gui-stuff-drawer-blink { animation: gk-gui-stuff-drawer-blink .8s ease-in-out 3; }
+.gk-gui-stuff-drawer-body { flex: 1; overflow: auto; padding: 10px 14px; }
+/* drawer handles: tabs on the window's right edge, the way into the drawer from the page */
+.gk-gui-stuff-drawer-handles { position: fixed; inset-inline-end: 0; inset-block-start: 38%; z-index: 1750; display: flex; flex-direction: column; gap: 6px; }
+.gk-gui-stuff-drawer-handle { writing-mode: vertical-rl; transform: rotate(180deg); display: flex; align-items: center; gap: 6px; padding: 10px 5px;
+  border: 1px solid var(--oc-gray-5, #adb5bd); border-inline-start: 0; border-radius: 6px 0 0 6px; background: var(--oc-white, #ffffff); color: inherit;
+  font: inherit; font-size: .9em; cursor: pointer; box-shadow: 0 1px 4px rgba(var(--oc-black-rgb), .15); }
+.gk-gui-stuff-drawer-handle:hover, .gk-gui-stuff-drawer-handle:focus-visible { background: var(--oc-gray-1, #f1f3f5); }
+.gk-gui-stuff-drawer-handle-count { writing-mode: horizontal-tb; transform: rotate(180deg); background: var(--oc-gray-8); color: var(--oc-white); border-radius: 9px; padding-inline: 6px; font-size: .8em; }
+
+/* actions_menu */
+.gk-gui-stuff-menu-line { border-block-start: 1px solid var(--oc-gray-3); margin-block: 4px; }
+.gk-gui-stuff-menu-row { display: block; }
+.gk-gui-stuff-menu-row svg.gk-gui-stuff-icon { vertical-align: middle; }
+.gk-gui-stuff-menu-system { color: var(--oc-red-9) !important; }
+.gk-gui-stuff-menu-trigger { cursor: pointer; font-size: 1.3em; padding-inline: 6px; }
+/* A row that shows a state that is on (I mitt fokus) */
+.gk-gui-stuff-row-active { font-weight: bold; }
+/* its star is whole (filled) while the state is on, in the link's colour */
+.gk-gui-stuff-row-active.icon-fav svg, .gk-gui-stuff-row-active.icon-fav:hover svg { fill: currentColor; stroke: currentColor; }
+
+/* fullscreen: only the content */
+.gk-gui-stuff-fullscreen #top-menu, .gk-gui-stuff-fullscreen #header, .gk-gui-stuff-fullscreen #sidebar, .gk-gui-stuff-fullscreen #footer, .gk-gui-stuff-fullscreen #sidebar-switch-panel { display: none !important; }
+.gk-gui-stuff-fullscreen #main { display: block; }
+.gk-gui-stuff-fullscreen #content { inline-size: auto; }
+
+/* branch_jump */
+.gk-gui-stuff-branch-btn { border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; padding-inline: 4px; border-radius: 3px; }
+/* The chevron has the text's colour; core strokes every svg.icon-svg in link blue (#169) */
+.gk-gui-stuff-branch-btn svg.icon-svg { stroke: currentColor; }
+.gk-gui-stuff-branch-btn:hover, .gk-gui-stuff-branch-btn:focus-visible, .gk-gui-stuff-branch-btn[aria-expanded="true"] { background: rgba(var(--oc-white-rgb),.25); outline: 1px solid currentColor; }
+.gk-gui-stuff-branch-lead { margin-inline-start: 6px; opacity: .7; font-size: .8em; line-height: 1; vertical-align: .18em; padding-block: 1px 3px; }
+.gk-gui-stuff-branch ul { list-style: none; margin: 0; padding: 0; }
+.gk-gui-stuff-branch li { display: flex; gap: 10px; justify-content: space-between; padding-block: 2px; }
+.gk-gui-stuff-branch-parent { border-block-end: 1px solid var(--oc-gray-3); margin-block-end: 4px; padding-block-end: 4px !important; }
+.gk-gui-stuff-branch-row { padding-inline-start: 12px; }
+.gk-gui-stuff-branch-child { padding-inline-start: 28px; }
+.gk-gui-stuff-branch-current > a { font-weight: bold; }
+/* the marker hangs in the margin: it never pushes the name, so names on the same level stand in one line */
+.gk-gui-stuff-branch li { position: relative; }
+.gk-gui-stuff-branch-mark { position: absolute; line-height: 0; inset-inline-start: 0; inset-block-start: 50%; transform: translateY(-50%); font-size: .8em; }
+.gk-gui-stuff-branch-child .gk-gui-stuff-branch-mark { inset-inline-start: 16px; }
+.gk-gui-stuff-branch-closed > a { color: var(--oc-gray-6); text-decoration: line-through; }
+.gk-gui-stuff-branch-count { color: var(--oc-gray-6); font-size: .9em; white-space: nowrap; }
+
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-wave, .gk-gui-stuff-wave-backdrop, .gk-gui-stuff-wave-text { transition: none; } .gk-gui-stuff-drawer-blink { animation: none; } }
+@media print {
+  .gk-gui-stuff-surface-back, .gk-gui-stuff-notices, .gk-gui-stuff-wave, .gk-gui-stuff-corner, .gk-gui-stuff-drawer, .gk-gui-stuff-drawer-handles, .gk-gui-stuff-branch-btn, .gk-gui-stuff-menu, .gk-gui-stuff-banner-close { display: none !important; }
+  .gk-gui-stuff-instance:not(.gk-gui-stuff-instance-drill) { display: none; }
+}
+/* a wave the page is born with stands at once (no fade in); the class goes when the kernel adopts it */
+.gk-gui-stuff-wave-born { transition: none !important; }
+/* Something that runs (a scenario, a job) waits in yellow, with dark text; its outcome is the usual green. The line
+   under the word may hold several lines (a run's steps). */
+.gk-gui-stuff-wave-running .gk-gui-stuff-wave-backdrop, .gk-gui-stuff-wave-running.gk-gui-stuff-wave-waiting .gk-gui-stuff-wave-backdrop { background: var(--oc-yellow-5); }
+.gk-gui-stuff-wave-running .gk-gui-stuff-wave-text { color: var(--oc-gray-9); text-shadow: none; }
+.gk-gui-stuff-wave-line { white-space: pre-line; }
+/* From waiting to the outcome in one movement; the colour glides (the backdrop's transition) and the words
+   cross-fade, the old one fading out where it stood while the new one fades in */
+.gk-gui-stuff-wave-word-out { position: absolute; inset-inline: 0; inset-block-start: 0; animation: gk-gui-stuff-wave-out .4s ease forwards; }
+.gk-gui-stuff-wave-word-in { animation: gk-gui-stuff-wave-in .4s ease; }
+@keyframes gk-gui-stuff-wave-out { to { opacity: 0; } }
+@keyframes gk-gui-stuff-wave-in { from { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-wave-word-out { animation: none; opacity: 0; } .gk-gui-stuff-wave-word-in { animation: none; } }
+
+/* the project menu as icons (Menu.main_menu): the name is hidden on screen and stays for screen readers; a tab without an icon
+   keeps its text */
+html.gk-gui-stuff-main-menu-icons #main-menu li a:not(.gk-gui-stuff-keeps-text) .icon-label {
+  position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap;
+}
+
+/* layout (Menu.layout): the sidebar's place and the header's height, where they differ from core's own; moved from the theme */
+html.gk-gui-stuff-sidebar-before #main { flex-direction: row; }
+html.gk-gui-stuff-sidebar-before #sidebar { border-inline-start: 0; border-inline-end: 1px solid var(--oc-gray-4, #ced4da); padding-inline: 20px; }
+/* core's sidebar switch mirrored: the strip spans the panel, the chevrons stand on its inner edge (towards the content)
+   and point the other way; folded, only the inner strip stays. Core's own rule for a folded sidebar is outranked. */
+html.gk-gui-stuff-sidebar-before #sidebar-switch-panel { margin-inline: -20px; padding-inline: 0; inline-size: auto; }
+html.gk-gui-stuff-sidebar-before #sidebar-switch-button { display: flex; justify-content: flex-end; padding-inline: 0; inline-size: auto; }
+html.gk-gui-stuff-sidebar-before #sidebar-switch-button svg { transform: scaleX(-1); }
+html.gk-gui-stuff-sidebar-before[dir="rtl"] #sidebar-switch-button svg.icon-rtl { transform: none; }
+html.gk-gui-stuff-sidebar-before #main.collapsedsidebar #sidebar { padding-inline: 0 20px; }
+html.gk-gui-stuff-sidebar-before #main.collapsedsidebar #sidebar-switch-panel { margin-inline-start: 0; }
+html.gk-gui-stuff-sidebar-hidden #sidebar { display: none; }
+html.gk-gui-stuff-header-compact #header { padding-block-start: 0; }
+html.gk-gui-stuff-header-compact #header h1 { font-size: 1.1rem; padding-block: 2px; }
+html.gk-gui-stuff-header-compact #quick-search { margin-block: 2px; }

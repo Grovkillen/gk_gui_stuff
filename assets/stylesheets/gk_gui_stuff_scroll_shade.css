@@ -1,0 +1,6 @@
+/* gk_gui_stuff scroll_shade: an inner shadow at the edge of a scrolling GK surface where there is more to scroll to;
+   the surface's own shadow (--gk-gui-stuff-shade-own, set by the script) stays under it */
+.gk-gui-stuff-shade-above { box-shadow: inset 0 10px 8px -8px rgba(0, 0, 0, 0.25), var(--gk-gui-stuff-shade-own, 0 0 0 transparent); }
+.gk-gui-stuff-shade-below { box-shadow: inset 0 -10px 8px -8px rgba(0, 0, 0, 0.25), var(--gk-gui-stuff-shade-own, 0 0 0 transparent); }
+.gk-gui-stuff-shade-above.gk-gui-stuff-shade-below { box-shadow: inset 0 10px 8px -8px rgba(0, 0, 0, 0.25), inset 0 -10px 8px -8px rgba(0, 0, 0, 0.25), var(--gk-gui-stuff-shade-own, 0 0 0 transparent); }
+@media print { .gk-gui-stuff-shade-above, .gk-gui-stuff-shade-below { box-shadow: var(--gk-gui-stuff-shade-own, none); } }

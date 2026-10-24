@@ -1,0 +1,14 @@
+/* gk_gui_stuff link_preview. Logical properties only (environment manifest 5.22); neutral colours until
+   theme_engine's palette tokens exist. The same card for every type. */
+.gk-gui-stuff-preview { position: absolute; z-index: 1000; inline-size: 22em; max-inline-size: calc(100vw - 16px);
+  padding-block: 0.6em; padding-inline: 0.8em; background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--oc-gray-4); border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(var(--oc-black-rgb), 0.18); font-size: 0.95em; line-height: 1.35; text-align: start; }
+.gk-gui-stuff-preview-title { display: block; font-weight: bold; }
+.gk-gui-stuff-preview-subtitle { color: var(--oc-gray-6); font-size: 0.9em; }
+.gk-gui-stuff-preview-badges { margin-block: 0.4em 0; }
+.gk-gui-stuff-preview-badge { display: inline-block; margin-inline-end: 0.4em; padding-inline: 0.5em; border: 1px solid var(--oc-gray-4);
+  border-radius: 1em; font-size: 0.85em; }
+.gk-gui-stuff-preview-text { margin-block: 0.5em 0; }
+.gk-gui-stuff-preview-fields { display: grid; grid-template-columns: max-content 1fr; column-gap: 0.8em; row-gap: 0.15em; margin-block: 0.5em 0; }
+.gk-gui-stuff-preview-fields dt { color: var(--oc-gray-6); }
+.gk-gui-stuff-preview-fields dd { margin: 0; }

@@ -1,0 +1,106 @@
+/* gk_gui_stuff list_filter and select_search (gk_gui_stuff_lists.js). Fields and lists in core's own look:
+   its inputs, borders, colours, radius and icons; the chooser's closed field takes its font, padding, corners and
+   arrow from the list it stands for, and its open panel has the look of core's drop-down menus. */
+
+/* list_filter: core's input with a magnifier at its start, the count and a clear button at its end */
+.gk-gui-stuff-lf { position: relative; display: flex; align-items: center; inline-size: min(22em, 100%); margin-block: 4px 6px; }
+input.gk-gui-stuff-lf-input { inline-size: 100%; margin: 0; }
+.gk-gui-stuff-lf.gk-gui-stuff-has-icon input.gk-gui-stuff-lf-input { padding-inline-start: 26px; }
+input.gk-gui-stuff-lf-input:focus, input.gk-gui-stuff-ss-find:focus { border-color: var(--oc-blue-5, #339af0); outline: none; }
+input.gk-gui-stuff-lf-input::-webkit-search-cancel-button, input.gk-gui-stuff-ss-find::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }
+.gk-gui-stuff-lf-icon, .gk-gui-stuff-ss-search-icon {
+  position: absolute; inset-inline-start: 7px; inset-block-start: 50%; transform: translateY(-50%);
+  display: inline-flex; color: var(--oc-gray-6, #868e96); pointer-events: none;
+}
+.gk-gui-stuff-lf-end { position: absolute; inset-inline-end: 4px; inset-block-start: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 4px; }
+.gk-gui-stuff-lf-count { color: var(--oc-gray-6, #868e96); font-size: 0.85em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.gk-gui-stuff-lf-count:empty { display: none; }
+button.gk-gui-stuff-lf-clear, button.gk-gui-stuff-ss-chip-x {
+  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; padding: 0;
+  border: 0; border-radius: 50%; background: transparent; color: var(--oc-gray-6, #868e96); cursor: pointer; line-height: 1;
+}
+button.gk-gui-stuff-lf-clear { inline-size: 18px; block-size: 18px; }
+button.gk-gui-stuff-lf-clear:hover, button.gk-gui-stuff-lf-clear:focus-visible { background-color: var(--oc-gray-2, #e9ecef); color: var(--oc-gray-9, #212529); outline: none; }
+button.gk-gui-stuff-lf-clear[hidden] { display: none; }
+.gk-gui-stuff-lf-line { margin-block-end: 4px; }
+.gk-gui-stuff-lf-miss { display: none !important; }
+/* a long list of check boxes in a box of its own height, so that it does not push the page down */
+span.gk-gui-stuff-lf-scroll { display: block; }
+.gk-gui-stuff-lf-scroll { max-block-size: 20em; overflow-y: auto; overscroll-behavior: contain; }
+ul.projects.gk-gui-stuff-lf-scroll { padding-inline-end: 4px; }
+
+/* select_search: the real list is still in the form, only out of sight */
+select.gk-gui-stuff-ss-native {
+  position: absolute !important; inline-size: 1px !important; block-size: 1px !important; min-inline-size: 0 !important; min-block-size: 0 !important;
+  overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; padding: 0; margin: 0; opacity: 0;
+}
+.gk-gui-stuff-ss { position: relative; display: inline-block; vertical-align: middle; max-inline-size: 100%; margin-block: 1px; }
+.gk-gui-stuff-ss-free { min-inline-size: 12em; }
+/* the closed field: core's list (border, background, colour); font, padding, height, corners and arrow come from the
+   list itself in the script */
+.gk-gui-stuff-ss-box {
+  display: flex; align-items: center; box-sizing: border-box; inline-size: 100%; position: relative;
+  color: var(--oc-gray-9, #333); background-color: var(--oc-white, #fff); border: 1px solid var(--oc-gray-4, #ccc); border-radius: 3px;
+  transition: border-color 100ms linear;
+}
+.gk-gui-stuff-ss-single .gk-gui-stuff-ss-box { padding-block: 4px; padding-inline: 7px 20px; cursor: default; user-select: none; background-repeat: no-repeat; }
+.gk-gui-stuff-ss-box:focus, .gk-gui-stuff-ss-multi .gk-gui-stuff-ss-box:focus-within, .gk-gui-stuff-ss-open .gk-gui-stuff-ss-box { border-color: var(--oc-blue-5, #339af0); outline: none; }
+.gk-gui-stuff-ss-disabled .gk-gui-stuff-ss-box { color: graytext; background-color: var(--oc-gray-2, #e9ecef); cursor: not-allowed; }
+.gk-gui-stuff-ss-value { flex: 1 1 auto; min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gk-gui-stuff-ss-placeholder { color: var(--oc-gray-6, #868e96); }
+.gk-gui-stuff-ss-caret { position: absolute; inset-inline-end: 3px; inset-block-start: 50%; transform: translateY(-50%); display: inline-flex; color: var(--oc-gray-7, #495057); pointer-events: none; }
+/* several choices: chips with a remove button, and the search typed among them; the chips wrap */
+.gk-gui-stuff-ss-multi .gk-gui-stuff-ss-box { flex-wrap: wrap; gap: 3px; min-block-size: 28px; padding-block: 2px; padding-inline: 3px; cursor: text; }
+.gk-gui-stuff-ss-chips { display: contents; }
+.gk-gui-stuff-ss-chip {
+  display: inline-flex; align-items: center; gap: 2px; max-inline-size: 100%; box-sizing: border-box;
+  border: 1px solid var(--oc-gray-4, #ced4da); border-radius: 10px; background-color: var(--oc-gray-1, #f1f3f5); color: var(--oc-gray-9, #212529);
+  padding-block: 0; padding-inline: 8px 2px; line-height: 20px; font-size: 0.95em;
+}
+.gk-gui-stuff-ss-chip-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-inline-size: 0; }
+button.gk-gui-stuff-ss-chip-x { flex: none; inline-size: 16px; block-size: 16px; }
+button.gk-gui-stuff-ss-chip-x:hover { background-color: var(--oc-gray-3, #dee2e6); color: var(--oc-red-8, #e03131); }
+input.gk-gui-stuff-ss-input {
+  flex: 1 1 5em; min-inline-size: 3em; block-size: 22px; margin: 0; padding-block: 0; padding-inline: 4px;
+  border: 0 !important; outline: 0; box-shadow: none !important; background: transparent; font: inherit; color: inherit;
+}
+/* the open panel, fixed to the window (placed by the script under or above the field) so that no box around the
+   field that scrolls or cuts what overflows hides part of it; the look of core's drop-down menus */
+.gk-gui-stuff-ss-drop {
+  position: fixed; z-index: 1000; box-sizing: border-box; display: flex; flex-direction: column; inline-size: max-content;
+  background-color: var(--oc-white, #fff); color: var(--oc-gray-9, #333); border: 1px solid var(--oc-gray-4, #ccc); border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(var(--oc-black-rgb, 0, 0, 0), 0.15); font-size: 0.95em; text-align: start;
+  opacity: 0; transform: translateY(-3px); transition: opacity 100ms ease-out, transform 100ms ease-out;
+}
+.gk-gui-stuff-ss-up .gk-gui-stuff-ss-drop { transform: translateY(3px); }
+.gk-gui-stuff-ss-drop.gk-gui-stuff-ss-in { opacity: 1; transform: none; }
+.gk-gui-stuff-ss-drop[hidden] { display: none; }
+.gk-gui-stuff-ss-search { position: relative; flex: none; padding: 6px; border-block-end: 1px solid var(--oc-gray-3, #dee2e6); }
+.gk-gui-stuff-ss-search-icon { inset-inline-start: 13px; }
+input.gk-gui-stuff-ss-find { display: block; inline-size: 100%; margin: 0; }
+.gk-gui-stuff-ss-search.gk-gui-stuff-has-icon input.gk-gui-stuff-ss-find { padding-inline-start: 26px; }
+.gk-gui-stuff-ss-list {
+  position: relative; flex: 0 1 auto; min-block-size: 0; max-block-size: 20em; overflow-y: auto; overscroll-behavior: contain;
+  margin: 0; padding-block: 4px; padding-inline: 0; list-style: none;
+}
+.gk-gui-stuff-ss-option { display: flex; align-items: center; gap: 6px; padding-block: 4px; padding-inline: 6px 10px; cursor: pointer; white-space: nowrap; }
+.gk-gui-stuff-ss-grouped { padding-inline-start: 14px; }
+.gk-gui-stuff-ss-check { flex: none; display: inline-flex; inline-size: 14px; justify-content: center; visibility: hidden; color: var(--oc-blue-7, #1c7ed6); }
+.gk-gui-stuff-ss-option[aria-selected="true"] .gk-gui-stuff-ss-check { visibility: visible; }
+.gk-gui-stuff-ss-text { overflow: hidden; text-overflow: ellipsis; min-inline-size: 0; }
+.gk-gui-stuff-ss-option.gk-gui-stuff-ss-active { background-color: var(--oc-blue-0, #e7f5ff); }
+.gk-gui-stuff-ss-option[aria-disabled="true"] { color: var(--oc-gray-5, #adb5bd); cursor: default; }
+.gk-gui-stuff-ss-option[aria-disabled="true"].gk-gui-stuff-ss-active { background-color: transparent; }
+mark.gk-gui-stuff-ss-hit { background: none; color: inherit; font-weight: bold; padding: 0; }
+.gk-gui-stuff-ss-group {
+  padding-block: 8px 2px; padding-inline: 8px; font-size: 0.85em; font-weight: bold; color: var(--oc-gray-6, #868e96);
+  cursor: default; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.gk-gui-stuff-ss-group:first-child { padding-block-start: 2px; }
+.gk-gui-stuff-ss-empty { padding-block: 6px; padding-inline: 10px; color: var(--oc-gray-6, #868e96); }
+/* a long list drawn in part: every row equally high, room for the rows not drawn */
+.gk-gui-stuff-ss-virtual { padding-block: 0; }
+.gk-gui-stuff-ss-virtual > li:not(.gk-gui-stuff-ss-spacer) { box-sizing: border-box; block-size: var(--gk-gui-stuff-ss-row, 26px); overflow: hidden; padding-block-start: 4px; }
+.gk-gui-stuff-ss-spacer { padding: 0; margin: 0; list-style: none; }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-ss-drop, .gk-gui-stuff-ss-up .gk-gui-stuff-ss-drop { transition: none; transform: none; } }
+@media print { .gk-gui-stuff-lf, .gk-gui-stuff-ss-drop { display: none; } .gk-gui-stuff-lf-scroll { max-block-size: none; overflow: visible; } }

@@ -1,0 +1,258 @@
+<%# gk_gui_stuff: the switches, then Om pluginet and the change log. Every change here is a records event;
+    the reason field comes from gk_records. %>
+<% plugin = Redmine::Plugin.find(:gk_gui_stuff) %>
+<% sw = GkGuiStuff::Switches %>
+<%# The instance's values: [setting, name (label, help text and field id), kind, owner, default, min, max, step]. A value
+    that one module alone uses (its owner) stands under that module's text, where it is looked for; in Values when the
+    module is not there, so that it is still sent. Values used by several modules or by all stand in Values. %>
+<% gk_values = [
+     ['fold_height_px', 'fold_height', :number, nil, 320, 80, 2000, 20],
+     ['fold_attachments', 'fold_attachments', :number, 'attachments_collapse', 6, 2, 100, 1],
+     ['attachments_newest', 'attachments_newest', :flag, 'attachments_collapse', false],
+     ['footer_text', 'footer_text', :text, 'footer_text'],
+     ['preview_delay_ms', 'preview_delay', :number, 'link_preview', 500, 0, 3000, 50],
+     ['flash_seconds', 'flash_seconds', :number, 'flash_timeout', 8, 0, 120, 1],
+     ['beat_seconds', 'beat_seconds', :number, nil, 30, 0, 600, 5],
+     ['wave_opacity_pct', 'wave_opacity_pct', :number, 'wave', 60, 0, 100, 5],
+     ['wave_first_ms', 'wave_first_ms', :number, 'wave', 1600, 0, 5000, 100],
+     ['wave_ms', 'wave_ms', :number, 'wave', 600, 0, 5000, 50],
+     ['wave_min_ms', 'wave_min_ms', :number, 'wave', 400, 0, 5000, 50],
+     ['wave_start_delay_ms', 'wave_start_delay_ms', :number, 'wave', 0, 0, 5000, 50],
+     ['loading_delay_ms', 'loading_delay_ms', :number, 'wave', 1300, 200, 10000, 100],
+     ['wave_hide_flash', 'wave_hide_flash', :flag, 'wave', true],
+     ['notice_seconds', 'notice_seconds', :number, nil, 6, 4, 60, 1],
+     ['notice_countdown', 'notice_countdown', :flag, nil, true],
+     ['corner_max_entries', 'corner_max_entries', :number, 'corner', 20, 1, 100, 1],
+     ['due_soon_days', 'due_soon_days', :number, nil, 3, 0, 60, 1],
+     ['personal_count_seconds', 'personal_count_seconds', :number, nil, 60, 0, 3600, 10],
+     ['description_lines', 'description_lines', :number, 'short_descriptions', 1, 1, 10, 1],
+     ['custom_mark_style', 'custom_mark_style', :select, 'custom_mark'],
+     ['login_warning_animate', 'lw_animate', :flag, 'login_warning', true],
+     ['login_warning_endless', 'lw_endless', :flag, 'login_warning', false]
+   ]
+   gk_value_field = lambda do |v|
+     key, name, kind = v
+     id = "gk_gui_stuff_#{name}"
+     field = case kind
+             when :number then number_field_tag("settings[#{key}]", sw.int(key, v[4], v[5]), min: v[5], max: v[6], step: v[7], id: id)
+             when :flag then hidden_field_tag("settings[#{key}]", '0', id: nil) + check_box_tag("settings[#{key}]", '1', sw.flag(sw.settings[key], v[4]), id: id)
+             when :text then text_field_tag("settings[#{key}]", sw.settings[key].to_s, size: 80, id: id)
+             when :select then select_tag("settings[#{key}]", options_for_select(GkGuiStuff::CustomMark::STYLES.map { |s| [l(:"label_gk_gui_stuff_custom_mark_#{s}"), s] }, GkGuiStuff::CustomMark.style), id: id)
+             end
+     help = I18n.exists?(:"text_gk_gui_stuff_#{name}") ? content_tag(:em, l(:"text_gk_gui_stuff_#{name}"), class: 'info') : nil
+     label = label_tag(id, l(:"label_gk_gui_stuff_#{name}"))
+     # a check box stands before its text; under Values core's .tabular still puts the text in the label column
+     safe_join((kind == :flag ? [field, label, help] : [label, field, help]).compact, "\n")
+   end %>
+<% gk_help_box = capture do %>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_help) %></em></p>
+  <p><label><%= l(:label_gk_gui_stuff_help_kind) %></label>
+    <% %w[core url wiki].each do |k| %>
+      <label class="inline"><%= radio_button_tag 'settings[help_kind]', k, (sw.settings['help_kind'].presence || 'core') == k, id: "gk_gui_stuff_help_kind_#{k}" %> <%= l(:"label_gk_gui_stuff_help_kind_#{k}") %></label>
+    <% end %></p>
+  <p><label for="gk_gui_stuff_help_url"><%= l(:label_gk_gui_stuff_help_url) %></label>
+    <%= text_field_tag 'settings[help_url]', sw.settings['help_url'].to_s, size: 70, id: 'gk_gui_stuff_help_url' %>
+    <em class="info"><%= l(:text_gk_gui_stuff_help_url) %></em></p>
+  <p><label for="gk_gui_stuff_help_wiki_project"><%= l(:label_gk_gui_stuff_help_wiki_project) %></label>
+    <%= select_tag 'settings[help_wiki_project]', options_for_select([['', '']] + Project.active.has_module(:wiki).order(:name).map { |p| [p.name, p.identifier] }, sw.settings['help_wiki_project'].to_s), id: 'gk_gui_stuff_help_wiki_project' %></p>
+  <p><label for="gk_gui_stuff_help_wiki_page"><%= l(:label_gk_gui_stuff_help_wiki_page) %></label>
+    <%= text_field_tag 'settings[help_wiki_page]', sw.settings['help_wiki_page'].to_s, size: 40, id: 'gk_gui_stuff_help_wiki_page' %>
+    <em class="info"><%= l(:text_gk_gui_stuff_help_wiki_page) %></em></p>
+<% end %>
+<% gk_declutter_box = capture do %>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_declutter) %></em></p>
+  <% dh = sw.settings['declutter'].is_a?(Hash) ? sw.settings['declutter'] : {} %>
+  <% GkGuiStuff::Declutter::TARGETS.each_key do |key| %>
+    <p><%= hidden_field_tag "settings[declutter][#{key}]", '0', id: nil %>
+      <%= check_box_tag "settings[declutter][#{key}]", '1', dh[key].to_s == '1', id: "gk_gui_stuff_dc_#{key}" %>
+      <label for="gk_gui_stuff_dc_<%= key %>"><%= l(:"label_gk_gui_stuff_dc_#{key}") %></label></p>
+  <% end %>
+<% end %>
+<% gk_mod_boxes = { 'help_link' => gk_help_box, 'declutter' => gk_declutter_box } %>
+<% changelog = ["CHANGELOG.#{current_language}.md", 'CHANGELOG.md'].map { |f| File.join(plugin.directory, f) }.find { |f| File.exist?(f) } %>
+<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_about) %></legend>
+  <div><strong><%= plugin.name %></strong> <%= plugin.version %></div>
+  <div><%= l(:text_gk_gui_stuff_description) %></div>
+</fieldset>
+<fieldset class="box tabular"><legend><%= l(:label_gk_gui_stuff_switches) %></legend>
+  <p><label for="gk_gui_stuff_core_like"><%= l(:label_gk_gui_stuff_core_like) %></label>
+    <%= hidden_field_tag 'settings[core_like]', '0', id: nil %>
+    <%= check_box_tag 'settings[core_like]', '1', sw.instance_core_like?, id: 'gk_gui_stuff_core_like' %>
+    <em class="info"><%= l(:text_gk_gui_stuff_core_like) %></em></p>
+  <p><label for="gk_gui_stuff_user_core_like"><%= l(:label_gk_gui_stuff_user_core_like) %></label>
+    <%= hidden_field_tag 'settings[user_core_like]', '0', id: nil %>
+    <%= check_box_tag 'settings[user_core_like]', '1', sw.user_core_like_allowed?, id: 'gk_gui_stuff_user_core_like' %>
+    <em class="info"><%= l(:text_gk_gui_stuff_user_core_like) %></em></p>
+</fieldset>
+<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_modules) %></legend>
+  <%# GK's recommendation and Like core, at the end of the filter's line above the modes (their explanation as the
+      buttons' tip, so no empty space): each sets every module's mode (to what GK recommends, or off as in core) and
+      marks the rows it changed, counted under them; nothing is saved until Save %>
+  <p class="gk-gui-stuff-recommend" style="float: inline-end; margin-block: 0; text-align: end;">
+    <a href="#" class="icon" title="<%= l(:text_gk_gui_stuff_recommend) %>" data-gk-recommend data-gk-done="<%= l(:text_gk_gui_stuff_recommend_changed) %>"><%= sprite_icon('checked', l(:button_gk_gui_stuff_recommend)) %></a>
+    <a href="#" class="icon" title="<%= l(:text_gk_gui_stuff_recommend) %>" data-gk-core-mode data-gk-done="<%= l(:text_gk_gui_stuff_core_mode_changed) %>"><%= sprite_icon('reload', l(:button_gk_gui_stuff_core_mode)) %></a>
+    <em class="info"></em></p>
+  <%# The page's own rules: a module's values and boxes stand in its row (the label beside the field, not moved out
+      into the margin as core's .tabular label places it: the whole settings form is .tabular), the modes at the top
+      of their rows, and the tables' headings at the start like their rows %>
+  <%= content_tag(:style, ['.tabular .gk-gui-stuff-mod-value label, .tabular .gk-gui-stuff-mod-box label { float: none; display: inline; margin-inline: 0 6px; inline-size: auto; text-align: start; font-weight: normal; line-height: normal; }',
+                           '.tabular .gk-gui-stuff-mod-box p { padding-inline-start: 0; margin-block: 2px; }',
+                           'table.gk-gui-stuff-modules td.mode { vertical-align: top; }'].join("\n")) %>
+  <%# the tables' headings follow their columns: each as the cell under it (start, centre or end) %>
+  <%= javascript_tag(<<~JS)
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('#settings table.list').forEach(function (t) {
+        var row = t.tBodies[0] && t.tBodies[0].rows[0];
+        if (!row || !t.tHead || !t.tHead.rows[0]) return;
+        Array.prototype.forEach.call(t.tHead.rows[0].cells, function (th, i) { if (row.cells[i]) th.style.textAlign = window.getComputedStyle(row.cells[i]).textAlign; });
+      });
+    });
+  JS
+  %>
+  <table class="list gk-gui-stuff-modules">
+    <thead><tr><th><%= l(:label_gk_gui_stuff_module) %></th><th><%= l(:label_gk_gui_stuff_mode) %></th></tr></thead>
+    <tbody>
+    <% GkGuiStuff::Registry.present.each_value do |m| %>
+      <tr>
+        <td class="name"><strong><%= l(m.label_key) %></strong><br><em class="info"><%= l(m.text_key) %></em>
+          <% gk_values.select { |v| v[3] == m.key }.each do |v| %><div class="gk-gui-stuff-mod-value"><%= gk_value_field.call(v) %></div><% end %>
+          <% if gk_mod_boxes[m.key] %><div class="gk-gui-stuff-mod-box"><%= gk_mod_boxes[m.key] %></div><% end %></td>
+        <td class="mode"><%= select_tag "settings[modules][#{m.key}][mode]",
+                           options_for_select((m.safety ? %w[off forced] : sw::MODES).map { |x| [l(:"label_gk_gui_stuff_mode_#{x}"), x] }, sw.mode(m)),
+                           id: nil, 'aria-label': l(m.label_key), data: { gk_recommended: sw.recommended(m), gk_core: 'off' } unless m.always %>
+          <% if m.always %><%= l(:label_gk_gui_stuff_mode_forced) %> <em class="info"><%= l(:text_gk_gui_stuff_mode_always) %></em><% end %>
+          <% if m.safety %><br><em class="info"><%= l(:text_gk_gui_stuff_safety) %></em><% end %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+  <%# a module that is not there (its need not met) keeps what was stored for it, unseen %>
+  <% (GkGuiStuff::Registry.all.keys - GkGuiStuff::Registry.present.keys).each do |key| %>
+    <% sw.mod_settings(key).each do |name, value| %><%= hidden_field_tag "settings[modules][#{key}][#{name}]", value, id: nil %><% end %>
+  <% end %>
+</fieldset>
+<% if GkGuiStuff::CoreStuffLooks.items.present? %>
+<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_core_stuff_looks) %></legend>
+  <%= render partial: 'gk_gui_stuff_features/core_stuff_looks' %>
+</fieldset>
+<% end %>
+<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_placements) %></legend>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_placements) %></em></p>
+  <%# icons by area: the default for everyone; each person may choose their own (Menu::ICON_AREAS) %>
+  <% GkGuiStuff::Menu::ICON_AREAS.each do |area| %>
+  <p><label for="gk-gui-stuff-icons-<%= area %>"><%= l(:"label_gk_gui_stuff_icons_#{area}") %></label>
+    <%= select_tag "settings[icons_#{area}]", options_for_select(GkGuiStuff::Menu::ICON_MODES.map { |m| [l(:"label_gk_gui_stuff_placement_#{m}"), m] }, GkGuiStuff::Menu.admin_icons(area) || 'core'), id: "gk-gui-stuff-icons-#{area}" %></p>
+  <% end %>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_icons) %></em></p>
+  <% GkGuiStuff::Menu::LAYOUT.each do |key, values| %>
+  <p><label for="gk-gui-stuff-layout-<%= key %>"><%= l(:"label_gk_gui_stuff_layout_#{key}") %></label>
+    <%= select_tag "settings[layout_#{key}]", options_for_select(values.map { |v| [l(:"label_gk_gui_stuff_layout_#{key}_#{v}"), v] }, GkGuiStuff::Menu.admin_layout(key) || values.first), id: "gk-gui-stuff-layout-#{key}" %></p>
+  <% end %>
+  <table class="list gk-gui-stuff-placements">
+    <thead><tr><th><%= l(:label_gk_gui_stuff_button) %></th><th><%= l(:label_gk_gui_stuff_where_shown) %></th><th><%= l(:label_gk_gui_stuff_plugin) %></th><th><%= l(:label_gk_gui_stuff_placement) %></th></tr></thead>
+    <tbody>
+    <% GkGuiStuff::Menu.all.values.sort_by { |r| [r.contexts.first.to_s, r.order] }.each do |r| %>
+      <% label = r.name ? l(r.name) : (r.label.respond_to?(:call) ? r.key : l(r.label, count: 'N', project: '')) %>
+      <tr>
+        <td class="name"><%= sprite_icon(r.icon) if r.icon.is_a?(String) %> <%= label %><br><span class="info"><%= r.key %></span></td>
+        <td class="text where_shown"><%= r.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
+        <td class="plugin"><%= r.plugin %></td>
+        <td class="placement"><%= select_tag "settings[placements][#{r.key}]",
+                           options_for_select([[l(:label_gk_gui_stuff_follow_area, which: l(:"label_gk_gui_stuff_placement_#{r.placement}")), '']] + GkGuiStuff::Menu::PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] },
+                                              GkGuiStuff::Menu.admin_choice(r.key)), id: nil %></td>
+      </tr>
+    <% end %>
+    <%# core's own buttons: as Redmine, icon and text, or the icon only, never in the menu (Menu::CORE_BUTTONS); empty follows the area %>
+    <% GkGuiStuff::Menu::CORE_BUTTONS.each do |b| %>
+      <tr>
+        <td class="name"><%= sprite_icon(b.icon) %> <%= GkGuiStuff::Menu.core_label(b) %><br><span class="info"><%= b.key %></span></td>
+        <td class="text where_shown"><%= b.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
+        <td class="plugin">Redmine</td>
+        <td class="placement"><%= select_tag "settings[placements][#{b.key}]",
+                           options_for_select([[l(:label_gk_gui_stuff_follow_area, which: l(:label_gk_gui_stuff_area)), '']] + GkGuiStuff::Menu::CORE_PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] },
+                                              GkGuiStuff::Menu.admin_choice(b.key)), id: nil %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</fieldset>
+<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_ag_rows) %></legend>
+  <% ag = GkGuiStuff::AdminGroups %>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_ag_rows, groups: (ag::GROUPS + [ag::OTHER]).map { |k| ag.label(k) }.join(', ')) %></em></p>
+  <table class="list gk-gui-stuff-ag-settings">
+    <thead><tr><th><%= l(:label_gk_gui_stuff_ag_row) %></th><th><%= l(:label_gk_gui_stuff_ag_group_now) %></th><th><%= l(:label_gk_gui_stuff_ag_tags) %></th><th><%= l(:label_gk_gui_stuff_ag_caption) %></th></tr></thead>
+    <tbody>
+    <% ag.items.each do |item| %>
+      <% name = item.name.to_s %>
+      <% own = ag.row(name)['caption'].is_a?(Hash) ? ag.row(name)['caption'] : {} %>
+      <% core_word = ag.core_caption(item) %>
+      <tr>
+        <td class="name"><%= core_word %><br><span class="info"><%= name %></span></td>
+        <td class="group"><%= content_tag('span', ag.label(ag.group(name)), class: "gk-gui-stuff-ag-group gk-gui-stuff-ag-group-#{ag.group(name)}") %></td>
+        <td class="tags"><%= text_field_tag "settings[admin_rows][#{name}][tags]", ag.row(name)['tags'].to_s, size: 28, id: nil,
+                               placeholder: ag.default_tags(name).map { |t| ag.label(ag.key_for(t)) }.join(', '), 'aria-label': "#{core_word}: #{l(:label_gk_gui_stuff_ag_tags)}" %></td>
+        <td class="caption"><%= text_field_tag "settings[admin_rows][#{name}][caption][#{current_language}]", own[current_language.to_s].to_s, size: 28, id: nil,
+                               placeholder: l(:"gk_gui_stuff_ag_caption_#{name}", default: core_word), 'aria-label': "#{core_word}: #{l(:label_gk_gui_stuff_ag_caption)}" %>
+          <% own.except(current_language.to_s).each do |lang, text| %><%= hidden_field_tag "settings[admin_rows][#{name}][caption][#{lang}]", text, id: nil %><% end %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</fieldset>
+<fieldset class="box tabular"><legend><%= l(:label_gk_gui_stuff_values) %></legend>
+  <% gk_values.reject { |v| v[3] && GkGuiStuff::Registry.present.key?(v[3]) }.each do |v| %>
+    <p><%= gk_value_field.call(v) %>
+      <%# 0 days is off for the mark and the palette alike; said aloud, since an installation may have 0 saved from before %>
+      <% if v[0] == 'due_soon_days' && GkGuiStuff::Overdue.soon_days.zero? %><em class="info warning"><%= l(:text_gk_gui_stuff_due_soon_days_off) %></em><% end %></p>
+  <% end %>
+</fieldset>
+<fieldset class="box tabular"><legend><%= l(:label_gk_gui_stuff_quick_done_status) %></legend>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_quick_done_status) %></em></p>
+  <% qd = sw.settings['quick_done_status'].is_a?(Hash) ? sw.settings['quick_done_status'] : {} %>
+  <%# many trackers stand in columns on a wide page, never fewer than 10 rows to a column %>
+  <% trs = Tracker.sorted.to_a %>
+  <div class="gk-gui-stuff-columns" style="columns: 26em <%= [(trs.size / 10.0).ceil, 1].max %>;">
+  <% trs.each do |tr| %>
+    <p style="break-inside: avoid;"><label for="gk_gui_stuff_qd_<%= tr.id %>"><%= tr.name %></label>
+      <%= select_tag "settings[quick_done_status][#{tr.id}]", options_for_select([[l(:label_gk_gui_stuff_quick_done_no_status), '']] + tr.issue_statuses.map { |s| [s.name + (s.is_closed? ? " (#{l(:label_closed_issues)})" : ''), s.id.to_s] }, qd[tr.id.to_s].to_s), id: "gk_gui_stuff_qd_#{tr.id}" %></p>
+  <% end %>
+  </div>
+</fieldset>
+<%# Hjälp and Dolt stand under their modules (help_link, declutter); a box of their own only when the module is not
+    there, so that what is stored is still sent %>
+<% unless GkGuiStuff::Registry.present.key?('help_link') %>
+<fieldset class="box tabular"><legend><%= l(:label_gk_gui_stuff_help) %></legend>
+  <%= gk_help_box %>
+</fieldset>
+<% end %>
+<% unless GkGuiStuff::Registry.present.key?('declutter') %>
+<fieldset class="box tabular"><legend><%= l(:label_gk_gui_stuff_declutter) %></legend>
+  <%= gk_declutter_box %>
+</fieldset>
+<% end %>
+<% if changelog %>
+<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_changelog) %></legend>
+  <% unless current_language.to_s.start_with?('en') %><div class="gk-changelog-note"><em><%= l(:text_gk_gui_stuff_changelog_english) %></em></div><% end %>
+  <details class="gk-changelog"><summary><%= l(:button_show) %></summary>
+  <div class="wiki"><%= Redmine::WikiFormatting.to_html('common_mark', File.read(changelog, encoding: 'UTF-8').sub(/\A.*?(?=^## )/m, '')).html_safe %></div>
+  </details>
+</fieldset>
+<% end %>
+<%# GK's recommendation (data-gk-recommended) and Like core (data-gk-core): every select with the button's attribute is
+    set to it; the rows that change are marked and counted beside the buttons, and the form is saved as usual %>
+<%= javascript_tag(<<~JS)
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('[data-gk-recommend], [data-gk-core-mode]');
+    if (!a) return;
+    e.preventDefault();
+    var key = a.hasAttribute('data-gk-core-mode') ? 'gkCore' : 'gkRecommended';
+    var n = 0, form = a.closest('form') || document;
+    form.querySelectorAll('select[data-gk-recommended]').forEach(function (s) {
+      var want = s.dataset[key], row = s.closest('tr') || s.closest('p');
+      if (want != null && s.value !== want) { s.value = want; s.dispatchEvent(new Event('change', { bubbles: true })); n++; if (row) { row.classList.add('gk-gui-stuff-recommend-changed'); row.style.backgroundColor = 'var(--oc-yellow-1)'; } }
+    });
+    var info = a.parentElement.querySelector('em.info');
+    if (info) info.textContent = a.dataset.gkDone.replace('%{count}', n);
+  });
+JS
+%>

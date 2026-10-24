@@ -1,0 +1,12 @@
+/* gk_gui_stuff sticky_columns: the floating copy of a list's header, and the first column of core's workflow
+   matrix held at the start while the matrix scrolls sideways. */
+.gk-gui-stuff-sticky-clone { position: fixed; inset-block-start: 0; z-index: 30; overflow: hidden; pointer-events: none; display: none;
+  box-shadow: 0 2px 4px rgba(var(--oc-black-rgb), 0.12); }
+.gk-gui-stuff-sticky-clone.gk-gui-stuff-sticky-on { display: block; }
+.gk-gui-stuff-sticky-clone table { table-layout: fixed; margin: 0; }
+.gk-gui-stuff-sticky-clone th, .gk-gui-stuff-sticky-clone td, .gk-gui-stuff-sticky-clone a, .gk-gui-stuff-sticky-clone input { pointer-events: auto; }
+.gk-gui-stuff-sticky-clone thead td { background: var(--oc-white, #ffffff); }
+.gk-gui-stuff-sticky-first table.workflows tbody td.name, .gk-gui-stuff-sticky-first table.workflows thead tr > :first-child {
+  position: sticky; inset-inline-start: 0; z-index: 1; background: var(--oc-white, #ffffff); }
+.gk-gui-stuff-sticky-first table.workflows thead tr:first-child > :first-child { background: var(--oc-gray-2, #e9ecef); }
+@media print { .gk-gui-stuff-sticky-clone { display: none !important; } }
