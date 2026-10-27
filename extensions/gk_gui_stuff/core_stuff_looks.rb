@@ -14,7 +14,8 @@ module GkGuiStuff
 
     def installed? = Redmine::Plugin.installed?(:gk_core_stuff)
 
-    # [{ key:, label:, on:, in_core: }]: the three above, then the looks in core_stuff's order
+    # [{ key:, label:, help:, on:, in_core: }]: the three above, then the looks in core_stuff's order; help is
+    # core_stuff's own text for the module (text_gk_core_stuff_<key>_info), empty when it has none
     def items
       return [] unless installed?
 
@@ -23,7 +24,7 @@ module GkGuiStuff
       defaults = defined?(::GkCoreStuff) ? ::GkCoreStuff.defaults.to_h.transform_keys(&:to_s) : {}
       s = defaults.merge(stored)
       list = KEYS.map do |k|
-        { key: k, label: ::I18n.t(:"label_gk_core_stuff_#{k}", default: k), on: s[k].to_s == '1', in_core: in_core?(k) }
+        { key: k, label: ::I18n.t(:"label_gk_core_stuff_#{k}", default: k), help: help(k), on: s[k].to_s == '1', in_core: in_core?(k) }
       end
       list + looks
     rescue StandardError => e
@@ -35,10 +36,12 @@ module GkGuiStuff
       return [] unless defined?(::GkCoreStuff::Looks)
 
       ::GkCoreStuff::Looks.all.each_value.map do |l|
-        { key: l.key, label: ::I18n.t(:"label_gk_core_stuff_#{l.key}", default: l.key), on: ::GkCoreStuff::Looks.mode(l.key) != 'off',
-          in_core: in_core?(l.key) }
+        { key: l.key, label: ::I18n.t(:"label_gk_core_stuff_#{l.key}", default: l.key), help: help(l.key),
+          on: ::GkCoreStuff::Looks.mode(l.key) != 'off', in_core: in_core?(l.key) }
       end
     end
+
+    def help(key) = ::I18n.t(:"text_gk_core_stuff_#{key}_info", default: '')
 
     def in_core?(key)
       defined?(::GkCoreStuff) ? ::GkCoreStuff.in_core?(key.to_sym) : false

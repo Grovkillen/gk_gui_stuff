@@ -67,6 +67,17 @@
 .gk-gui-stuff-note-warning .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-yellow-8); }
 .gk-gui-stuff-note-alarm .gk-gui-stuff-note-mark:has(svg), .gk-gui-stuff-note-critical .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-red-8); }
 .gk-gui-stuff-note-mark svg.gk-gui-stuff-icon { stroke: currentColor; vertical-align: 0; }
+/* the countdown circle of a notice that goes away by itself (the same circle as flash_timeout's in
+   gk_gui_stuff_modules.css, which a page with only the notices does not load): the ring and the number share one
+   grid cell, so the number is always in the ring's middle, at every width */
+.gk-gui-stuff-note .gk-gui-stuff-flash-count { display: inline-grid; place-items: center; flex: none; box-sizing: border-box; inline-size: 26px; block-size: 26px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; color: inherit; line-height: 1; vertical-align: middle; }
+.gk-gui-stuff-note .gk-gui-stuff-flash-count > svg, .gk-gui-stuff-note .gk-gui-stuff-flash-count > .gk-gui-stuff-flash-mark { grid-area: 1 / 1; }
+.gk-gui-stuff-note .gk-gui-stuff-flash-count > svg { display: block; inline-size: 100%; block-size: 100%; }
+.gk-gui-stuff-note .gk-gui-stuff-flash-ring { stroke: currentColor; opacity: .2; }
+.gk-gui-stuff-note .gk-gui-stuff-flash-arc { stroke: currentColor; transition: stroke-dashoffset .1s linear; }
+.gk-gui-stuff-note .gk-gui-stuff-flash-mark { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1; font-weight: bold; font-variant-numeric: tabular-nums; }
+.gk-gui-stuff-note .gk-gui-stuff-flash-mark svg { display: block; stroke: currentColor; fill: none; }
+.gk-gui-stuff-note.gk-gui-stuff-flash-paused .gk-gui-stuff-flash-arc { opacity: .45; }
 
 /* wave: never takes the pointer or the keyboard */
 .gk-gui-stuff-wave { position: fixed; inset: 0; z-index: 2100; pointer-events: none; opacity: 0; transition: opacity .35s ease; display: flex; align-items: center; justify-content: center; }

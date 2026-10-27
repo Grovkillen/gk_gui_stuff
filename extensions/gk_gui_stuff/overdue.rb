@@ -29,17 +29,25 @@ module GkGuiStuff
       issue.due_date >= today && issue.due_date <= today + days
     end
 
+    # Issue#css_classes has one owner among the GK plugins, this patch: another plugin adds its classes to an issue
+    # here, by a key of its own, instead of patching the method too (GK Theme Engine's palette). The block gets the
+    # issue and the user and returns a list of classes; they come after core's classes and the mark above, in the
+    # order the keys were first registered. A key registered again (a reload) keeps its place.
+    def register_classes(key, &block)
+      (@classes ||= {})[key.to_s] = block
+    end
+
+    def classes_for(issue, user) = (@classes || {}).values.flat_map { |b| Array(b.call(issue, user)) }
+
+    # Core patch (Patches.apply!): core's css_classes(user = User.current) returns a string of classes, the same in
+    # every supported series
     module IssuePatch
       def css_classes(user = User.current)
         s = super
-        return s unless Overdue.soon_days.positive? && Overdue.due_soon?(self, user) && Overdue.on_for?(user)
-
-        "#{s} gk-gui-stuff-due-soon"
+        s = "#{s} gk-gui-stuff-due-soon" if Overdue.soon_days.positive? && Overdue.due_soon?(self, user) && Overdue.on_for?(user)
+        extra = Overdue.classes_for(self, user)
+        extra.empty? ? s : "#{s} #{extra.join(' ')}"
       end
-    end
-
-    def apply!
-      ::Issue.prepend(IssuePatch) unless ::Issue < IssuePatch
     end
   end
 end

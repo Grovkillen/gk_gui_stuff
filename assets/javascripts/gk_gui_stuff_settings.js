@@ -111,6 +111,7 @@
     if (old) lg.replaceChild(chev, old); else lg.insertBefore(chev, lg.firstChild);
   }
   function fold(sec, open) {
+    if (sec.own) return; // a section with a fold of its own is never folded by the frame (foldsItself)
     sec.el.classList.toggle('collapsed', !open);
     sec.body.hidden = !open;
     sec.legend.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -129,6 +130,18 @@
       out.push(n);
     });
     return out;
+  }
+  // The general rule against double folding: a section folds by itself when it is core's fieldset.collapsible (its
+  // legend toggles it), when its legend has a toggle of its own (an onclick, aria-expanded, core's
+  // icon-expanded/icon-collapsed, or a button or toggle inside it), when it is marked data-gk-gui-own-fold, or when all
+  // it holds is details elements (a details folds by itself; the change log's details.gk-changelog is not counted, the
+  // frame takes it apart and folds it per version). Such a section is never folded again by the frame.
+  function foldsItself(f, legend) {
+    if (f.matches('.collapsible, [data-gk-gui-own-fold]')) return true;
+    if (legend.hasAttribute('onclick') || legend.matches('[aria-expanded], .icon-expanded, .icon-collapsed') ||
+        legend.querySelector('button, [aria-expanded], [onclick]')) return true;
+    var kids = Array.prototype.filter.call(f.children, function (n) { return n !== legend && !n.matches('input[type=hidden]'); });
+    return kids.length > 0 && kids.every(function (n) { return n.tagName === 'DETAILS' && !n.classList.contains('gk-changelog'); });
   }
   function changelogOf(f) {
     // a plugin's page folds its change log by itself (details.gk-changelog, also without this module): the frame takes
@@ -175,6 +188,9 @@
     root.dataset.gkGuiFrame = '1';
     var secs = fs.map(function (f) {
       var legend = f.querySelector(':scope > legend');
+      // One fold, never two on top of each other: a section that already folds by itself keeps its own fold and gets
+      // none from the frame. The search still reaches its settings (it shows or hides the section and its rows).
+      if (foldsItself(f, legend)) return { el: f, legend: legend, body: f, own: true, log: false, title: norm(legend.textContent) };
       // what is under the heading in one part that folds; the fields stay where they are in the form
       var inner = N('div', 'gk-gui-stuff-sf-body');
       Array.prototype.slice.call(f.childNodes).forEach(function (n) { if (n !== legend) inner.appendChild(n); });
@@ -191,12 +207,12 @@
       legend.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
       return sec;
     });
-    var plain = secs.filter(function (s) { return !s.log; });
+    var plain = secs.filter(function (s) { return !s.log && !s.own; });
     secs.forEach(function (s) { fold(s, !s.log && plain.length === 1); });
     // the boxes open or folded as they were left on this page the last time, in this browser (localStorage, per path);
     // the search never changes what is remembered
     var memo = 'sf:' + location.pathname;
-    function remember() { var m = {}; secs.forEach(function (s) { m[s.title] = !s.body.hidden; }); G.set(memo, JSON.stringify(m)); }
+    function remember() { var m = {}; secs.forEach(function (s) { if (!s.own) m[s.title] = !s.body.hidden; }); G.set(memo, JSON.stringify(m)); }
     try { var was = JSON.parse(G.get(memo) || 'null'); if (was) secs.forEach(function (s) { if (Object.prototype.hasOwnProperty.call(was, s.title)) fold(s, !!was[s.title]); }); } catch (e) { /* nothing remembered */ }
 
     var barEl = N('div', 'gk-gui-stuff-sf-bar');

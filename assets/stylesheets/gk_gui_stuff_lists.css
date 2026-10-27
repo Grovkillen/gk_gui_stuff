@@ -4,7 +4,9 @@
 
 /* list_filter: core's input with a magnifier at its start, the count and a clear button at its end */
 .gk-gui-stuff-lf { position: relative; display: flex; align-items: center; inline-size: min(22em, 100%); margin-block: 4px 6px; }
-input.gk-gui-stuff-lf-input { inline-size: 100%; margin: 0; }
+/* the input is the whole wrap, whatever caps core puts on inputs around it (.tabular input: max-inline-size 95%),
+   so the count and the clear button at the wrap's end always stand inside the field */
+.gk-gui-stuff-lf > input.gk-gui-stuff-lf-input { flex: 1 1 auto; inline-size: 100%; min-inline-size: 0; max-inline-size: none; margin: 0; }
 .gk-gui-stuff-lf.gk-gui-stuff-has-icon input.gk-gui-stuff-lf-input { padding-inline-start: 26px; }
 input.gk-gui-stuff-lf-input:focus, input.gk-gui-stuff-ss-find:focus { border-color: var(--oc-blue-5, #339af0); outline: none; }
 input.gk-gui-stuff-lf-input::-webkit-search-cancel-button, input.gk-gui-stuff-ss-find::-webkit-search-cancel-button { -webkit-appearance: none; appearance: none; display: none; }

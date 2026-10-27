@@ -1,4 +1,3 @@
-# Revision: 0.00.000
 sv:
   label_gk_gui_stuff_about: "Om pluginet"
   label_gk_gui_stuff_changelog: "Ändringslogg"
@@ -256,6 +255,8 @@ sv:
   gk_gui_stuff_sec_empty: "Här finns inget än."
   label_gk_gui_stuff_mod_hide_disabled: "Dölj spärrade åtgärder"
   text_gk_gui_stuff_mod_hide_disabled: "En åtgärd som inte får användas (till exempel Ta bort ärende när ärenden makuleras) visas inte alls i ärendelistans meny. Av: den står kvar dämpad, med en ledtext om varför."
+  label_gk_gui_stuff_mod_filled_badges: "Fyllda etiketter"
+  text_gk_gui_stuff_mod_filled_badges: "Etiketterna för läge (som Öppen, Låst, Stängd, PÅ och AV) fylls med sin egen färg och texten blir vit, på alla sidor, core:s och GK-pluginens. Av: core:s etiketter med bara ram."
   label_gk_gui_stuff_mod_short_descriptions: "Korta projektbeskrivningar i listor"
   text_gk_gui_stuff_mod_short_descriptions: "Ett projekts beskrivning i en lista (Administration, Projekt och projektlistan) kortas efter så många rader som anges under Värden och slutar med ...; hela texten visas när pekaren vilar på den. Av: hela beskrivningen står i listan."
   label_gk_gui_stuff_description_lines: "Projektbeskrivning i listor: rader"
@@ -305,14 +306,13 @@ sv:
   gk_gui_stuff_ag_caption_settings: "Grundinställningar"
   label_gk_gui_stuff_features: "Funktioner"
   label_gk_gui_stuff_features_modules: "Gränssnittets moduler (gui_stuff)"
-  text_gk_gui_stuff_features: "Varje plugins funktioner. En funktion som är av syns inte för användarna; dess data ligger kvar. Förvalet är det en ny installation får. Varje ändring sparas med skälet."
-  label_gk_gui_stuff_feature_default: "På från start"
+  text_gk_gui_stuff_features: "Varje plugins funktioner, ur GK Records register. En funktion som är av syns inte för användarna; dess data ligger kvar. Alla är av i en ny installation. Varje ändring sparas med skälet."
+  text_gk_gui_stuff_features_no_register: "Funktionerna står i GK Records register. Utan GK Records, eller med en version av det som saknar registret, listas inga funktioner här och alla är av."
   label_gk_gui_stuff_feature_on: "På"
   label_gk_gui_stuff_feature_off: "Av"
   label_gk_gui_stuff_feature_reason: "Skäl"
   button_gk_gui_stuff_feature_on: "Slå på"
   button_gk_gui_stuff_feature_off: "Slå av"
-  label_gk_gui_stuff_event_feature_switched: "Funktion på eller av"
   text_gk_gui_stuff_mode_always: "Andra plugin lägger sina knappar på ärendet här."
   label_gk_reason_gui_stuff_feature_switch: "Funktion, slå på eller av"
   # Personliga sidor efter version

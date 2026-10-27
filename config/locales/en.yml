@@ -1,4 +1,3 @@
-# Revision: 0.00.000
 en:
   label_gk_gui_stuff_about: "About the plugin"
   label_gk_gui_stuff_changelog: "Changelog"
@@ -256,6 +255,8 @@ en:
   gk_gui_stuff_sec_empty: "Nothing here yet."
   label_gk_gui_stuff_mod_hide_disabled: "Hide actions that are closed"
   text_gk_gui_stuff_mod_hide_disabled: "An action that may not be used (such as Delete issue when issues are annulled) is not shown at all in the issue list's menu. Off: it stays dimmed, with a tooltip that says why."
+  label_gk_gui_stuff_mod_filled_badges: "Filled badges"
+  text_gk_gui_stuff_mod_filled_badges: "The status badges (such as Open, Locked, Closed, ON and OFF) are filled with their own colour and the text is white, on every page, core's and the GK plugins'. Off: core's outlined badges."
   label_gk_gui_stuff_mod_short_descriptions: "Short project descriptions in lists"
   text_gk_gui_stuff_mod_short_descriptions: "A project's description in a list (Administration, Projects and the project list) is cut after the number of lines set under Values and ends with ...; the whole text shows when the pointer rests on it. Off: the whole description stands in the list."
   label_gk_gui_stuff_description_lines: "Project description in lists: lines"
@@ -305,14 +306,13 @@ en:
   gk_gui_stuff_ag_caption_settings: "Basic settings"
   label_gk_gui_stuff_features: "Functions"
   label_gk_gui_stuff_features_modules: "Interface modules (gui_stuff)"
-  text_gk_gui_stuff_features: "Every plugin's functions. A function that is off is not shown to users; its data stays. The default is what a new installation gets. Every change is kept with its reason."
-  label_gk_gui_stuff_feature_default: "On from the start"
+  text_gk_gui_stuff_features: "Every plugin's functions, from the register in GK Records. A function that is off is not shown to users; its data stays. All are off in a new installation. Every change is kept with its reason."
+  text_gk_gui_stuff_features_no_register: "The functions are in the register of GK Records. Without GK Records, or with a version of it that has no register, no function is listed here and all are off."
   label_gk_gui_stuff_feature_on: "On"
   label_gk_gui_stuff_feature_off: "Off"
   label_gk_gui_stuff_feature_reason: "Reason"
   button_gk_gui_stuff_feature_on: "Switch on"
   button_gk_gui_stuff_feature_off: "Switch off"
-  label_gk_gui_stuff_event_feature_switched: "Function on or off"
   text_gk_gui_stuff_mode_always: "Other plugins put their buttons on the issue here."
   label_gk_reason_gui_stuff_feature_switch: "Function, switch on or off"
   # Personliga sidor efter version

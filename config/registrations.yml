@@ -25,11 +25,9 @@ surfaces: []
 color_roles:            # theme_engine and the palette give the colour (--gk-role-<group>-<key>)
   - {key: parent_row, group: ui, label: label_gk_gui_stuff_mod_parent_link}   # parent_link: the parent issue's row in the box of related issues
 records:
-  targets:
-    - {key: gui_feature, model: GkGuiStuffFeature}          # en funktion under Administration, Funktioner
+  targets: []             # funktionerna under Administration, Funktioner är records register (feature)
   note_kinds: []
   event_kinds:
-    - {key: gui_feature_switched, target: gui_feature, label: label_gk_gui_stuff_event_feature_switched}
     - {key: gui_choice_changed, target: user, label: label_gk_gui_stuff_event_choice_changed}
   link_kinds: []
 strings:

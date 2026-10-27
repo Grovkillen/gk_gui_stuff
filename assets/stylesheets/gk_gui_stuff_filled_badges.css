@@ -1,0 +1,7 @@
+/* gk_gui_stuff filled_badges: core's status badges filled with their own colour and the text white, on every page,
+   core's and the GK plugins'. Core draws them outlined (.badge-status-open, -locked, -closed); .badge-private is
+   filled in core already. The colours are core's own, as variables where the series has them, else core's fixed ones
+   (6.0). Off: core's outlined badges. */
+.badge.badge-status-open { color: var(--oc-white, #fff); background: var(--oc-blue-9, #205D86); border-color: var(--oc-blue-9, #205D86); }
+.badge.badge-status-locked { color: var(--oc-white, #fff); background: var(--oc-gray-7, #696969); border-color: var(--oc-gray-7, #696969); }
+.badge.badge-status-closed { color: var(--oc-white, #fff); background: var(--oc-green-9, #1D781D); border-color: var(--oc-green-9, #1D781D); }

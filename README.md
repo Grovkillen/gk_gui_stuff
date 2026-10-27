@@ -1,6 +1,6 @@
 # GK GUI Stuff
 
-GK GUI Stuff is a collection of small, switchable user interface modules for Redmine. It also provides shared interface parts that other GK plugins use: a page of switchable functions for every plugin, rows in Redmine's three-dot menu, personal pages and on-page notices.
+GK GUI Stuff is a collection of small, switchable user interface modules for Redmine. It also provides shared interface parts that other GK plugins use: the page that switches every plugin's functions (declared in GK Records), rows in Redmine's three-dot menu, personal pages and on-page notices.
 
 ## Features
 
@@ -9,7 +9,7 @@ Switching and choice:
 - Every module can be set to Off, Optional (each person may switch it off) or Forced (on for everyone). A module that is off loads no script and no stylesheet.
 - "Core-like (everything off)" switches every module off for everyone, and administrators can let each user choose the core-like experience for themselves.
 - On from the start in a new installation: rows in the three-dot menu (always on), short project descriptions in lists, the scroll shadow, key suggested from the name, image cropping, the Gantt chart's wider subjects column, the calendar's Compact view, the filter field above long lists, the searchable chooser for long lists, the sticky Save, the Configure frame of GK plugins, the attachment size buttons and administration in groups. The other modules are off until an administrator switches them on.
-- Administration > Functions lists the functions every GK plugin declares and lets an administrator switch each on or off. A function that is off is not shown to users; its data stays. With gk_records each switch is kept as an event with an optional reason.
+- Administration > Functions lists the functions every GK plugin declares in the register of gk_records and lets an administrator switch each on or off, each switch kept there as an event with an optional reason. A function is off until it is switched on; one that is off is not shown to users, and its data stays. Without gk_records no function is listed and all are off.
 
 Modules:
 
@@ -115,11 +115,13 @@ This plugin is developed and tested on Windows 11 with PostgreSQL only. That is 
 GK plugins:
 
 - Required: none.
-- Optional: gk_records (users' choices and function switches kept as events, and the reason field), gk_fields (translated names for the administration rows), gk_icons (icons in the modules and the custom field mark), gk_compat (core's colour variables, icons and the account menu where an older Redmine series lacks them), gk_core_stuff (its appearance modules listed with a link), gk_scenarios (the plugin's scenario steps and checks).
+- Optional: gk_records (the register of every plugin's functions that Administration > Functions shows and switches, users' choices kept as events, and the reason field), gk_fields (translated names for the administration rows), gk_icons (icons in the modules and the custom field mark), gk_compat (core's colour variables, icons and the account menu where an older Redmine series lacks them), gk_core_stuff (its appearance modules listed with a link), gk_scenarios (the plugin's scenario steps and checks).
 
 ## Installation
 
 The plugin directory must be named `gk_gui_stuff` (it is the plugin id): `plugins/gk_gui_stuff/`.
+
+This version is installed anew and does not upgrade an earlier one: uninstall the earlier version first (as under Uninstall below, while its own files are in place), then install this one. Nothing is carried over from the earlier installation.
 
 1. Unpack the release package into Redmine's `plugins` directory.
 2. Run the migrations: `bundle exec rake redmine:plugins:migrate RAILS_ENV=production`
@@ -133,7 +135,7 @@ Uninstall:
 ## Configuration
 
 - Administration > Plugins > Configure (GK GUI Stuff): Core-like for everyone and per user, the mode of each module, placement of buttons (out or in the three-dot menu), rows of the administration (group tags and names), values (fold height, number of attachments shown, footer text, login reminder animation, heartbeat, wave timings, notice and message box timeouts, due soon days and more), the status per tracker for "100 % done", where Help leads, and what is hidden.
-- Administration > Functions: switch the functions declared by GK plugins on or off.
+- Administration > Functions: switch the functions declared by GK plugins in gk_records on or off.
 
 ## Usage
 

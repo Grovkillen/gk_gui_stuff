@@ -1,9 +1,7 @@
 # frozen_string_literal: true
-# Revision: 0.00.000
 # Depends on: none required; optional gk_records, gk_fields, gk_icons, gk_compat, gk_core_stuff, gk_scenarios.
 
 require_relative 'extensions/gk_gui_stuff/core'
-require_relative 'extensions/gk_gui_stuff/features' # Administration > Funktioner: every plugin's declared functions
 require_relative 'extensions/gk_gui_stuff/choices_box' # The box of choices above a list's rows
 require_relative 'extensions/gk_gui_stuff/elements'
 require_relative 'extensions/gk_gui_stuff/user_status'
@@ -15,15 +13,16 @@ require_relative 'extensions/gk_gui_stuff/admin_groups'
 require_relative 'extensions/gk_gui_stuff/row_editor' # The shared row editor (add, remove, move rows)
 require_relative 'extensions/gk_gui_stuff/row_menu' # The shared row menu (a list's row actions in a menu)
 require_relative 'extensions/gk_gui_stuff/core_stuff_looks' # core_stuff's look modules, linked from here
+require_relative 'extensions/gk_gui_stuff/patches' # The core patches, all in one place
 
 Redmine::Plugin.register :gk_gui_stuff do
   name        'GK GUI Stuff'
   author      'Jimmy Westberg'
   description 'Collection of small, switchable UI modules'
-  version     '1.00.000'
+  version     '1.01.000'
   requires_redmine version_or_higher: '6.0.0'
 
-  # Administration > Funktioner, every plugin's declared functions
+  # Administration > Funktioner, every plugin's declared functions, read from gk_records' register
   menu :admin_menu, :gk_gui_stuff_features, { controller: 'gk_gui_stuff_features', action: 'index' },
        caption: :label_gk_gui_stuff_features, icon: 'settings', html: { class: 'icon' }
 
@@ -102,6 +101,9 @@ GkGuiStuff::Registry.register('short_descriptions', script: 'gk_gui_stuff_short_
 GkGuiStuff::Registry.register('scroll_shade', script: 'gk_gui_stuff_scroll_shade', stylesheet: 'gk_gui_stuff_scroll_shade', kernel: true, group: :forms, default: true)
 # Actions that may not be used are left out of the context menu instead of dimmed; off in a new installation (a choice)
 GkGuiStuff::Registry.register('hide_disabled', stylesheet: 'gk_gui_stuff_hide_disabled', group: :forms)
+# Core's status badges filled with their own colour on every page; off: core's outlined badges. Badges follow core,
+# and are filled only through this module
+GkGuiStuff::Registry.register('filled_badges', stylesheet: 'gk_gui_stuff_filled_badges', anonymous: true)
 GkGuiStuff::Registry.register('key_suggest', script: 'gk_gui_stuff_key_suggest', kernel: true, group: :forms, default: true, texts: %i[gk_gui_stuff_key_hint])
 # A square part of a picture chosen in the browser (people's pictures of users); on in a new installation
 GkGuiStuff::Registry.register('image_crop', script: 'gk_gui_stuff_crop', kernel: true, group: :forms, default: true, texts: %i[gk_gui_stuff_crop_hint gk_gui_stuff_crop_size])
@@ -152,7 +154,6 @@ GkGuiStuff::Registry.register('calendar_compact', script: 'gk_gui_stuff_calendar
                                                    options: -> { { on: GkGuiStuff::ViewStates.for(User.current)['calendar_compact'] == 'on' } })
 GkGuiStuff::Registry.register('collapse_all', script: 'gk_gui_stuff_sections', stylesheet: 'gk_gui_stuff_sections', kernel: true, group: :issue,
                                                texts: %i[gk_gui_stuff_sec_attributes gk_gui_stuff_sec_close_all gk_gui_stuff_sec_open_all gk_gui_stuff_sec_empty])
-GkGuiStuff::Overdue.apply!
 
 # Long lists, on core's pages and ours, each its own module and on in a new installation: a filter field above a long
 # list of check boxes or a long table, a searchable chooser for a long list of choices (the real list stays in the
@@ -189,22 +190,17 @@ end
 # Redmine::Hook is reloaded with core's lib/ in development mode: register again
 Redmine::Hook.add_listener(GkGuiStuff::Hooks) unless Redmine::Hook.listeners.any?(GkGuiStuff::Hooks)
 Redmine::Hook.add_listener(GkGuiStuff::PersonalHooks) unless Redmine::Hook.listeners.any?(GkGuiStuff::PersonalHooks)
-# The person's own pages in the page's data and on the pulse; a change forgets the person's counts
+# The person's own pages in the page's data and on the pulse
 GkGuiStuff::Personal.register_page_data!
-ApplicationController.prepend(GkGuiStuff::Personal::ForgetAfterChange) unless ApplicationController < GkGuiStuff::Personal::ForgetAfterChange
 
-# The page's data (GkGuiStuff::PageData) and the shared pulse (GkGuiStuff::Pulse); the people core links on a page are
-# noted while it is drawn
-ApplicationHelper.prepend(GkGuiStuff::PageData::PrincipalLinkPatch) unless ApplicationHelper < GkGuiStuff::PageData::PrincipalLinkPatch
-
-# gk_gui_stuff_choices_box, the box above a list for choices, additions and mass actions, made like core's Filter and
-# Alternativ (collapsible fieldset, core's toggleFieldset), minimized, open when the list is empty, its state remembered
-# in the browser; in every view.
-ApplicationController.helper(GkGuiStuff::ChoicesBoxHelper) unless ApplicationController._helpers.include?(GkGuiStuff::ChoicesBoxHelper)
-# gk_gui_stuff_row_editor, the shared row editor's script and kit; in every view
-ApplicationController.helper(GkGuiStuff::RowEditorHelper) unless ApplicationController._helpers.include?(GkGuiStuff::RowEditorHelper)
-# gk_gui_stuff_row_menu, the shared row menu's script and kit; in every view
-ApplicationController.helper(GkGuiStuff::RowMenuHelper) unless ApplicationController._helpers.include?(GkGuiStuff::RowMenuHelper)
+# Core patches (extensions/gk_gui_stuff/patches.rb), applied here and again on every reload: the due soon mark on
+# issues (overdue_mark) and the classes other plugins register for an issue; a change forgets the person's counts;
+# the people core links on a page are noted while it is drawn (the page's data, GkGuiStuff::PageData, and the shared
+# pulse, GkGuiStuff::Pulse); and in every view gk_gui_stuff_choices_box (the box above a list for choices, additions
+# and mass actions, made like core's Filter and Alternativ: collapsible fieldset, core's toggleFieldset, minimized,
+# open when the list is empty, its state remembered in the browser), gk_gui_stuff_row_editor (the shared row editor's
+# script and kit) and gk_gui_stuff_row_menu (the shared row menu's script and kit)
+GkGuiStuff::Patches.apply!
 # The reason places in gk_records (records may load after this plugin)
 Rails.configuration.after_initialize do
   if defined?(::GkRecords::Reasons)

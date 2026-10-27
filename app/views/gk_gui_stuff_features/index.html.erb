@@ -1,5 +1,5 @@
-<%# Administration > Funktioner: per plugin, every declared function with its explanation, the default for a new
-    installation and on or off. A switch takes a reason and is an event in records. %>
+<%# Administration > Funktioner: per plugin, every function declared in gk_records' register with its explanation and
+    on or off. A switch takes a reason and is an event in records. %>
 <% content_for :header_tags do %><%= stylesheet_link_tag 'gk_gui_stuff_features', plugin: 'gk_gui_stuff' %><% end %>
 <h2><%= l(:label_gk_gui_stuff_features) %></h2>
 <p class="info"><%= l(:text_gk_gui_stuff_features) %></p>
@@ -8,23 +8,26 @@
   <h3><%= l(:label_gk_gui_stuff_core_stuff_looks) %></h3>
   <%= render partial: 'gk_gui_stuff_features/core_stuff_looks' %>
 <% end %>
-<% if @groups.blank? %>
+<% if @register.nil? %>
+  <p class="nodata"><%= l(:text_gk_gui_stuff_features_no_register) %></p>
+<% elsif @groups.blank? %>
   <p class="nodata"><%= l(:label_no_data) %></p>
 <% end %>
 <% @groups.each do |plugin, features| %>
   <h3><%= features.first.plugin_name %></h3>
-  <%# the row menu's list; the switch with its reason field stays in the row (keep) %>
+  <%# the row menu's list; the switch with its reason field stays in the row (keep). In core's div.autoscroll:
+      a table wider than the window scrolls instead of squeezing its columns %>
+  <div class="autoscroll">
   <table class="list gk-gui-stuff-features" data-gk-gui-rowmenu>
-    <colgroup><col class="name"><col class="description"><col class="default"><col class="status"><col class="buttons"></colgroup>
-    <thead><tr><th><%= l(:field_name) %></th><th><%= l(:field_description) %></th><th><%= l(:label_gk_gui_stuff_feature_default) %></th>
+    <colgroup><col class="name"><col class="description"><col class="status"><col class="buttons"></colgroup>
+    <thead><tr><th><%= l(:field_name) %></th><th><%= l(:field_description) %></th>
       <th><%= l(:field_status) %></th><th></th></tr></thead>
     <tbody>
     <% features.sort_by(&:label).each do |f| %>
-      <% on = GkGuiStuff::Features.on?(f.key) %>
+      <% on = @register.on?(f.key) %>
       <tr id="f-<%= f.key.tr('.', '-') %>" class="<%= cycle('odd', 'even') %>">
         <td class="name"><%= f.label %></td>
         <td class="description"><%= f.help %></td>
-        <td class="default"><%= f.default ? l(:general_text_Yes) : l(:general_text_No) %></td>
         <td class="status"><span class="badge <%= on ? 'badge-status-closed' : 'badge-status-locked' %> gk-gui-stuff-feature-state gk-gui-stuff-feature-state-<%= on ? 'on' : 'off' %>"><%= on ? l(:label_gk_gui_stuff_feature_on) : l(:label_gk_gui_stuff_feature_off) %></span></td>
         <td class="buttons">
           <%= form_tag gk_gui_stuff_feature_path(key: f.key), method: :patch, class: 'gk-gui-stuff-feature-form', data: { gk_gui_row_action: 'keep' } do %>
@@ -38,6 +41,7 @@
     <% end %>
     </tbody>
   </table>
+  </div>
 <% end %>
 <%= gk_gui_stuff_row_menu if respond_to?(:gk_gui_stuff_row_menu) %>
 <% html_title l(:label_gk_gui_stuff_features) %>

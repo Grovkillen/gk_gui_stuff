@@ -206,8 +206,11 @@ module GkGuiStuff
     end
   end
 
+  # The register of every plugin's declared functions is gk_records' (Administration > Funktioner shows it); nil
+  # without it, or with a records that has no register: then no function is listed and every one is off
+  def self.features = defined?(::GkRecords::Features) && ::GkRecords::Features.respond_to?(:register) ? ::GkRecords::Features : nil
+
   def self.register_records!
-    Features.register_records!
     ::GkRecords::Kinds.register_event(Choices::KIND, plugin: :gk_gui_stuff, label_key: 'label_gk_gui_stuff_event_choice_changed', target: 'user')
   end
 

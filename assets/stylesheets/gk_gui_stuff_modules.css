@@ -83,11 +83,14 @@ html.gk-gui-stuff-lw-phone-on div#sticky-issue-header { inset-block-start: calc(
 .gk-gui-stuff-flash { position: relative; padding-inline-end: 70px !important; transition: opacity .3s; }
 .gk-gui-stuff-flash-out { opacity: 0; }
 .gk-gui-stuff-flash-tools { position: absolute; inset-inline-end: 8px; inset-block-start: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 4px; }
-.gk-gui-stuff-flash-count { position: relative; inline-size: 26px; block-size: 26px; padding: 0; border: 0; background: transparent; cursor: pointer; color: inherit; }
-.gk-gui-stuff-flash-count > svg { position: absolute; inset: 0; }
+/* the countdown circle: the ring and the number share one grid cell, so the number is always in the ring's middle;
+   the same rules stand in gk_gui_stuff_elements.css for the notices, which do not load this sheet */
+.gk-gui-stuff-flash-count { display: inline-grid; place-items: center; flex: none; box-sizing: border-box; inline-size: 26px; block-size: 26px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; cursor: pointer; color: inherit; line-height: 1; vertical-align: middle; }
+.gk-gui-stuff-flash-count > svg, .gk-gui-stuff-flash-count > .gk-gui-stuff-flash-mark { grid-area: 1 / 1; }
+.gk-gui-stuff-flash-count > svg { display: block; inline-size: 100%; block-size: 100%; }
 .gk-gui-stuff-flash-ring { stroke: currentColor; opacity: .2; }
 .gk-gui-stuff-flash-arc { stroke: currentColor; transition: stroke-dashoffset .1s linear; }
-.gk-gui-stuff-flash-mark { position: relative; font-size: 10px; line-height: 26px; font-weight: bold; }
+.gk-gui-stuff-flash-mark { display: inline-flex; align-items: center; justify-content: center; font-size: 10px; line-height: 1; font-weight: bold; font-variant-numeric: tabular-nums; }
 .gk-gui-stuff-flash-paused .gk-gui-stuff-flash-arc { opacity: .45; }
 .gk-gui-stuff-flash-close { border: 0; background: transparent; cursor: pointer; color: inherit; font-size: 1.3em; line-height: 1; padding-inline: 4px; }
 /* core moves the icon of a message box into its margin (div.flash svg.icon-svg, -26px); the cross and the pause sign

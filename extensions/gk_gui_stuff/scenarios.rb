@@ -12,9 +12,10 @@ module GkGuiStuff
 
     # A new installation has only some modules on, so the scenario says which it uses: gui_stuff: { modules: {
     # user_status: optional, collapse_all: optional }, features: { tags.marks: true } } modules get their mode in
-    # gui_stuff's settings; features are switched with Features.set! (each an event)
+    # gui_stuff's settings; features are switched in gk_records' register with set! (each an event), as on the page
     ::GkScenarios::Steps.register('gui_stuff', plugin: :gk_gui_stuff, order: 20) do |ctx|
-      Features.forget! # emptying the instance cleared the table behind the process's memory
+      feats = GkGuiStuff.features
+      feats&.forget! # emptying the instance cleared the table behind the process's memory
       data = ctx.scenario.data['gui_stuff'] || {}
       mods = (data['modules'] || {}).to_h { |k, v| [k.to_s, v.to_s] }
       if mods.any?
@@ -27,9 +28,12 @@ module GkGuiStuff
       end
       (data['features'] || {}).each do |k, v|
         on = v == true || v.to_s == 'on'
-        changed = Features.find(k) && Features.on?(k) != on
-        Features.set!(k, on, reason: 'scenario') if changed
-        ctx.note(:gui_feature, k, nil, changed)
+        raise ::GkScenarios::Error, "features: #{k}: the register of GK Records is not there" unless feats
+        raise ::GkScenarios::Error, "features: #{k} is not a declared function" unless feats.find(k)
+
+        changed = feats.on?(k) != on
+        feats.set!(k, on, reason: 'scenario') if changed
+        ctx.note(:feature, k, nil, changed)
       end
     end
 

@@ -45,8 +45,16 @@
     var f = a.tagName === 'FORM' ? a : null;
     return !!(f && f.querySelector('input[name=_method][value=delete i]'));
   }
-  // what the item presses: a form's submit button, else the action itself
-  function target(a) { return a.tagName === 'FORM' ? (a.querySelector('[type=submit], button:not([type])') || a) : a; }
+  // what the item presses: a form's own submit button, else the action itself. The buttons of a reason field
+  // (gk_records' .gk-records-reason-wrap: "use the reason", the cross) are submit buttons for core's look but
+  // never the form's action, so they are skipped
+  function target(a) {
+    if (a.tagName !== 'FORM') return a;
+    var own = Array.prototype.find.call(a.querySelectorAll('[type=submit], button:not([type])'), function (b) {
+      return !b.closest('.gk-records-reason-wrap');
+    });
+    return own || a;
+  }
   function label(a) {
     var t = target(a);
     var s = (a.getAttribute('data-gk-gui-row-action-label') || t.getAttribute('aria-label') || t.value || t.textContent || t.title || '').replace(/\s+/g, ' ').trim();

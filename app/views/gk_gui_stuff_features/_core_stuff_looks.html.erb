@@ -1,15 +1,22 @@
 <%# core_stuff's modules that change how core looks: listed here, switched in core_stuff (GkGuiStuff::CoreStuffLooks).
-    The caller gives the heading; nothing is drawn without core_stuff. %>
+    The caller gives the heading; nothing is drawn without core_stuff. The table has the same columns and form as the
+    plugins' tables below it; the description is core_stuff's own text for the module. %>
 <% looks = GkGuiStuff::CoreStuffLooks.items %>
 <% if looks.present? %>
+  <%# the table's columns also on gui_stuff's settings page, which renders this too %>
+  <% content_for :header_tags do %><%= stylesheet_link_tag 'gk_gui_stuff_features', plugin: 'gk_gui_stuff' %><% end %>
   <p><em class="info"><%= l(:text_gk_gui_stuff_core_stuff_looks) %></em></p>
   <%# the row menu's list; the link to core_stuff is the row's one action and stays in it (keep) %>
-  <table class="list gk-gui-stuff-core-stuff-looks" data-gk-gui-filter="off" data-gk-gui-rowmenu>
-    <thead><tr><th><%= l(:field_name) %></th><th><%= l(:field_status) %></th><th></th></tr></thead>
+  <div class="autoscroll">
+  <table class="list gk-gui-stuff-features gk-gui-stuff-core-stuff-looks" data-gk-gui-filter="off" data-gk-gui-rowmenu>
+    <colgroup><col class="name"><col class="description"><col class="status"><col class="buttons"></colgroup>
+    <thead><tr><th><%= l(:field_name) %></th><th><%= l(:field_description) %></th>
+      <th><%= l(:field_status) %></th><th></th></tr></thead>
     <tbody>
     <% looks.each do |m| %>
-      <tr>
+      <tr class="<%= cycle('odd', 'even') %>">
         <td class="name"><%= m[:label] %></td>
+        <td class="description"><%= m[:help] %></td>
         <td class="status">
           <% if m[:in_core] %><%= l(:text_gk_gui_stuff_core_stuff_in_core) %>
           <% else %><span class="badge <%= m[:on] ? 'badge-status-closed' : 'badge-status-locked' %> gk-gui-stuff-feature-state gk-gui-stuff-feature-state-<%= m[:on] ? 'on' : 'off' %>"><%= m[:on] ? l(:label_gk_gui_stuff_feature_on) : l(:label_gk_gui_stuff_feature_off) %></span><% end %>
@@ -19,5 +26,6 @@
     <% end %>
     </tbody>
   </table>
+  </div>
   <%= gk_gui_stuff_row_menu %>
 <% end %>
