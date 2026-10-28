@@ -20,6 +20,26 @@
     }
     a.appendChild(document.createTextNode(text));
   }
+  // The page of the row one is on carries the row's word too: its heading (or the heading's first link, when the
+  // heading is a trail such as "Layouts » Edit") and the window's title, where they say the row's own word
+  function retitle(was, text) {
+    if (!was || was === text) return;
+    var h2 = document.querySelector('#content > h2');
+    if (h2) {
+      var link = h2.querySelector('a');
+      if (link && link.textContent.trim() === was) link.textContent = text;
+      else {
+        for (var i = 0; i < h2.childNodes.length; i++) {
+          var n = h2.childNodes[i];
+          if (n.nodeType === 3 && n.nodeValue.trim().indexOf(was) === 0) { n.nodeValue = n.nodeValue.replace(was, text); break; }
+        }
+      }
+    }
+    // the title may start with the instance's mark ("[development] Layouts - Redmine"): the first "<word> - " in it
+    var t = document.title, at = t.indexOf(was + ' - ');
+    if (at < 0 && t.indexOf(was) === 0) at = 0;
+    if (at >= 0) document.title = t.slice(0, at) + text + t.slice(at + was.length);
+  }
   function setClosed(sec, btn, closed) {
     sec.classList.toggle('gk-gui-stuff-ag-closed', closed);
     btn.setAttribute('aria-expanded', closed ? 'false' : 'true');
@@ -33,7 +53,11 @@
     rows.forEach(function (r) {
       var a = linkOf(ul, r.cls);
       if (!a) return; // a row core does not draw right now (its condition), or not for this person
-      if (r.caption) rename(a, r.caption);
+      if (r.caption) {
+        var was = a.textContent.trim();
+        rename(a, r.caption);
+        if (a.classList.contains('selected')) retitle(was, r.caption);
+      }
       (by[r.group] = by[r.group] || []).push(a.parentNode);
     });
     var wrap = GkGui.node('div', 'gk-gui-stuff-ag');

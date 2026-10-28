@@ -9,6 +9,13 @@ class GkGuiStuffApiController < ApplicationController
   include IssuesHelper
   include CustomFieldsHelper
 
+  # A background call carrying the token of a page opened in another session (a tab left open when the person signed
+  # in again or switched user) is refused, and the session stays: core's handle_unverified_request would sign the
+  # person out, so one old tab's pulse ended every session after it
+  def handle_unverified_request
+    head 422
+  end
+
   def view_state
     if GkGuiStuff::ViewStates.set(User.current, params[:key], params[:value])
       render json: { key: params[:key].to_s, value: params[:value].to_s }

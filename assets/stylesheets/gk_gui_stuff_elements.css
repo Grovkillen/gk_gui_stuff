@@ -175,7 +175,8 @@
 .drdn-items > .gk-gui-stuff-menu-line { padding: 0; border: 0; border-block-start: 1px solid var(--oc-gray-3); margin-block: 2px; }
 .gk-gui-stuff-menu-row { display: block; }
 .gk-gui-stuff-menu-row svg.gk-gui-stuff-icon { vertical-align: middle; }
-.gk-gui-stuff-menu-system { color: var(--oc-red-9) !important; }
+/* the system's rows (such as Annul...) have core's colours, as core draws its own Delete in a menu; a theme may colour
+   them (the class stays) */
 .gk-gui-stuff-menu-trigger { cursor: pointer; font-size: 1.3em; padding-inline: 6px; }
 /* A row that shows a state that is on (I mitt fokus) */
 .gk-gui-stuff-row-active { font-weight: bold; }

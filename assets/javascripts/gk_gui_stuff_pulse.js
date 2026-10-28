@@ -5,10 +5,10 @@
 window.gkGuiStuffPulse = (function () {
   var page = window.gkGuiStuffPage || {};
   var cfg = page.pulse || {};
-  var parts = {}, busy = false;
+  var parts = {}, busy = false, stale = false;
   function token() { var m = document.querySelector('meta[name="csrf-token"]'); return m ? m.getAttribute('content') : ''; }
   function tick() {
-    if (busy || document.hidden || !cfg.url) return;
+    if (busy || stale || document.hidden || !cfg.url) return;
     var body = {}, any = false;
     Object.keys(parts).forEach(function (k) {
       var v = null;
@@ -19,7 +19,9 @@ window.gkGuiStuffPulse = (function () {
     busy = true;
     fetch(cfg.url, { method: 'POST', credentials: 'same-origin', body: JSON.stringify({ parts: body }),
                      headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-Token': token() } })
-      .then(function (r) { return r.ok ? r.json() : {}; })
+      // 401 or 422: the page belongs to a session that has ended (signed out, signed in again or switched user in
+      // another tab); it asks no more until it is opened again
+      .then(function (r) { if (r.status === 401 || r.status === 422) { stale = true; } return r.ok ? r.json() : {}; })
       .then(function (d) {
         Object.keys(d || {}).forEach(function (k) { if (parts[k] && parts[k].handle) { try { parts[k].handle(d[k]); } catch (e) { /* next pulse */ } } });
       })

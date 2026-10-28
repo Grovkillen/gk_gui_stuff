@@ -20,7 +20,7 @@ Redmine::Plugin.register :gk_gui_stuff do
   name        'GK GUI Stuff'
   author      'Jimmy Westberg'
   description 'Collection of small, switchable UI modules'
-  version     '1.02.000'
+  version     '1.03.000'
   requires_redmine version_or_higher: '6.0.0'
 
   # Administration > Funktioner, every plugin's declared functions, read from gk_records' register

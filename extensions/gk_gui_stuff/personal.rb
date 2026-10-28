@@ -9,7 +9,7 @@ module GkGuiStuff
   # account_dropdown), otherwise in the sidebar of Mitt konto under Mina sidor. A page may carry a count (an integer, or own and shared); the counts of the pages that wait
   # for the person are summed at the person's name (at the dropdown's button, or at Inloggad som where there is none), and the person may choose to see own and shared apart (2+3). The same pages and counts are a block on Min
   # sida. The counts go with the page (PageData) and are renewed by the pulse; each is kept per person for a short time
-  # (personal_count_seconds, 60), and forgotten when the person changes something.
+  # (personal_count_seconds, 60), and forgotten when anybody changes something.
   module Personal
     Page = Struct.new(:key, :plugin, :label_key, :url, :icon, :order, :cond, :counter, :waits, :css, keyword_init: true) do
       def label = ::I18n.t(label_key, default: key)
@@ -74,7 +74,8 @@ module GkGuiStuff
       v.empty? ? 60 : [v.to_i, 0].max
     end
 
-    # The count of one page for the person: { n:, own:, shared: } or nil; kept seconds long per person
+    # The count of one page for the person: { n:, own:, shared: } or nil; kept seconds long per person, until somebody
+    # changes something
     def count(page, user)
       return nil unless page.counter
 
@@ -97,9 +98,11 @@ module GkGuiStuff
       end
     end
 
-    # A change by the person forgets the counts kept for her, so that her own change shows at once
-    def generation(user) = Rails.cache.read("gk_gui_stuff_personal_gen/#{user.id}") || 0
-    def forget!(user) = user&.logged? && Rails.cache.write("gk_gui_stuff_personal_gen/#{user.id}", Time.current.to_f)
+    # A change by anyone forgets the counts kept for everyone: a change often waits for somebody else (a decision on her
+    # proposal, a request to sign), and the count at her name has to show it at her next page or pulse, not a minute later
+    def generation(_user = nil) = Rails.cache.read(GENERATION) || 0
+    def forget!(user = nil) = (user.nil? || user.logged?) && Rails.cache.write(GENERATION, Time.current.to_f)
+    GENERATION = 'gk_gui_stuff_personal_gen'
 
     def split?(user) = GkGuiStuffUserSetting.for(user).data['count_split'].to_s == '1'
 
@@ -128,7 +131,7 @@ module GkGuiStuff
       Pulse.register('personal', plugin: :gk_gui_stuff) { |user, _part, _c| any? ? summary(user) : nil }
     end
 
-    # After a request that changed something, the person's counts are counted again
+    # After a request that changed something, everyone's counts are counted again
     module ForgetAfterChange
       def self.prepended(base)
         base.after_action :gk_gui_stuff_personal_forget

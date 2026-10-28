@@ -2,6 +2,18 @@
 
 All notable changes to GK GUI Stuff are documented in this file.
 
+## 1.03.000 (2026-10-28)
+
+### Changed
+
+* Administration groups: a row given a word of its own carries it on its page too: the page's heading and the window's title say the row's word where they said Redmine's or the plugin's.
+* Actions menu: the system's rows (such as Annul) have Redmine's colours, as Redmine draws its own rows; a theme may colour them.
+
+### Fixed
+
+* The counts at the person's name follow a change made by somebody else at once (a decision on her proposal, a request that waits for her), instead of up to a minute later: a change by anyone forgets the counts kept for everyone.
+* A page left open in another tab after signing in again or switching user no longer signs the person out: its background requests (the pulse, remembered views) are refused, and the pulse of that page stops until it is opened again.
+
 ## 1.02.000 (2026-10-28)
 
 ### Added
