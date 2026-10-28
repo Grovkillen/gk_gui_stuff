@@ -3,8 +3,6 @@
     plugins' tables below it; the description is core_stuff's own text for the module. %>
 <% looks = GkGuiStuff::CoreStuffLooks.items %>
 <% if looks.present? %>
-  <%# the table's columns also on gui_stuff's settings page, which renders this too %>
-  <% content_for :header_tags do %><%= stylesheet_link_tag 'gk_gui_stuff_features', plugin: 'gk_gui_stuff' %><% end %>
   <p><em class="info"><%= l(:text_gk_gui_stuff_core_stuff_looks) %></em></p>
   <%# the row menu's list; the link to core_stuff is the row's one action and stays in it (keep) %>
   <div class="autoscroll">

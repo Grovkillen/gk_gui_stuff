@@ -13,13 +13,14 @@ require_relative 'extensions/gk_gui_stuff/admin_groups'
 require_relative 'extensions/gk_gui_stuff/row_editor' # The shared row editor (add, remove, move rows)
 require_relative 'extensions/gk_gui_stuff/row_menu' # The shared row menu (a list's row actions in a menu)
 require_relative 'extensions/gk_gui_stuff/core_stuff_looks' # core_stuff's look modules, linked from here
+require_relative 'extensions/gk_gui_stuff/top_menu' # the GK plugins' top menu entries under the installation's own word
 require_relative 'extensions/gk_gui_stuff/patches' # The core patches, all in one place
 
 Redmine::Plugin.register :gk_gui_stuff do
   name        'GK GUI Stuff'
   author      'Jimmy Westberg'
   description 'Collection of small, switchable UI modules'
-  version     '1.01.000'
+  version     '1.02.000'
   requires_redmine version_or_higher: '6.0.0'
 
   # Administration > Funktioner, every plugin's declared functions, read from gk_records' register
@@ -30,7 +31,7 @@ Redmine::Plugin.register :gk_gui_stuff do
                       'login_warning_animate' => '1', 'login_warning_endless' => '0', 'beat_seconds' => '30', 'wave_opacity_pct' => '60',
                       'wave_first_ms' => '1600', 'wave_ms' => '600', 'loading_delay_ms' => '1300', 'wave_hide_flash' => '1', 'notice_seconds' => '6',
                       'corner_max_entries' => '20', 'declutter' => {}, 'flash_seconds' => '8', 'notice_countdown' => '1', 'custom_mark_style' => 'diamond', 'quick_done_status' => {}, 'wave_min_ms' => '400', 'wave_start_delay_ms' => '0', 'help_kind' => 'core', 'help_url' => '',
-                      'help_wiki_project' => '', 'help_wiki_page' => '', 'due_soon_days' => '3', 'placements' => {}, 'admin_rows' => {}, 'personal_count_seconds' => '60', 'description_lines' => '1',
+                      'help_wiki_project' => '', 'help_wiki_page' => '', 'due_soon_days' => '3', 'placements' => {}, 'admin_rows' => {}, 'top_menu' => {},'personal_count_seconds' => '60', 'description_lines' => '1',
                       'modules' => {} }, # each module's mode; a module declared default: true is on in a new installation
 
            partial: 'settings/gk_gui_stuff_settings'
@@ -185,6 +186,7 @@ GkGuiStuff::Registry.register('admin_groups', script: 'gk_gui_stuff_admin_groups
                                                options: -> { GkGuiStuff::AdminGroups.options })
 Rails.configuration.after_initialize do
   GkGuiStuff::AdminGroups.register_texts!
+  GkGuiStuff::TopMenu.register_texts!
 end
 
 # Redmine::Hook is reloaded with core's lib/ in development mode: register again

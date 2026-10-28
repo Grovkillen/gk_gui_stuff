@@ -1,8 +1,8 @@
 Package: gk_gui_stuff
-Version: 1.01.000
+Version: 1.02.000
 
-Build tag: 1xLpDu
-Build time (UTC): 2026-10-27 22:00:54
+Build tag: 1xM3Al
+Build time (UTC): 2026-10-28 12:54:35
 Git: git version 2.56.0.windows.1
 PowerShell: 7.6.9
 Redmine 6.0 runs on Ruby: 3.2

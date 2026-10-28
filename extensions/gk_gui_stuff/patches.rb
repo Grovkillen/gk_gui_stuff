@@ -22,6 +22,8 @@ module GkGuiStuff
       ::Issue.prepend(Overdue::IssuePatch) unless ::Issue < Overdue::IssuePatch
       ::ApplicationController.prepend(Personal::ForgetAfterChange) unless ::ApplicationController < Personal::ForgetAfterChange
       ::ApplicationHelper.prepend(PageData::PrincipalLinkPatch) unless ::ApplicationHelper < PageData::PrincipalLinkPatch
+      # the GK plugins' top menu entries under the installation's own word (TopMenu)
+      ::Redmine::MenuManager::MenuHelper.prepend(TopMenu::MenuHelperPatch) unless ::Redmine::MenuManager::MenuHelper < TopMenu::MenuHelperPatch
       [ChoicesBoxHelper, RowEditorHelper, RowMenuHelper].each { |m| ActionView::Base.include(m) unless ActionView::Base.include?(m) }
     end
   end

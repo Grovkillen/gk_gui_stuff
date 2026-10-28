@@ -171,7 +171,8 @@
 .gk-gui-stuff-drawer-handle-count { writing-mode: horizontal-tb; transform: rotate(180deg); background: var(--oc-gray-8); color: var(--oc-white); border-radius: 9px; padding-inline: 6px; font-size: .8em; }
 
 /* actions_menu */
-.gk-gui-stuff-menu-line { border-block-start: 1px solid var(--oc-gray-3); margin-block: 4px; }
+/* only the line itself: none of core's padding and white border for .drdn-items > * (18 px of air before, 5 px now) */
+.drdn-items > .gk-gui-stuff-menu-line { padding: 0; border: 0; border-block-start: 1px solid var(--oc-gray-3); margin-block: 2px; }
 .gk-gui-stuff-menu-row { display: block; }
 .gk-gui-stuff-menu-row svg.gk-gui-stuff-icon { vertical-align: middle; }
 .gk-gui-stuff-menu-system { color: var(--oc-red-9) !important; }

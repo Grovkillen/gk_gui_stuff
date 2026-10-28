@@ -2,6 +2,16 @@
 
 All notable changes to GK GUI Stuff are documented in this file.
 
+## 1.02.000 (2026-10-28)
+
+### Added
+
+* Top menu entries: the GK plugins' entries in the top menu can be given the installation's own name in the settings (such as Articles instead of CMDB), in the language at hand; the other languages are translated on GK Fields' Translations page. Redmine's own entries keep Redmine's names.
+
+### Fixed
+
+* Actions menu: the lines between the groups of rows take only their own space, without the padding of Redmine's menu rows, so the rows around them are as close as in Redmine.
+
 ## 1.01.000 (2026-10-27)
 
 ### Added

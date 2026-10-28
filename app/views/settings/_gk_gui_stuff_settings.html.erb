@@ -133,6 +133,8 @@
 </fieldset>
 <% if GkGuiStuff::CoreStuffLooks.items.present? %>
 <fieldset class="box"><legend><%= l(:label_gk_gui_stuff_core_stuff_looks) %></legend>
+  <%# the table's columns as on Administration > Funktioner, whose page links the stylesheet itself %>
+  <% content_for :header_tags do %><%= stylesheet_link_tag 'gk_gui_stuff_features', plugin: 'gk_gui_stuff' %><% end %>
   <%= render partial: 'gk_gui_stuff_features/core_stuff_looks' %>
 </fieldset>
 <% end %>
@@ -199,6 +201,34 @@
     </tbody>
   </table>
 </fieldset>
+<%# The GK plugins' entries in the top menu under the installation's own word (TopMenu); other languages on fields' Översättningar %>
+<% tm_items = GkGuiStuff::TopMenu.items %>
+<% if tm_items.any? %>
+<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_top_menu) %></legend>
+  <p><em class="info"><%= l(:text_gk_gui_stuff_top_menu) %></em></p>
+  <table class="list gk-gui-stuff-top-menu-settings">
+    <thead><tr><th><%= l(:label_gk_gui_stuff_top_menu_entry) %></th><th><%= l(:label_gk_gui_stuff_top_menu_caption) %></th></tr></thead>
+    <tbody>
+    <% tm_items.each do |item| %>
+      <% name = item.name.to_s %>
+      <% own = GkGuiStuff::TopMenu.stored.dig(name, 'caption'); own = own.is_a?(Hash) ? own : {} %>
+      <% word = GkGuiStuff::TopMenu.plugin_caption(item) %>
+      <tr>
+        <td class="name"><%= word %><br><span class="info"><%= name %></span></td>
+        <td class="caption"><%= text_field_tag "settings[top_menu][#{name}][caption][#{current_language}]", own[current_language.to_s].to_s, size: 28, id: nil,
+                               placeholder: word, 'aria-label': "#{word}: #{l(:label_gk_gui_stuff_top_menu_caption)}" %>
+          <% own.except(current_language.to_s).each do |lang, text| %><%= hidden_field_tag "settings[top_menu][#{name}][caption][#{lang}]", text, id: nil %><% end %></td>
+      </tr>
+    <% end %>
+    </tbody>
+  </table>
+</fieldset>
+<% end %>
+<%# an entry that is not in the top menu right now (its plugin switched off) keeps what was stored for it, unseen %>
+<% tm_names = tm_items.map { |i| i.name.to_s } %>
+<% GkGuiStuff::TopMenu.stored.except(*tm_names).each do |name, row| %>
+  <% (row.is_a?(Hash) && row['caption'].is_a?(Hash) ? row['caption'] : {}).each do |lang, text| %><%= hidden_field_tag "settings[top_menu][#{name}][caption][#{lang}]", text, id: nil %><% end %>
+<% end %>
 <fieldset class="box tabular"><legend><%= l(:label_gk_gui_stuff_values) %></legend>
   <% gk_values.reject { |v| v[3] && GkGuiStuff::Registry.present.key?(v[3]) }.each do |v| %>
     <p><%= gk_value_field.call(v) %>
