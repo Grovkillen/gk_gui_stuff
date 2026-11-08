@@ -1,0 +1,26 @@
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_under), "gk_gui_stuff_layer_button(label) { … }") do %>
+    <%= gk_gui_stuff_layer_button(l(:label_gk_gui_stuff_sg_open_layer), title: l(:label_gk_gui_stuff_sg_layer)) do %><p><%= l(:text_gk_gui_stuff_sg_layer) %></p><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_edge), "edge: :end") do %>
+    <%= gk_gui_stuff_layer_button(l(:label_gk_gui_stuff_sg_open_layer), title: l(:label_gk_gui_stuff_sg_layer), edge: :end) do %><p><%= l(:text_gk_gui_stuff_sg_layer) %></p><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_wide), "width: :wide") do %>
+    <%= gk_gui_stuff_layer_button(l(:label_gk_gui_stuff_sg_open_layer), title: l(:label_gk_gui_stuff_sg_wide), width: :wide) do %>
+      <p><%= l(:text_gk_gui_stuff_sg_wide) %></p>
+      <%= gk_gui_stuff_bars([{ title: l(:label_gk_gui_stuff_sg_example_group), role: 1, rows: [{ label: gk_gui_stuff_pill(sample.call(:pump), role: 1), value: 14 }, { label: gk_gui_stuff_pill(sample.call(:very_long), role: 1), value: 6 }] }]) %>
+    <% end %>
+  <% end %>
+  <%# the layer right after its parent pill, opened by the pill's value part (gk_gui_stuff_styleguide.js) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_layer_parent), "GkGui.layer.open({title, content, parent: pill, opener: part})") do %>
+    <%# the field's own part opens nothing here; only the value part does %>
+    <%= gk_gui_stuff_pill(l(:field_status), role: :choice, button: { aria: { haspopup: 'true', expanded: 'false' }, data: { gk_gui_sg_noop: '1' } },
+                          part_buttons: [{ content: l(:label_gk_gui_stuff_sg_example_is_open), aria: { haspopup: 'true', expanded: 'false' },
+                                           data: { gk_gui_sg_parent: { title: l(:field_status), text: l(:text_gk_gui_stuff_sg_layer) }.to_json } }]) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_script), "GkGui.layer.open({key, title, content, anchor, edge, parent, opener, width, onClose})", mode: :live) do %>
+    <%= gk_gui_stuff_sg_still(:layer, title: l(:label_gk_gui_stuff_sg_layer), text: l(:text_gk_gui_stuff_sg_layer)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('layer', title: l(:label_gk_gui_stuff_sg_layer), text: l(:text_gk_gui_stuff_sg_layer)) %></p>
+  <% end %>
+</div>

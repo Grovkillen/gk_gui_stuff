@@ -1,0 +1,57 @@
+<%# Administration > Utseende: one form for every plugin's appearance settings in one table, the column headings once,
+    each group a body of its own under a row with its fold button and its count; the shared values last. The fill
+    links Som Redmine and GK:s förslag stand in core's div.contextual beside the heading; the top row says nothing
+    applies before Spara and has the search; the bar at the bottom has the count, Ångra alla and Spara with the reason
+    of the place gui_stuff.appearance (an optional reason while a row needs one in its sharp state, even when the place
+    asks for none). The forms of the action values come after the page's form. %>
+<% gk_gui_stuff_form_page_assets %>
+<% form_id = 'gk-gui-stuff-appearance-form' %>
+<% if @register && @groups.present? %>
+  <%= gk_gui_stuff_form_page_fill_links(form_id, [[l(:button_gk_gui_stuff_fill_redmine), 'redmine', 'reload', l(:text_gk_gui_stuff_fill_off_tip)],
+                                                  [l(:button_gk_gui_stuff_fill_proposal), 'proposal', 'fav', l(:text_gk_gui_stuff_fill_proposal_tip)]]) %>
+<% end %>
+<h2><%= l(:label_gk_gui_stuff_appearance) %></h2>
+<p class="info"><%= l(:text_gk_gui_stuff_appearance) %></p>
+<%# GK Theme Engine and the palette keep their own pages and forms; the style guide shows the primitives %>
+<% own_pages = Redmine::MenuManager.items(:admin_menu).select { |i| %i[gk_theme_engine gk_theme_engine_palette].include?(i.name) } %>
+<% links = own_pages.map { |i| link_to(i.caption, i.url) } %>
+<% links << link_to(l(:label_gk_gui_stuff_styleguide), gk_gui_stuff_styleguide_path, GkGuiStuff::Effect.attributes('styleguide')) if GkGuiStuff.styleguide? %>
+<% if links.any? %><p class="gk-gui-stuff-form-page-links"><%= safe_join(links, ' · ') %></p><% end %>
+<% if @register.nil? %>
+  <p class="nodata"><%= l(:text_gk_gui_stuff_appearance_no_register) %></p>
+<% elsif @groups.empty? %>
+  <p class="nodata"><%= l(:label_no_data) %></p>
+<% else %>
+  <% fills = { 'redmine' => @register.fill(:redmine), 'proposal' => @register.fill(:proposal) }.transform_values { |h| h.transform_keys { |k| "modes[#{k}]" } } %>
+  <% words = %w[off optional forced].to_h { |m| [m, gk_gui_stuff_mode_word(m)] } %>
+  <%= form_tag gk_gui_stuff_appearance_path, method: :patch, id: form_id, class: 'gk-gui-stuff-form-page',
+               data: gk_gui_stuff_form_page_data(fills: fills, words: { modes: words }) do %>
+    <%= gk_gui_stuff_form_page_top %>
+    <% names = @register.declared.transform_values(&:label) %>
+    <div class="autoscroll gk-gui-stuff-form-page-scroll">
+    <table class="list gk-gui-stuff-form-page-table">
+      <colgroup><col class="name"><col class="choice"><col class="choice"><col class="choice"></colgroup>
+      <thead><tr><th><%= l(:label_gk_gui_stuff_appearance_setting) %></th>
+        <% %w[off optional forced].each do |m| %><th class="gk-gui-stuff-choice-col"><%= gk_gui_stuff_mode_word(m) %></th><% end %></tr></thead>
+      <% @groups.each_with_index do |(group, rows), i| %>
+        <% shared = group == GkRecords::AppearanceSettings::SHARED %>
+        <% count = if shared
+                     l(:text_gk_gui_stuff_values_count, count: rows.size)
+                   else
+                     l(:text_gk_gui_stuff_group_on, on: rows.count { |r| @register.mode(r.key) != 'off' }, count: rows.size)
+                   end %>
+        <%= gk_gui_stuff_form_page_group_head(shared ? l(:label_gk_gui_stuff_shared_values) : l(:"label_gk_gui_stuff_group_#{group}"),
+                                              count, "gk-gui-stuff-form-page-group-#{i}", 4) %>
+        <tbody id="gk-gui-stuff-form-page-group-<%= i %>" class="gk-gui-stuff-form-page-group-body" data-gk-gui-group="<%= group %>">
+          <% rows.each do |row| %>
+            <%= render partial: 'gk_gui_stuff_appearance/row', locals: { row: row, shared: shared, names: names } %>
+          <% end %>
+        </tbody>
+      <% end %>
+    </table>
+    </div>
+    <%= gk_gui_stuff_form_page_bar(GkGuiStuffAppearanceController::PLACE, floor: gk_gui_stuff_appearance_floor(@groups)) %>
+  <% end %>
+  <%= render 'gk_gui_stuff_appearance/action_forms' %>
+<% end %>
+<% html_title l(:label_gk_gui_stuff_appearance) %>

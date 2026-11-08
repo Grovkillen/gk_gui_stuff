@@ -1,0 +1,7 @@
+<%# Visa for the icon of Redmine's messages: the three messages, still, as Redmine draws them; with the setting, the same
+    messages with the icon lifted by the picture's own rule (gk_gui_stuff_pictures.css), which holds only in this row's
+    picture; the module's stylesheet comes only with the row on. Each message its own row with the line through the
+    middle of its text. row: the setting %>
+<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_pictures') %>
+<% shown = %i[notice warning error].map { |k| gk_gui_stuff_sg_flash(k => l(:"text_gk_gui_stuff_sg_example_flash_#{k}")) } %>
+<%= gk_gui_stuff_appearance_preview(row, off: shown, on: shown, mid_line: true) %>

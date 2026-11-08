@@ -1,0 +1,11 @@
+<%# core's tips: the title (core's hover tooltip, live by hovering) and span.tip in .tooltip, shown once and still:
+    the word with its card under it, in the look core gives the card on hover %>
+<% ex = ->(k) { l(:"label_gk_gui_stuff_sg_example_#{k}") } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_title_tip), "title:", mode: :nosave) do %>
+    <%= content_tag(:span, ex.call(:mark), title: l(:text_gk_gui_stuff_sg_example_note)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_span_tip), "div.tooltip span.tip") do %>
+    <div class="gk-gui-stuff-sg-still" inert><%= content_tag(:div, safe_join([ex.call(:mark), content_tag(:span, l(:text_gk_gui_stuff_sg_example_note), class: 'tip')]), class: 'tooltip') %></div>
+  <% end %>
+</div>

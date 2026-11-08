@@ -1,0 +1,3 @@
+<%# A row's warning under its description, in core's warning box: the plain text, or the sharper one while the row is
+    sharp (sharp:). The script swaps the text in .gk-gui-stuff-form-page-warning-text as the row's fields change. %>
+<div class="flash warning gk-gui-stuff-form-page-warning" role="note"><strong><%= l(:label_gk_gui_stuff_warning) %>:</strong> <span class="gk-gui-stuff-form-page-warning-text"><%= gk_gui_stuff_row_warning(row, sharp) %></span></div>

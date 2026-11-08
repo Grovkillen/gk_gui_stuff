@@ -4,13 +4,15 @@
 // Save (so the form is sent exactly as by that button, with its name, its reason field and every script on it).
 // There is still one Save; the bar is only where it can be reached. On core's settings (every tab, and every
 // plugin's Configure page) by itself; any other form asks with data-gk-gui-sticky-save (its value, if any, a selector
-// for the form's own Save; else the form's last submit button standing directly in it). While the bar shows, the
+// for the form's own Save; else the form's one submit button). While the bar shows, the
 // page's root has the class gk-gui-stuff-savebar-on and --gk-gui-stuff-savebar-size (its height), so that what stands
 // at the bottom of the window (the notices) stands above it.
 // settings_frame: the Configure page of every GK plugin (Administration > Plugins, /settings/plugin/gk_*) and any
 // element marked data-gk-gui-settings-frame. Its boxes start folded under their headings (a page with one box keeps
-// it open), or as they were left on the page the last time in this browser, a search field above them finds settings by their label and help text (the boxes with a hit open, the
-// rows without one hide) and the change log is folded, with one section per version, the latest first and open.
+// it open), or as they were left on the page the last time in this browser, a search field above them finds settings by their label, help text and key (the boxes with a hit open, the
+// rows without one hide), each row shows its key quietly, and the change log is folded, with one section per version, the latest first and open.
+// A row's key is the name of its field, settings[key]; a row with data-gk-gui-search is found by that text too (its
+// English name, gk_gui_stuff_form_page_search_text).
 // #gk-find=<text> in the address fills in the search (a link to one setting from another page). Nothing in the form
 // changes: a hidden or folded field is still sent.
 // attachment_sizes: on core's Files settings, buttons beside the sizes (largest attachment, largest download of
@@ -31,8 +33,13 @@
   function ownSave(f) {
     var sel = f.getAttribute('data-gk-gui-sticky-save');
     if (sel) { try { var el = f.querySelector(sel); if (el) return el; } catch (e) { /* not a selector: the default */ } }
-    var subs = f.querySelectorAll(':scope > input[type=submit], :scope > button[type=submit], :scope > button:not([type])');
-    return subs.length ? subs[subs.length - 1] : null;
+    // else the form's one submit button that sends it to its own address (the form's own list of controls, wherever
+    // they stand in it; a button with a formaction of its own sends it elsewhere); a form with more than one names
+    // its Save with the mark, it is never chosen by where it stands
+    var subs = Array.prototype.filter.call(f.elements, function (el) {
+      return el.type === 'submit' && el.matches('input, button') && !el.hasAttribute('formaction');
+    });
+    return subs.length === 1 ? subs[0] : null;
   }
   function stickyForms() {
     var list = Array.prototype.slice.call(document.querySelectorAll('form[data-gk-gui-sticky-save]'));
@@ -42,7 +49,7 @@
     return list;
   }
   function makeBar() {
-    bar = N('div', 'gk-gui-stuff-savebar');
+    bar = G.effect(N('div', 'gk-gui-stuff-savebar'), 'sticky_save');
     bar.setAttribute('role', 'region');
     bar.setAttribute('aria-label', G.t('savebar'));
     bar.hidden = true;
@@ -94,14 +101,35 @@
   function soon() { if (!tick) { tick = true; requestAnimationFrame(placeBar); } }
 
   // ---------------------------------------------------------------- settings_frame
+  // What the frame reads: core gives the frame on /settings/plugin/<id> (its #settings with the class plugin-<id>, and
+  // the box .box.tabular.settings it draws the plugin's partial in; ids and classes core sets on purpose), and every
+  // thing inside is the GK plugin's own partial. In it a section is a fieldset with its caption (the fieldset's own
+  // legend), a row is a table row of a tbody, a list item, a form row (p) or anything marked data-gk-gui-settings-row,
+  // and the change log is GK's details.gk-changelog with its .wiki. They are found at any depth, by what they are and
+  // never by how deep they stand or what stands before them, so a wrapper or another order in a partial changes
+  // nothing. A partial may mark a row (data-gk-gui-settings-row) or a part to leave out (gk-gui-stuff-sf-skip).
   function frameRoots(root) {
     var out = Array.prototype.slice.call(root.querySelectorAll('[data-gk-gui-settings-frame]'));
     if (body('controller-settings') && body('action-plugin')) {
       var s = document.querySelector('#settings[class*="plugin-gk_"]');
-      var r = s && (s.querySelector('form > .box.tabular.settings') || s.querySelector('form'));
+      var r = s && (s.querySelector('.box.tabular.settings') || s.querySelector('form'));
       if (r && out.indexOf(r) < 0) out.push(r);
     }
     return out;
+  }
+  // the fieldset's own caption: a legend whose nearest fieldset is this one
+  function legendOf(f) {
+    return Array.prototype.filter.call(f.querySelectorAll('legend'), function (l) { return l.closest('fieldset') === f; })[0] || null;
+  }
+  // the sections of a frame: its fieldsets with a caption that stand in no other fieldset of the frame, nor in another
+  // frame marked inside it
+  function sectionsOf(root) {
+    return Array.prototype.filter.call(root.querySelectorAll('fieldset'), function (f) {
+      var up = f.parentElement && f.parentElement.closest('fieldset');
+      var fr = f.closest('[data-gk-gui-settings-frame]');
+      if (fr && fr !== root && root.contains(fr)) return false;
+      return !(up && root.contains(up)) && !!legendOf(f);
+    });
   }
   function setIcon(lg, open) {
     var old = lg.querySelector(':scope > .gk-gui-stuff-sf-chev');
@@ -117,19 +145,51 @@
     sec.legend.setAttribute('aria-expanded', open ? 'true' : 'false');
     setIcon(sec.legend, open);
   }
-  // a section's rows: what the search shows or hides. A table's rows, a list's items, a form row, a box's line.
+  // a section's rows: what the search shows or hides. A row inside another row is part of it (the outer one is the
+  // row); a caption, a details' summary, a table's head or foot, a skipped part and a list's own filter field
+  // (list_filter) are no rows. What holds no row at all (a line of text in a div) is a row of its own.
+  var ROW = 'tr, li, p, [data-gk-gui-settings-row]';
+  var NOT_ROW = 'legend, summary, thead, tfoot, .gk-gui-stuff-sf-skip, .gk-gui-stuff-lf-line, .gk-gui-stuff-lf';
   function rowsOf(el, out) {
-    Array.prototype.forEach.call(el.children, function (n) {
-      // a list's own filter field (list_filter) is not a setting
-      if (n.tagName === 'LEGEND' || n.matches('.gk-gui-stuff-sf-skip, .gk-gui-stuff-lf-line, .gk-gui-stuff-lf, input[type=hidden]')) return;
-      if (n.tagName === 'TABLE') { Array.prototype.forEach.call(n.tBodies, function (b) { Array.prototype.forEach.call(b.rows, function (r) { out.push(r); }); }); return; }
-      if (n.tagName === 'UL' || n.tagName === 'OL') { n.querySelectorAll('li').forEach(function (li) { out.push(li); }); return; }
-      if (n.tagName === 'DETAILS') { rowsOf(n, out); return; }
-      if (n.tagName === 'SUMMARY') return;
-      if (n.tagName === 'FIELDSET' || (n.tagName === 'DIV' && n.querySelector(':scope > p, :scope > table, :scope > ul, :scope > details, :scope > div'))) { rowsOf(n, out); return; }
+    el.querySelectorAll(ROW).forEach(function (n) {
+      if (n.closest(NOT_ROW)) return;
+      var outer = n.parentElement && n.parentElement.closest(ROW);
+      if (outer && el.contains(outer)) return;
+      out.push(n);
+    });
+    Array.prototype.forEach.call(el.querySelectorAll('*'), function (n) {
+      if (n.matches(ROW) || n.matches(NOT_ROW) || n.closest(NOT_ROW) || n.matches('input[type=hidden], br')) return;
+      if (n.querySelector(ROW)) return;
+      // the largest part with no row in it: outside every row, and its parent is the section or holds rows elsewhere
+      if (n.closest(ROW)) return;
+      var p = n.parentElement;
+      if (p !== el && !p.querySelector(ROW)) return;
+      if ((n.textContent || '').trim() === '' && !n.querySelector('input, select, textarea')) return; // gk-r17 P4r: the frame's parts are the GK plugin's own settings partial, and only whether a part holds any text is asked
       out.push(n);
     });
     return out;
+  }
+  // The settings a row's fields belong to: the first part of each field's name, settings[key] or settings[key][...]
+  function keysOf(r) {
+    var out = [], list = Array.prototype.slice.call(r.querySelectorAll('[name]'));
+    if (r.hasAttribute('name')) list.push(r);
+    list.forEach(function (f) {
+      var m = /^settings\[([^\]]+)\]/.exec(f.getAttribute('name') || '');
+      if (m && out.indexOf(m[1]) < 0) out.push(m[1]);
+    });
+    return out;
+  }
+  // A row of one plain setting shows its key quietly at its end (in its first cell, if it is a table's row). A row of
+  // several settings, or of a setting's nested parts, shows none; the search still finds their keys.
+  function showKey(r) {
+    var keys = keysOf(r);
+    if (keys.length !== 1 || r.querySelector('.gk-gui-stuff-sf-key')) return;
+    var fields = Array.prototype.filter.call(r.querySelectorAll('[name^="settings["]'), function (f) { return f.type !== 'hidden'; });
+    if (!fields.length || !fields.every(function (f) { return /^settings\[[^\]]+\](\[\])?$/.test(f.name); })) return;
+    var key = G.effect(N('span', 'gk-gui-stuff-sf-key', keys[0]), 'settings_frame');
+    key.dir = 'ltr';
+    key.setAttribute('translate', 'no');
+    (r.matches('tr') ? r.querySelector('td, th') || r : r).appendChild(key);
   }
   // The general rule against double folding: a section folds by itself when it is core's fieldset.collapsible (its
   // legend toggles it), when its legend has a toggle of its own (an onclick, aria-expanded, core's
@@ -140,29 +200,32 @@
     if (f.matches('.collapsible, [data-gk-gui-own-fold]')) return true;
     if (legend.hasAttribute('onclick') || legend.matches('[aria-expanded], .icon-expanded, .icon-collapsed') ||
         legend.querySelector('button, [aria-expanded], [onclick]')) return true;
-    var kids = Array.prototype.filter.call(f.children, function (n) { return n !== legend && !n.matches('input[type=hidden]'); });
-    return kids.length > 0 && kids.every(function (n) { return n.tagName === 'DETAILS' && !n.classList.contains('gk-changelog'); });
+    // every row it has stands in a details of its own (not the change log's)
+    function inOwnDetails(n) { var d = n.closest('details'); return !!d && f.contains(d) && !d.classList.contains('gk-changelog'); }
+    var rs = rowsOf(f, []);
+    return rs.length > 0 && rs.every(inOwnDetails);
   }
   function changelogOf(f) {
     // a plugin's page folds its change log by itself (details.gk-changelog, also without this module): the frame takes
     // the log out of it and folds it per version as before
-    var d = f.querySelector(':scope > details.gk-changelog');
+    var d = f.querySelector('details.gk-changelog');
     if (d) {
-      var dw = d.querySelector(':scope > div.wiki');
+      var dw = d.querySelector('.wiki');
       if (dw) { d.parentNode.insertBefore(dw, d); d.remove(); }
     }
-    var w = f.querySelector(':scope > div.wiki');
-    return w && w.querySelector(':scope > h2') ? w : null;
+    // the log: the .wiki the plugin draws its CHANGELOG in, whose version headings are its "## " lines (h2)
+    return Array.prototype.filter.call(f.querySelectorAll('.wiki'), function (w) { return w.querySelector('h2'); })[0] || null;
   }
   function version(h) {
-    var m = /(\d+)\.(\d+)\.(\d+)/.exec(h.textContent || '');
+    var m = /(\d+)\.(\d+)\.(\d+)/.exec(h.textContent || ''); // gk-r17 P4r: the heading is a version line of the GK plugin's own change log, not core's
     return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
   }
-  // one section per version, an empty one (Unreleased with nothing yet) left out, the latest first and open
+  // one section per version, an empty one (Unreleased with nothing yet) left out, the latest first and open. The log is
+  // the plugin's own CHANGELOG as the formatter draws it: a version is an h2 and what follows it up to the next
   function shapeLog(wiki) {
     var parts = [], cur = null;
     Array.prototype.slice.call(wiki.childNodes).forEach(function (n) {
-      if (n.nodeType === 1 && n.tagName === 'H2') { cur = { head: n, nodes: [] }; parts.push(cur); return; }
+      if (n.nodeType === 1 && n.matches('h2')) { cur = { head: n, nodes: [] }; parts.push(cur); return; }
       if (cur) cur.nodes.push(n);
     });
     var before = Array.prototype.slice.call(wiki.childNodes).filter(function (n) { return !parts.some(function (p) { return p.head === n || p.nodes.indexOf(n) >= 0; }); });
@@ -183,17 +246,17 @@
   }
   function frame(root) {
     if (root.dataset.gkGuiFrame) return;
-    var fs = Array.prototype.filter.call(root.children, function (n) { return n.tagName === 'FIELDSET' && n.querySelector(':scope > legend'); });
+    var fs = sectionsOf(root);
     if (!fs.length) return;
     root.dataset.gkGuiFrame = '1';
     var secs = fs.map(function (f) {
-      var legend = f.querySelector(':scope > legend');
+      var legend = legendOf(f);
       // One fold, never two on top of each other: a section that already folds by itself keeps its own fold and gets
       // none from the frame. The search still reaches its settings (it shows or hides the section and its rows).
       if (foldsItself(f, legend)) return { el: f, legend: legend, body: f, own: true, log: false, title: norm(legend.textContent) };
       // what is under the heading in one part that folds; the fields stay where they are in the form
       var inner = N('div', 'gk-gui-stuff-sf-body');
-      Array.prototype.slice.call(f.childNodes).forEach(function (n) { if (n !== legend) inner.appendChild(n); });
+      Array.prototype.slice.call(f.childNodes).forEach(function (n) { if (!n.contains(legend)) inner.appendChild(n); });
       f.appendChild(inner);
       f.classList.add('gk-gui-stuff-sf-section');
       legend.classList.add('gk-gui-stuff-sf-legend');
@@ -207,6 +270,7 @@
       legend.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flip(); } });
       return sec;
     });
+    secs.forEach(function (s) { rowsOf(s.body, []).forEach(showKey); });
     var plain = secs.filter(function (s) { return !s.log && !s.own; });
     secs.forEach(function (s) { fold(s, !s.log && plain.length === 1); });
     // the boxes open or folded as they were left on this page the last time, in this browser (localStorage, per path);
@@ -215,7 +279,7 @@
     function remember() { var m = {}; secs.forEach(function (s) { if (!s.own) m[s.title] = !s.body.hidden; }); G.set(memo, JSON.stringify(m)); }
     try { var was = JSON.parse(G.get(memo) || 'null'); if (was) secs.forEach(function (s) { if (Object.prototype.hasOwnProperty.call(was, s.title)) fold(s, !!was[s.title]); }); } catch (e) { /* nothing remembered */ }
 
-    var barEl = N('div', 'gk-gui-stuff-sf-bar');
+    var barEl = G.effect(N('div', 'gk-gui-stuff-sf-bar'), 'settings_frame');
     var input = N('input', 'gk-gui-stuff-sf-input');
     input.type = 'search';
     input.autocomplete = 'off';
@@ -258,6 +322,8 @@
         all[i].forEach(function (r) {
           var t = r.textContent || '';
           r.querySelectorAll('input[type=text], input[type=search], input:not([type]), option:checked').forEach(function (x) { t += ' ' + (x.value || x.textContent); });
+          keysOf(r).forEach(function (k) { t += ' ' + k + ' ' + k.replace(/_/g, ' '); });
+          t += ' ' + (r.getAttribute('data-gk-gui-search') || '');
           var ok = whole || hit(norm(t), ws);
           r.classList.toggle('gk-gui-stuff-sf-miss', !ok);
           if (ok && !whole) { hits++; any = true; }
@@ -288,7 +354,7 @@
     root.querySelectorAll('#settings_attachment_max_size, #settings_bulk_download_max_size').forEach(function (field) {
       if (field.dataset.gkGuiSizes) return;
       field.dataset.gkGuiSizes = '1';
-      var o = G.opt('attachment_sizes'), row = N('span', 'gk-gui-stuff-sizes');
+      var o = G.opt('attachment_sizes'), row = G.effect(N('span', 'gk-gui-stuff-sizes'), 'attachment_sizes');
       var buttons = SIZES_KB.map(function (s) {
         var kb = s[0] * (s[1] === 'gb' ? 1048576 : 1024), label = s[0] + ' ' + (o[s[1]] || s[1].toUpperCase());
         var b = N('button', 'gk-gui-stuff-size', label);
@@ -307,8 +373,8 @@
       function mark() { buttons.forEach(function (b) { b.setAttribute('aria-pressed', String(field.value).trim() === String(b._kb) ? 'true' : 'false'); }); }
       field.addEventListener('input', mark);
       mark();
-      // after core's unit, at the end of the row
-      field.parentNode.appendChild(row);
+      // after core's unit, at the end of the field's form row (the nearest p around it, however core wraps the field)
+      (field.closest('p') || field.parentNode).appendChild(row);
     });
   }
 

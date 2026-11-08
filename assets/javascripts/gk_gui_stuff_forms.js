@@ -9,9 +9,10 @@
   G.onContent(function () {
     if (G.on('flash_timeout')) {
       var secs = G.opt('flash_timeout').seconds || 0;
-      document.querySelectorAll('#content .flash.notice:not([data-gk-gui-stuff-timeout]), #flash_notice:not([data-gk-gui-stuff-timeout])').forEach(function (f) {
+      document.querySelectorAll('#content .flash.notice:not([data-gk-gui-stuff-timeout], .gk-gui-stuff-sg-still *, [inert] *), #flash_notice:not([data-gk-gui-stuff-timeout], .gk-gui-stuff-sg-still *, [inert] *)').forEach(function (f) {
         f.dataset.gkGuiStuffTimeout = '1';
         f.classList.add('gk-gui-stuff-flash');
+        G.effect(f, 'flash_timeout');
         var box = G.node('span', 'gk-gui-stuff-flash-tools');
         var x = G.put(G.node('button', 'gk-gui-stuff-flash-close'), 'close', '×', 14); x.type = 'button';
         x.title = G.t('close'); x.setAttribute('aria-label', G.t('close'));

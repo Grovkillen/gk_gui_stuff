@@ -22,6 +22,8 @@ fieldset.gk-gui-stuff-sf-section > legend.gk-gui-stuff-sf-legend:focus-visible {
 fieldset.gk-gui-stuff-sf-section.collapsed { padding-block-end: 0; }
 .gk-gui-stuff-sf-body[hidden] { display: none; }
 .gk-gui-stuff-sf-miss { display: none !important; }
+/* a row's key, quiet on a line of its own; a click takes all of it, ready to copy and pass on */
+.gk-gui-stuff-sf-key { display: block; font-size: 0.85em; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); user-select: all; }
 /* the change log: one part per version, its heading as core's */
 details.gk-gui-stuff-sf-version > summary { cursor: pointer; }
 details.gk-gui-stuff-sf-version > summary > h2 { display: inline; }

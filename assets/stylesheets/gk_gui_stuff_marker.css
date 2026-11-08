@@ -1,0 +1,51 @@
+/* gk_gui_stuff: the marker (marker.rb; gk_gui_stuff_marker.js). Where a setting or a function changes something on
+   the page: a dashed outline in the role ui-effect around each place, 3 px outside it, an outline so that nothing
+   moves; solid and a little thicker at the place Nästa ställe stands on, where the striped flag says what changed
+   (the flag's own stylesheet). On every page with the primitives. */
+
+[data-gk-gui-mark] { outline: 2px dashed var(--gk-role-ui-effect, var(--oc-blue-8, #1971c2)) !important; outline-offset: 3px !important; }
+[data-gk-gui-mark][data-gk-gui-mark-current] { outline-style: solid !important; outline-width: 3px !important; }
+/* The frame's four corners are the same small step inward. An outline follows its box's corners, so a box with corners
+   of its own keeps them (they are the same all round), and one without gets this notch: the script marks it, and a mark
+   the server drew (gk_gui_stuff_mark, a span with no class) has it from the start. A browser without corner-shape
+   rounds the four alike. Round an inline box and what stands in it a browser draws one shape, with steps where a badge
+   stands out; such a box on one line is made one box, which moves nothing since it keeps its width and its baseline. */
+[data-gk-gui-mark-fold], span[data-gk-gui-mark]:not([class]) { border-radius: 2px; corner-shape: notch; }
+[data-gk-gui-mark-box] { display: inline-block !important; }
+
+/* Visa var den stod: an empty dashed box where the gone thing stood, laid on top, taking no room */
+.gk-gui-stuff-marker-ghost { position: absolute; z-index: 29; box-sizing: border-box; border: 2px dashed var(--gk-role-ui-effect, var(--oc-blue-8, #1971c2));
+  border-radius: 2px; background: transparent; pointer-events: none; }
+/* under a box held at the top of the window (the page's bar, core's fixed header) it is hidden, as its flag is */
+.gk-gui-stuff-marker-ghost.gk-gui-stuff-marker-ghost-off { visibility: hidden; }
+
+/* the panel has fixed places: the button and the number each hold all their words on top of each other in one cell, so
+   that their size is that of the longest in any language and nothing moves when the marks go on and off */
+.gk-gui-stuff-marker-stack { display: inline-grid; justify-items: center; align-items: center; }
+.gk-gui-stuff-marker-stack > * { grid-area: 1 / 1; }
+.gk-gui-stuff-marker-room { visibility: hidden; }
+.gk-gui-stuff-marker-panel[data-gk-gui-marker-on="1"] [data-gk-gui-marker-word="show"],
+.gk-gui-stuff-marker-panel:not([data-gk-gui-marker-on="1"]) [data-gk-gui-marker-word="hide"] { visibility: hidden; }
+.gk-gui-stuff-marker-count { color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); font-variant-numeric: tabular-nums; }
+/* Föregående and Nästa with the marks off: they keep their place and their focus, and say why */
+.gk-gui-stuff-marker-panel [data-gk-gui-marker][aria-disabled="true"] { opacity: 0.55; cursor: default; }
+/* the row of what is gone is always there, empty when nothing is */
+.gk-gui-stuff-marker-gone { min-block-size: 1.6em; }
+
+/* the panel's quiet rows: Borta, and what does not show on this page */
+.gk-gui-stuff-marker-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25em 0.5em; margin: 4px 0;
+  color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); }
+.gk-gui-stuff-marker-list { margin: 0; padding-inline-start: 1.6em; }
+.gk-gui-stuff-marker-list li { margin: 2px 0; }
+/* under 899 px the band's part is a sheet at the window's lower edge, and the band holds the fixed header's height:
+   the list from Visa alla stands over that sheet, not behind it */
+@media (max-width: 899px) { .gk-gui-stuff-layer:has(.gk-gui-stuff-marker-list) { z-index: 10002; } }
+
+@media (forced-colors: active) {
+  [data-gk-gui-mark] { outline-color: Highlight !important; }
+  .gk-gui-stuff-marker-ghost { border-color: Highlight; }
+}
+@media print {
+  [data-gk-gui-mark] { outline: none !important; }
+  .gk-gui-stuff-marker-ghost { display: none; }
+}

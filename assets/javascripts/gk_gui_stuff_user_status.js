@@ -22,7 +22,7 @@
     var dot = a.nextElementSibling && a.nextElementSibling.classList.contains('gk-gui-stuff-status') ? a.nextElementSibling : null;
     if (!s) { if (dot) dot.remove(); return; }
     if (!dot) {
-      dot = G.node('span', 'gk-gui-stuff-status');
+      dot = G.effect(G.node('span', 'gk-gui-stuff-status'), 'user_status');
       dot.setAttribute('role', 'button');
       dot.tabIndex = 0;
       // a click on the dot is for the source's plugin (readup opens a direct channel): an event, never a route here

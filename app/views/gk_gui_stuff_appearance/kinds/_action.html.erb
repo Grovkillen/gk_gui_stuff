@@ -1,0 +1,31 @@
+<%# An action value: what cannot be undone, the reason button's irreversible form under the setting: "Ordet…" always
+    opens a box in the role alarm with what disappears, the action's button with Avbryt and, under them, the reason
+    when the place asks for one. The reason and the button belong, by HTML's form attribute, to the action's own hidden
+    form, drawn after the page's form (_action_forms), so that nothing nests and the page's own fields are never sent
+    with it. Emptying the previews says how many addresses go (every row it removes: cards, queued and failed) and
+    how much of the picture folder; any other action says its confirmation. A route that is missing draws nothing; a row that cannot be chosen draws the label quietly. %>
+<% url = gk_gui_stuff_action_url(value) %>
+<% if url %>
+  <div class="gk-gui-stuff-form-page-value">
+    <% if disabled %>
+      <span class="gk-gui-stuff-form-page-quiet"><%= value.label %></span>
+    <% else %>
+      <% form_id = gk_gui_stuff_action_form_id(row, value) %>
+      <% (@gk_gui_stuff_actions ||= []) << [form_id, url] %>
+      <% question = nil
+         info = value.confirm.presence
+         if row.key == GkGuiStuffExternalPreviewController::ROW_KEY && value.name == 'clear' && defined?(GkGuiStuff::External::Storage)
+           begin
+             rows = ::GkGuiStuffLinkPreview.count
+             bytes = GkGuiStuff::External::Storage.ours.sum { |p| File.file?(p) ? File.size(p) : 0 }
+             question = l(:text_gk_gui_stuff_lpe_clear_question)
+             info = l(:text_gk_gui_stuff_lpe_clear_what, count: rows, size: number_to_human_size(bytes))
+           rescue StandardError
+             question = nil
+           end
+         end %>
+      <%= gk_gui_stuff_reason_button(value.label, reason: GkGuiStuffAppearanceController::PLACE, irreversible: true, question: question, info: info,
+                                     form: form_id, html: { form: form_id }) %>
+    <% end %>
+  </div>
+<% end %>

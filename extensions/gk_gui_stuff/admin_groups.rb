@@ -29,7 +29,7 @@ module GkGuiStuff
       'gk_theme_engine' => %w[appearance], 'gk_theme_engine_palette' => %w[appearance], 'gk_icons_library' => %w[appearance],
       'gk_fields_translations' => %w[appearance], 'gk_snippets_snippets' => %w[appearance],
       'gk_ops_jobs' => %w[system], 'gk_ops_backups' => %w[system], 'gk_ops_server' => %w[system], 'gk_scenarios_index' => %w[system],
-      'gk_ops_logs' => %w[system], 'gk_ops_deployments' => %w[system], 'gk_gui_stuff_features' => %w[system],
+      'gk_ops_logs' => %w[system], 'gk_ops_deployments' => %w[system],
       'gk_publishing_doc_types' => %w[traceability], 'gk_revisions_names' => %w[traceability],
       'gk_signoff_roles' => %w[people], 'gk_people_org_kinds' => %w[people], 'gk_checklists_templates' => %w[issues],
       # records' readings under traceability, people's quick words under people
@@ -48,8 +48,9 @@ module GkGuiStuff
 
     def clean(tag) = tag.to_s.strip.gsub(/\s+/, ' ').first(40)
 
+    # The table value of the appearance setting admin_groups
     def stored
-      h = Switches.settings['admin_rows']
+      h = Switches.value('admin_groups', 'admin_rows', {})
       h.is_a?(Hash) ? h : {}
     end
 
@@ -131,6 +132,74 @@ module GkGuiStuff
       {}
     end
 
+    # The page of a renamed row carries the row's word in its heading and the window's title too, written by the
+    # server as the page is drawn. Which row the page belongs to is what core selects in its administration menu: the
+    # controller's current menu item (core's menu_item, the name the row is registered with) on a page in core's
+    # administration layout. Core writes the page's heading and its html_title with the same word as the row, the
+    # translation of the key the row was registered with (its caption); on that page alone the view gives the row's
+    # own word for that key (RetitleHelperPatch), so the heading, a trail's first link and the title follow, in any
+    # language and whatever core's words are. A page whose heading uses another key keeps core's word.
+    # { key => word } for the page, or nil
+    def retitle_for(controller, user = ::User.current)
+      return nil unless controller.is_a?(::ActionController::Base) && admin_layout?(controller)
+      return nil unless user&.admin? && (m = Registry.find('admin_groups')) && Switches.on_for?(m, user)
+
+      name = controller.respond_to?(:current_menu_item) ? controller.current_menu_item : nil
+      item = name && items.find { |i| i.name.to_s == name.to_s }
+      return nil unless item
+
+      text = caption(item.name)
+      key = caption_key(item)
+      text.empty? || key.nil? ? nil : { key => text }
+    rescue StandardError => e
+      Rails.logger.warn("[gk_gui_stuff] admin_groups heading left as core's: #{e.class} #{e.message}")
+      nil
+    end
+
+    # Core's administration pages are drawn in its layout admin (also a plugin's page there)
+    def admin_layout?(controller)
+      controller.class.respond_to?(:_layout) && controller.class._layout.to_s == 'admin'
+    end
+
+    # The key the row's word is the translation of: the caption it was registered with, or core's label_<name> for a row
+    # without one (MenuItem#caption); nil for a caption that is a text or a Proc. MenuItem has no reader for the key it
+    # was given, only caption(project) with the word, so the key is read from the item and then proven: it is used only
+    # when its translation is the word core's caption gives. Should core rename what the item keeps, the answer is nil
+    # and the heading stays core's, never a guessed key.
+    def caption_key(item, translate: ->(key) { ::I18n.t(key, default: '') })
+      raw = item.instance_variable_defined?(:@caption) ? item.instance_variable_get(:@caption) : nil
+      key = if raw.is_a?(Symbol) then raw.to_s
+            elsif raw.nil? then "label_#{item.name}"
+            end
+      return nil unless key
+
+      word = item.caption(nil).to_s
+      !word.empty? && translate.call(key).to_s == word ? key : nil
+    rescue StandardError
+      nil
+    end
+
+    # In every view: l(key) gives the renamed row's word for the key of the row the page belongs to (retitle_for),
+    # anything else as core gives it
+    module RetitleHelperPatch
+      def l(*args)
+        if args.size == 1 && (args.first.is_a?(Symbol) || args.first.is_a?(String))
+          map = gk_gui_stuff_retitle
+          return map[args.first.to_s] if map&.key?(args.first.to_s)
+        end
+        super
+      end
+
+      def gk_gui_stuff_retitle
+        return @gk_gui_stuff_retitle if defined?(@gk_gui_stuff_retitle)
+
+        ctrl = respond_to?(:controller) ? controller : nil
+        @gk_gui_stuff_retitle = ctrl ? AdminGroups.retitle_for(ctrl) : nil
+      rescue StandardError
+        @gk_gui_stuff_retitle = nil
+      end
+    end
+
     # fields' page Översättningar gets the rows' words as a source of its own: the word in the instance's language
     # is the text as written, the other languages are its translations. Saved here, in this plugin's settings.
     def register_texts!
@@ -151,16 +220,19 @@ module GkGuiStuff
       end
     end
 
+    # A row's caption per language, kept in the table value of admin_groups (records' register; nothing without it)
     def save_captions(name, texts)
-      s = Switches.settings.deep_dup
-      rows = s['admin_rows'].is_a?(Hash) ? s['admin_rows'] : (s['admin_rows'] = {})
+      register = GkGuiStuff.appearance_settings
+      return false unless register
+
+      rows = stored.deep_dup
       r = rows[name].is_a?(Hash) ? rows[name] : (rows[name] = {})
       before = r['caption'].is_a?(Hash) ? r['caption'] : {}
       after = before.merge(texts.to_h.transform_keys(&:to_s).transform_values { |v| v.to_s.strip }).reject { |_l, v| v.empty? }
       return false if after == before
 
       r['caption'] = after
-      ::Setting.plugin_gk_gui_stuff = s
+      register.save!(values: { Appearance.key('admin_groups') => { 'admin_rows' => rows } })
       true
     end
   end

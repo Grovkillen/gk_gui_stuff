@@ -57,7 +57,7 @@
   }
   function label(a) {
     var t = target(a);
-    var s = (a.getAttribute('data-gk-gui-row-action-label') || t.getAttribute('aria-label') || t.value || t.textContent || t.title || '').replace(/\s+/g, ' ').trim();
+    var s = (a.getAttribute('data-gk-gui-row-action-label') || t.getAttribute('aria-label') || t.value || t.textContent || t.title || '').replace(/\s+/g, ' ').trim(); // gk-r17 P4r: the action is in a list marked data-gk-gui-rowmenu (GK's own), its word names the menu item
     return s || (a.title || '');
   }
   function disabled(a) { var t = target(a); return t.disabled || t.classList.contains('disabled') || t.getAttribute('aria-disabled') === 'true'; }
@@ -89,7 +89,7 @@
     menu.className = 'gk-gui-stuff-rowmenu';
     var ul = document.createElement('ul');
     ul.setAttribute('role', 'menu');
-    var name = row.getAttribute('data-gk-gui-row-menu-label') || (row.cells[0] ? row.cells[0].textContent.replace(/\s+/g, ' ').trim() : '');
+    var name = row.getAttribute('data-gk-gui-row-menu-label') || (row.cells[0] ? row.cells[0].textContent.replace(/\s+/g, ' ').trim() : ''); // gk-r17 P4r: the row is in a list marked data-gk-gui-rowmenu (GK's own), its first cell names the menu
     if (name) ul.setAttribute('aria-label', name);
     rest.concat(dels).forEach(function (a) {
       var li = document.createElement('li');

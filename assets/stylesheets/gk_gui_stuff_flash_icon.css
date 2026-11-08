@@ -1,0 +1,6 @@
+/* gk_gui_stuff flash_icon: the icon of Redmine's messages lifted to the middle of the text; Redmine lays it on the text's
+   lower edge. Only its place: the colour, the form and the box stay Redmine's, and the error box of a form, which
+   Redmine places by the box's own middle, is left alone. Off: Redmine's own, also in a still sample
+   (.gk-gui-stuff-sg-still: the style guide, Visa under Administration, Appearance), and in another setting's picture
+   under Visa (.gk-gui-stuff-preview-on), which shows that setting alone. */
+div.flash > svg.icon-svg:not(.gk-gui-stuff-sg-still *, .gk-gui-stuff-preview-on *) { position: relative; inset-block-start: -0.11em; }

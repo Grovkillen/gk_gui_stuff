@@ -1,0 +1,68 @@
+<%# the line in its three forms, drawn from data (gk_gui_stuff_sg_line_data); a step saves at once against the
+    guide's save address, and fails against the one that fails; the editable form writes the inputs of its own form.
+    The detailed and the upright line only show (their steps are text); the line of crowded steps has Visa, and Prova
+    opens the panel of the line that saves %>
+<% line = ->(key, **o) { gk_gui_stuff_sg_line_data(key, **o) } %>
+<% edit_data = line.call('gk-gui-stuff-sg-line-edit', editable: true) %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_detailed), "gk_gui_stuff_line(data, form: :detailed)", wide: true) do %>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-detailed'), form: :detailed) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_compact), "gk_gui_stuff_line(data, form: :compact, mode: :save, remember: 'gui_stuff.styleguide_line')", wide: true, mode: :server) do %>
+    <%# the panel's state is posted to the guide's own address (quiet: it answers without a page or a flash), which
+        stores nothing, never to the view states %>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-compact', save: save), form: :compact, mode: :save, remember: 'gui_stuff.styleguide_line',
+                                                                                   remember_url: gk_gui_stuff_styleguide_save_path(quiet: 1)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_compact_open), "GkGui.line.open(root, {focus: true})", wide: true, mode: :server) do %>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-open', save: save), form: :compact, mode: :save, html: { id: 'gk-gui-stuff-sg-line-open' }) %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_line_open) %> <%= gk_gui_stuff_sg_try('line', line: 'gk-gui-stuff-sg-line-open') %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_saved), "mode: :save, save: { url:, name:, after: :none }; url: …?fail=1", wide: true, mode: :server) do %>
+    <%# two lines that look the same until a step is chosen: each says what its step does %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:label_gk_gui_stuff_sg_line_saves) %></p>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-saved', save: save), form: :detailed, mode: :save, legend: false) %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:label_gk_gui_stuff_sg_line_fails) %></p>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-fail', save: fail), form: :detailed, mode: :save, legend: false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_choose), "gk_gui_stuff_line(data, form: :compact, mode: :choose), field: { select_id:, current: }", wide: true, mode: :nosave) do %>
+    <% choose_data = line.call('gk-gui-stuff-sg-line-choose', chosen: 5) %>
+    <p><%= label_tag 'gk-gui-stuff-sg-line-choose-select', l(:field_status) %>
+      <%= select_tag 'sg_status', options_for_select(choose_data[:steps].map { |s| [s[:label], s[:id]] }, '5'), id: 'gk-gui-stuff-sg-line-choose-select' %></p>
+    <%= gk_gui_stuff_line(choose_data, form: :compact, mode: :choose) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_editable), "gk_gui_stuff_line(data, form: :editable), edit: { form:, limits:, marks:, band_cells: true }", wide: true, mode: :server) do %>
+    <%= gk_gui_stuff_line(edit_data, form: :editable) %>
+    <%= form_tag(save, id: 'gk-gui-stuff-sg-line-edit-form', data: gk_gui_stuff_form_changes) do %>
+      <table class="list"><thead><tr><th><%= l(:field_status) %></th><th><%= l(:label_gk_gui_stuff_sg_line_side) %></th><th><%= l(:label_gk_gui_stuff_sg_line_place) %></th>
+        <th><%= l(:label_gk_gui_stuff_sg_line_lane) %></th><th><%= l(:label_gk_gui_stuff_sg_line_band) %></th></tr></thead><tbody>
+        <% edit_data[:steps].each do |s| %>
+          <% band = edit_data[:halves].flat_map { |h| h[:bands] }.find { |b| b[:key] == s[:band] } %>
+          <tr data-gk-gui-line-row-of="<%= s[:id] %>">
+            <td><%= s[:label] %></td>
+            <td><%= select_tag s[:inputs][:half], options_for_select(edit_data[:halves].map { |h| [h[:label], h[:key]] }, s[:half]), id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_line_side) %></td>
+            <td><%= number_field_tag s[:inputs][:at], s[:at], min: 1, max: edit_data[:max], id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_line_place) %></td>
+            <td><%= select_tag s[:inputs][:lane], options_for_select(edit_data[:lanes].map { |ln| [ln[:label], ln[:key]] }, s[:lane]), id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_line_lane) %></td>
+            <td data-gk-gui-line-band-of="<%= s[:id] %>"><%= band && band[:label] %></td>
+          </tr>
+        <% end %>
+      </tbody></table>
+      <p><label><%= l(:label_gk_gui_stuff_sg_line_upto, band: l(:label_gk_gui_stuff_sg_example_band_active)) %>
+        <%= number_field_tag 'sg_limits[active]', 799, min: 1, max: edit_data[:max] - 1, id: nil %></label></p>
+      <p><%= submit_tag l(:button_save), name: nil %></p>
+    <% end %>
+  <% end %>
+  <%# the second of two neighbours has its label lifted, one that still does not fit is cut, and two steps on the same
+      place have the alarm edge and the row under the line with Visa %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_clash), "gk_gui_stuff_line(data, form: :detailed, legend: false)", wide: true, mode: :nosave) do %>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-crowd', crowd: true), form: :detailed, legend: false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_vertical), "gk_gui_stuff_line(data, vertical: true)", wide: true) do %>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-vertical'), vertical: true) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_script), "GkGui.line.mount(root), GkGui.line.open(root, {focus}), GkGui.line.close(root)", wide: true, mode: :server) do %>
+    <%# a compact line of its own, so that the panel comes where the link is pressed %>
+    <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-script', save: save), form: :compact, mode: :save, html: { id: 'gk-gui-stuff-sg-line-script' }) %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_line_open) %> <%= gk_gui_stuff_sg_try('line', line: 'gk-gui-stuff-sg-line-script') %></p>
+  <% end %>
+</div>

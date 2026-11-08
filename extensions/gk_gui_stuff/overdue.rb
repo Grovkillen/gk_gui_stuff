@@ -10,7 +10,7 @@ module GkGuiStuff
   module Overdue
     module_function
 
-    def soon_days = Switches.int('due_soon_days', 3, 0)
+    def soon_days = Switches.value('due_soon', 'due_soon_days', 3)
 
     def on_for?(user)
       m = Registry.find('overdue_mark')

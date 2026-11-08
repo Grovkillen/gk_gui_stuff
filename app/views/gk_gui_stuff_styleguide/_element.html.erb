@@ -1,0 +1,10 @@
+<%# One element: its partial drawn first (gk_gui_stuff_sg_draw), so that its heading can say how many states (tiles)
+    it has; then the heading (name, plugin, states, the choices, the legend of the tiles' flags, Används för and Inte
+    för, the GK counterpart of a Redmine form) and the tiles. A section that fails is core's warning with its key, and
+    the rest of the page is drawn. frame: true draws the tiles alone, for the frame in a phone's width. %>
+<% drawn = gk_gui_stuff_sg_draw(s, locals) %>
+<section id="<%= s.anchor %>" class="box gk-gui-stuff-sg-element gk-gui-stuff-sg-in-<%= s.part %>" data-gk-gui-sg-element="<%= s.key %>" data-gk-gui-sg-group="<%= s.group %>"
+         data-gk-gui-sg-words="<%= [s.label, s.uses].join(' ') %>">
+  <% unless frame %><%= gk_gui_stuff_sg_element_head(s, drawn[:n], all: sections, dark: @dark.present?, modes: drawn[:modes]) %><% end %>
+  <div class="gk-gui-stuff-sg-body"><%= drawn[:body] %></div>
+</section>

@@ -1,4 +1,4 @@
-/* gk_gui_stuff report_clarity. Logical properties only (environment manifest 5.22); neutral colours until
+/* gk_gui_stuff report_clarity. Logical properties only; neutral colours until
    theme_engine's palette tokens exist. Three kinds of columns, three looks: statuses, sums, everything. */
 table.issue-report-detailed tr.gk-gui-stuff-rep-groups th { font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; border-block-end: 0; }
 table.issue-report-detailed .gk-gui-stuff-rep-first { border-inline-start: 2px solid var(--oc-gray-5); }

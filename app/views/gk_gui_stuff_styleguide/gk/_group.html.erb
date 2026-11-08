@@ -1,0 +1,16 @@
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_open), "gk_gui_stuff_group(title, role: 1, count: 3) { … }") do %>
+    <%= gk_gui_stuff_group(l(:label_gk_gui_stuff_sg_example_group), role: 1, count: 3) do %><%= gk_gui_stuff_pill(sample.call(:pump), role: 1, count: 2) %> <%= gk_gui_stuff_pill(sample.call(:valve), role: 1, count: 1) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_closed), "collapsed: true") do %>
+    <%= gk_gui_stuff_group(l(:label_gk_gui_stuff_sg_example_group2), role: 8, count: 2, collapsed: true) do %><%= gk_gui_stuff_pill(sample.call(:power), role: 8) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_remembered), "remember: 'gui_stuff.styleguide'") do %>
+    <%= gk_gui_stuff_group(l(:label_gk_gui_stuff_sg_remembered), count: 1, remember: 'gui_stuff.styleguide') do %><%= l(:text_gk_gui_stuff_sg_remembered) %><% end %>
+  <% end %>
+  <%# the fold button whose words turn with the state; the line draws the same button with gk_gui_stuff_group_toggle %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_group_texts), "gk_gui_stuff_group(title, texts: [closed, open], collapsed: true); gk_gui_stuff_group_toggle(closed, open)") do %>
+    <%= gk_gui_stuff_group(l(:label_gk_gui_stuff_sg_example_group), texts: [l(:button_gk_gui_stuff_line_show), l(:button_gk_gui_stuff_line_hide)], collapsed: true) do %><%= gk_gui_stuff_pill(sample.call(:pump), role: 1) %><% end %>
+  <% end %>
+</div>

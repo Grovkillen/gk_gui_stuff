@@ -1,0 +1,6 @@
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_two_groups), "gk_gui_stuff_bars([{ title:, role:, rows: [{ label:, value:, href: }] }])") do %>
+    <%= gk_gui_stuff_bars([{ title: l(:label_gk_gui_stuff_sg_example_group), role: 1, rows: [{ label: gk_gui_stuff_pill(sample.call(:pump), role: 1), value: 14 }, { label: gk_gui_stuff_pill(sample.call(:valve), role: 1), value: 6 }] },
+                           { title: l(:label_gk_gui_stuff_sg_example_group2), role: 8, rows: [{ label: gk_gui_stuff_pill(sample.call(:very_long), role: 8), value: 9 }] }]) %>
+  <% end %>
+</div>

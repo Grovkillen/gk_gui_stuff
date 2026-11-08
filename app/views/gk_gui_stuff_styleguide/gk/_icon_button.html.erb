@@ -1,0 +1,31 @@
+<%# Ikonknappen: each accepted icon drawn by gk_gui_stuff_icon_button, and Prova for the banner and the notice
+    with the icon button before the cross (the forms and the failed save take) %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_reload), "gk_gui_stuff_icon_button(:reload, label)") do %>
+    <%= gk_gui_stuff_icon_button(:reload, l(:gk_gui_stuff_reload)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_close), "gk_gui_stuff_icon_button(:close, label)") do %>
+    <%= gk_gui_stuff_icon_button(:close, l(:gk_gui_stuff_close)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_larger), "gk_gui_stuff_icon_button(:maximize, label)") do %>
+    <%= gk_gui_stuff_icon_button(:maximize, l(:gk_gui_stuff_drawer_size_half)) %>
+  <% end %>
+  <%# smaller: GK Icons' own minimize, the size button's in the whole window; without GK Icons maximize with the tooltip %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_smaller), "gk_gui_stuff_icon_button(:minimize, label)") do %>
+    <%= gk_gui_stuff_icon_button(:minimize, l(:gk_gui_stuff_drawer_size_back)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_leave), "gk_gui_stuff_icon_button(:cancel, label, href:)") do %>
+    <%= gk_gui_stuff_icon_button(:cancel, l(:label_gk_gui_stuff_sg_ribbon_to_live), href: '#') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_in_text), "GkGui.iconButton({icon, label, fallback, href, onClick})") do %>
+    <%= l(:text_gk_gui_stuff_sg_icon_in_text) %> <%= gk_gui_stuff_icon_button(:reload, l(:gk_gui_stuff_reload)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_banner), "GkGui.banner.show({key, level, text, button: {icon: 'reload', label, action}})", mode: :live, wide: true) do %>
+    <%= gk_gui_stuff_sg_still(:banner, level: 'alarm', text: l(:text_gk_gui_stuff_sg_icon_banner), icon: :reload, label: l(:label_gk_gui_stuff_sg_try_now)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('banner', level: 'alarm', text: l(:text_gk_gui_stuff_sg_icon_banner), icon: 'reload', label: l(:label_gk_gui_stuff_sg_try_now)) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_notice), "GkGui.notice.show({level, text, buttons: [{icon: 'reload', label, action}]})", mode: :live) do %>
+    <%= gk_gui_stuff_sg_still(:notice, level: 'alarm', text: l(:text_gk_gui_stuff_sg_icon_notice), icon: :reload, label: l(:label_gk_gui_stuff_sg_try_again)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('notice', level: 'alarm', text: l(:text_gk_gui_stuff_sg_icon_notice), icon: 'reload', label: l(:label_gk_gui_stuff_sg_try_again)) %></p>
+  <% end %>
+</div>

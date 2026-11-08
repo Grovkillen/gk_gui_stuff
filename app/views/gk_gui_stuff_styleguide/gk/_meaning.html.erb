@@ -1,0 +1,27 @@
+<%# the segment first among the page's actions, where the person may choose, and the
+    administrator's table with one page type made up for the guide; both post to the guide's address, which stores
+    nothing, and nothing is loaded again %>
+<% ex = ->(k) { l(:"label_gk_gui_stuff_sg_example_#{k}") } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_meaning_segment), "gk_gui_stuff_meaning_switch(key) in div.contextual; GkGui.meaning.view(key)", mode: :server) do %>
+    <div class="contextual gk-gui-stuff-sg-contextual"><%= gk_gui_stuff_meaning_switch('styleguide', demo: true) %>
+      <%= link_to sprite_icon('add', l(:label_issue_new)), '#', class: 'icon icon-add', data: { gk_gui_sg_noop: '1' } %></div>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_meaning_admin), "GkGuiStuff::Meaning.register(key, plugin:, label:, match:, default_mode:, default_view:); GkRecords::Reasons.check('gui_stuff.meaning', reason)", mode: :server) do %>
+    <table class="list gk-gui-stuff-meaning-table">
+      <thead><tr><th><%= l(:label_gk_gui_stuff_meaning_page) %></th><th><%= l(:label_gk_gui_stuff_meaning_mode) %></th><th><%= l(:label_gk_gui_stuff_meaning_default) %></th></tr></thead>
+      <tbody>
+        <tr class="gk-gui-stuff-meaning-all"><th scope="row"><%= l(:label_gk_gui_stuff_meaning_all) %></th>
+          <td colspan="2"><span class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_meaning_all) %></span>
+            <% gk_gui_stuff_meaning_modes.each do |text, v| %><%= gk_gui_stuff_reason_button(text, reason: :optional, url: save, params: { mode: v }) %> <% end %></td></tr>
+        <tr><td><%= ex.call(:issue_list) %></td>
+          <td><%= gk_gui_stuff_rail(url: save, method: :post, tag: :span) { gk_gui_stuff_segment('mode', gk_gui_stuff_meaning_modes, 'choice', label: l(:label_gk_gui_stuff_meaning_mode), reason: :optional) } %></td>
+          <td><%= gk_gui_stuff_rail(url: save, method: :post, tag: :span) { gk_gui_stuff_segment('default', gk_gui_stuff_meaning_views, 'meaning', label: l(:label_gk_gui_stuff_meaning_default), reason: :optional) } %></td></tr>
+      </tbody>
+    </table>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_meaning_my), "view_my_account_preferences: link_to l(:button_gk_gui_stuff_meaning_reset), gk_gui_stuff_meaning_reset_path, method: :post") do %>
+    <div class="tabular"><p><label><%= l(:label_gk_gui_stuff_meaning_admin) %></label>
+      <%= link_to sprite_icon('reload', l(:button_gk_gui_stuff_meaning_reset)), '#', class: 'icon icon-reload', data: { gk_gui_sg_noop: '1' } %></p></div>
+  <% end %>
+</div>

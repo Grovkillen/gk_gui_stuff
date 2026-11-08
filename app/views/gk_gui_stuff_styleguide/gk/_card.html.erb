@@ -1,0 +1,17 @@
+<% @gk_gui_stuff_sg_mode = :server %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_plain), "gk_gui_stuff_action_card(title, text) { … }") do %>
+    <%= gk_gui_stuff_action_card(l(:label_gk_gui_stuff_sg_example_card), l(:text_gk_gui_stuff_sg_example_card)) do %>
+      <%= gk_gui_stuff_fly(l(:label_gk_gui_stuff_sg_example_action)) do %>
+        <%= form_tag(save) do %><p><%= l(:text_gk_gui_stuff_sg_fly) %></p><%= gk_gui_stuff_fly_buttons(l(:label_gk_gui_stuff_sg_example_action)) %><% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_alarm), "role: :alarm") do %>
+    <%= gk_gui_stuff_action_card(l(:label_gk_gui_stuff_sg_example_alarm_card), l(:text_gk_gui_stuff_sg_cannot_undo), role: :alarm) do %>
+      <%= gk_gui_stuff_fly(l(:button_delete), role: :alarm) do %>
+        <%= form_tag(save) do %><p><%= l(:text_gk_gui_stuff_sg_cannot_undo) %></p><%= gk_gui_stuff_fly_buttons(l(:button_delete), alarm: true) %><% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

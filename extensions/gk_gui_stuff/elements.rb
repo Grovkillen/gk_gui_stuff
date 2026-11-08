@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module GkGuiStuff
-  # The instance's role (environment manifest 6.2b), read once from INSTANCE.yml, never from the database.
-  # No role, or production: no band.
+  # The instance's role, read once from INSTANCE.yml, never from the database.
+  # No role, production, or the module instance_band off (as in a new installation): no band.
   module Instance
     SHOWN = %w[sandbox dev development test drill].freeze
 
@@ -31,6 +31,17 @@ module GkGuiStuff
       SHOWN.include?(role) ? role : nil
     end
 
+    # The band's word when the band is to be drawn: the module instance_band is on (off in a new installation)
+    # and the role is one that is shown; nil otherwise. Like Redmine for me leaves it as it is: the band says which
+    # instance one is in, also while one compares with plain Redmine
+    def band_word
+      w = word
+      return nil unless w
+
+      m = Registry.find('instance_band')
+      m && Switches.enabled?(m) && Registry.present?(m) ? w : nil
+    end
+
     def css_key = drill? ? 'drill' : role
 
     # Anywhere else: nil, and the band offers nothing to copy.
@@ -40,6 +51,8 @@ module GkGuiStuff
       data['buildtag'].presence
     end
   end
+
+  # The top band's parts (GkGuiStuff::TopBand) are in top_band.rb.
 
   # actions_menu: rows registered as data, drawn by gui_stuff in core's three-dot menu, in four sections in a
   # fixed order (do, state, show, system). A row whose condition is not met is not shown at all.
@@ -91,26 +104,20 @@ module GkGuiStuff
     end
 
     # Icons, by area: the project tabs, the buttons to the right on the issue page and those on other pages, each as
-    # Redmine draws it (core), with icon and text (both) or with the icon only (icon).
-    # The administrator's choice per area is the default; each person may choose their own.
+    # Redmine draws it (core), with icon and text (both) or with the icon only (icon). Each area is an appearance
+    # setting (icons_tabs, icons_issue, icons_other): off is Redmine's own, forced the administrator's value for all,
+    # and optional the administrator's value as the default, each person choosing their own.
     ICON_MODES = %w[core both icon].freeze
     ICON_AREAS = %w[tabs issue other].freeze
 
-    def user_icons(user, area)
-      return nil unless user&.logged?
+    def user_icons(user, area) = Appearance.own_value("icons_#{area}", 'mode', user, ICON_MODES)
 
-      v = GkGuiStuffUserSetting.for(user).data["icons_#{area}"].to_s
-      ICON_MODES.include?(v) ? v : nil
-    rescue StandardError
-      nil
+    # The administrator's value of an area, for a person the setting is on for
+    def admin_icons(area, user = ::User.current)
+      Appearance.on_for?("icons_#{area}", user) ? Appearance.admin_value("icons_#{area}", 'mode', ICON_MODES) : nil
     end
 
-    def admin_icons(area)
-      v = Switches.settings["icons_#{area}"].to_s
-      ICON_MODES.include?(v) ? v : nil
-    end
-
-    def icons(area, user = ::User.current) = user_icons(user, area) || admin_icons(area) || 'core'
+    def icons(area, user = ::User.current) = user_icons(user, area) || admin_icons(area, user) || 'core'
 
     # The area of a page's buttons to the right
     def area_for(page) = page && page[:kind].to_s == 'issue' ? 'issue' : 'other'
@@ -118,32 +125,29 @@ module GkGuiStuff
     # A button's area by where it is shown first (for the tables that show what follows)
     def area_of(contexts) = Array(contexts).first.to_s == 'issue' ? 'issue' : 'other'
     # Where the sidebar stands and how tall the header is: the person's own choice, the administrator's, core's own (the
-    # first) the sidebar after or before the content, whichever way the language reads
+    # first) the sidebar after or before the content, whichever way the language reads. Each is an appearance setting
+    # (layout_sidebar with the value side, layout_header with the value height), as the icons above.
     LAYOUT = { 'sidebar' => %w[after before hidden], 'header' => %w[tall compact] }.freeze
+    LAYOUT_VALUES = { 'sidebar' => 'side', 'header' => 'height' }.freeze
 
-    def user_layout(user, key)
-      return nil unless user&.logged?
+    def user_layout(user, key) = Appearance.own_value("layout_#{key}", LAYOUT_VALUES[key], user, LAYOUT[key])
 
-      v = GkGuiStuffUserSetting.for(user).data["layout_#{key}"].to_s
-      LAYOUT[key].include?(v) ? v : nil
-    rescue StandardError
-      nil
+    def admin_layout(key, user = ::User.current)
+      Appearance.on_for?("layout_#{key}", user) ? Appearance.admin_value("layout_#{key}", LAYOUT_VALUES[key], LAYOUT[key]) : nil
     end
 
-    def admin_layout(key)
-      v = Switches.settings["layout_#{key}"].to_s
-      LAYOUT[key].include?(v) ? v : nil
-    end
-
-    def layout(key, user = ::User.current) = user_layout(user, key) || admin_layout(key) || LAYOUT[key].first
+    def layout(key, user = ::User.current) = user_layout(user, key) || admin_layout(key, user) || LAYOUT[key].first
 
     # The classes on <html> for what differs from core's own layout
     def layout_classes(user = ::User.current)
       LAYOUT.keys.filter_map { |k| v = layout(k, user); "gk-gui-stuff-#{k}-#{v}" unless v == LAYOUT[k].first }
     end
 
-    def admin_choice(key)
-      h = Switches.settings['placements']
+    # The buttons' placement is an appearance setting (placements, its value the table of choices per button)
+    def admin_choice(key, user = ::User.current)
+      return '' unless Appearance.on_for?('placements', user)
+
+      h = Appearance.admin_value('placements', 'placements')
       h.is_a?(Hash) ? h[key].to_s : ''
     end
 
@@ -155,22 +159,18 @@ module GkGuiStuff
       own = user_placement(row, user)
       return own if own
 
-      v = admin_choice(row.key)
+      v = admin_choice(row.key, user || ::User.current)
       base = PLACEMENTS.include?(v) ? v : row.placement
       return base unless OUT.include?(base)
 
       area_out = ->(mode) { mode && (mode == 'icon' ? 'icon' : 'out') }
-      area_out.call(user_icons(user, area)) || (PLACEMENTS.include?(v) ? base : nil) || area_out.call(admin_icons(area)) || base
+      area_out.call(user_icons(user, area)) || (PLACEMENTS.include?(v) ? base : nil) || area_out.call(admin_icons(area, user || ::User.current)) || base
     end
-    # The person's own placement of a row, or nil when the person follows the default
+    # The person's own placement of a row, or nil when the person follows the default (the placements setting optional)
     def user_placement(row, user)
-      return nil unless user&.logged?
-
-      h = GkGuiStuffUserSetting.for(user).data['placements']
+      h = Appearance.own_value('placements', 'placements', user)
       v = h.is_a?(Hash) ? h[row.key].to_s : ''
       PLACEMENTS.include?(v) ? v : nil
-    rescue StandardError
-      nil
     end
 
     # Core's own buttons among a page's links, chosen by the administrator and by each person: as core draws them, with
@@ -180,22 +180,24 @@ module GkGuiStuff
     CoreButton = Struct.new(:key, :selector, :label, :icon, :contexts, :compat, keyword_init: true)
     CORE_PLACEMENTS = ICON_MODES
     # selector: where the button stands, in full (the page's own links, the description's head, the subtasks and the
-    # relations); label: an I18n key, or several joined with ": " where core's word alone says too little (Lägg till)
+    # relations), by core's own classes only: the button row (.contextual) at any depth and the link's icon class, a link in
+    # core's dropdown (.drdn) never counted, so a wrapper core puts round the links changes nothing; label: an I18n key, or
+    # several joined with ": " where core's word alone says too little (Lägg till)
     CORE_BUTTONS = [
-      CoreButton.new(key: 'core_edit', selector: '#content .contextual > a.icon-edit', label: :button_edit, icon: 'edit', contexts: %w[issue wiki_page other]),
-      CoreButton.new(key: 'core_log_time', selector: '#content .contextual > a.icon-time-add', label: :button_log_time, icon: 'time-add',
+      CoreButton.new(key: 'core_edit', selector: '#content .contextual a.icon-edit:not(.drdn a)', label: :button_edit, icon: 'edit', contexts: %w[issue wiki_page other]),
+      CoreButton.new(key: 'core_log_time', selector: '#content .contextual a.icon-time-add:not(.drdn a)', label: :button_log_time, icon: 'time-add',
                      contexts: %w[issue issue_list project]),
-      CoreButton.new(key: 'core_watch', selector: '#content .contextual > a.icon-fav, #content .contextual > a.icon-fav-off', label: :button_watch,
+      CoreButton.new(key: 'core_watch', selector: '#content .contextual a.icon-fav:not(.drdn a), #content .contextual a.icon-fav-off:not(.drdn a)', label: :button_watch,
                      icon: 'fav', contexts: %w[issue wiki_page project]),
-      CoreButton.new(key: 'core_copy', selector: '#content .contextual > a.icon-copy', label: :button_copy, icon: 'copy', contexts: %w[issue]),
-      CoreButton.new(key: 'core_new_issue', selector: '#content .contextual > a.new-issue', label: :label_issue_new, icon: 'add',
+      CoreButton.new(key: 'core_copy', selector: '#content .contextual a.icon-copy:not(.drdn a)', label: :button_copy, icon: 'copy', contexts: %w[issue]),
+      CoreButton.new(key: 'core_new_issue', selector: '#content .contextual a.new-issue:not(.drdn a)', label: :label_issue_new, icon: 'add',
                      contexts: %w[issue_list project]),
       CoreButton.new(key: 'core_quote', selector: '.description .contextual a.icon-quote', label: :button_quote, icon: 'comment', contexts: %w[issue]),
       # Lägg till as the newest core draws it, with its icon; where an older series draws it as text, compat says so and
       # draws the icon, which is put in only when the person shows the button as an icon
-      CoreButton.new(key: 'core_add_subtask', selector: '#issue_tree .contextual > a.icon-add', label: %i[label_subtask_plural button_add], icon: 'add',
+      CoreButton.new(key: 'core_add_subtask', selector: '#issue_tree .contextual a.icon-add:not(.drdn a)', label: %i[label_subtask_plural button_add], icon: 'add',
                      contexts: %w[issue], compat: 'issue_add_subtask'),
-      CoreButton.new(key: 'core_add_relation', selector: '#relations .contextual > a.icon-link-add', label: %i[label_related_issues button_add],
+      CoreButton.new(key: 'core_add_relation', selector: '#relations .contextual a.icon-link-add:not(.drdn a)', label: %i[label_related_issues button_add],
                      icon: 'link-add', contexts: %w[issue], compat: 'issue_add_relation')
     ].freeze
 
@@ -218,13 +220,13 @@ module GkGuiStuff
     # The same order as placement: the person's for the button, the person's for the area, the administrator's for the button,
     # the administrator's for the area, as Redmine
     def core_placement(button, user: nil, area: 'other')
-      if user&.logged?
-        own = GkGuiStuffUserSetting.for(user).data['placements']
-        v = own.is_a?(Hash) ? own[button.key].to_s : ''
-        return v if CORE_PLACEMENTS.include?(v)
-      end
-      v = admin_choice(button.key)
-      user_icons(user, area) || (CORE_PLACEMENTS.include?(v) ? v : nil) || admin_icons(area) || 'core'
+      own = Appearance.own_value('placements', 'placements', user)
+      v = own.is_a?(Hash) ? own[button.key].to_s : ''
+      return v if CORE_PLACEMENTS.include?(v)
+
+      viewer = user || ::User.current
+      v = admin_choice(button.key, viewer)
+      user_icons(user, area) || (CORE_PLACEMENTS.include?(v) ? v : nil) || admin_icons(area, viewer) || 'core'
     rescue StandardError
       'core'
     end
@@ -292,28 +294,47 @@ module GkGuiStuff
   end
 
   # declutter, first edition: named targets (never raw selectors), hidden for everyone in the client. Hiding is
-  # never permission: what must not be done is a role or a rule.
+  # never permission: what must not be done is a role or a rule. A target is found by what core sets on purpose (an id, a
+  # link's icon class, the button row's class at any depth, or a mark GK Core Stuff puts there), never by how deep it
+  # stands or by its address. The rows of estimated time and % done are the rows GK Core Stuff's anchor_marks marks
+  # with data-field, in the issue form and in the issue bulk edit form; without the marks those two rows are not hidden.
   module Declutter
     TARGETS = {
       'top_help' => '#top-menu a.help',
       'footer_powered' => '#footer',
-      'issue_log_time' => '#content > .contextual a.icon-time-add, #content > .contextual a[href$="/time_entries/new"]',
-      'issue_copy' => '#content > .contextual a.icon-copy',
+      'issue_log_time' => '#content .contextual a.icon-time-add',
+      'issue_copy' => '#content .contextual a.icon-copy',
       'sidebar_watchers' => '#sidebar #watchers',
-      'form_estimated_hours' => 'p:has(> #issue_estimated_hours)',
-      'form_done_ratio' => 'p:has(> #issue_done_ratio)'
+      'form_estimated_hours' => '[data-field="estimated_hours"]',
+      'form_done_ratio' => '[data-field="done_ratio"]'
     }.freeze
 
     module_function
 
+    # The targets ticked in the declutter setting's table value
     def hidden
-      h = Switches.settings['declutter']
+      h = Switches.value('declutter', 'declutter', {})
       h.is_a?(Hash) ? TARGETS.keys.select { |k| h[k].to_s == '1' } : []
     end
 
     def css
       sel = hidden.map { |k| TARGETS[k] }
       sel.empty? ? '' : "#{sel.join(', ')} { display: none !important; }"
+    end
+
+    # The targets that can stand as a row in core's three-dot menu (core puts Logga tid and Kopiera there on a narrow
+    # page or in a theme)
+    MENU_ROWS = %w[issue_log_time issue_copy].freeze
+
+    # The mark of the menu rows this module hides, for the script that hides a three-dot menu left without a row
+    # (actions_menu, gk_gui_stuff_uses.js): the same selectors as the rule above, so that the script counts by what
+    # the server hid, never by the computed style. nil when declutter hides none of them for the reader.
+    def menu_rows(user = ::User.current)
+      m = Registry.find('declutter')
+      return nil unless m && Switches.on_for?(m, user)
+
+      sel = (hidden & MENU_ROWS).map { |k| TARGETS[k] }
+      sel.empty? ? nil : sel.join(', ')
     end
   end
 
@@ -381,16 +402,17 @@ module GkGuiStuff
 
     # { href:, new_tab: } or nil for core's own address
     def target(_page = nil)
-      s = Switches.settings
-      case s['help_kind'].to_s
+      s = Switches.value('help_link', 'help_link', {})
+      s = {} unless s.is_a?(Hash)
+      case s['kind'].to_s
       when 'url'
-        url = s['help_url'].to_s.strip
+        url = s['url'].to_s.strip
         url.match?(%r{\A(https?://|/)}) ? { href: url, new_tab: url.start_with?('http') } : nil
       when 'wiki'
-        project = ::Project.find_by(identifier: s['help_wiki_project'].to_s.strip)
+        project = ::Project.find_by(identifier: s['wiki_project'].to_s.strip)
         return nil unless project
 
-        page = s['help_wiki_page'].to_s.strip
+        page = s['wiki_page'].to_s.strip
         root = Redmine::Utils.relative_url_root.to_s
         { href: "#{root}/projects/#{project.identifier}/wiki#{page.empty? ? '' : "/#{ERB::Util.url_encode(::Wiki.titleize(page))}"}", new_tab: false }
       end
@@ -401,28 +423,47 @@ end
 module GkGuiStuff
   # custom_mark: a small visual detail on what is not core's own: the custom fields in the row menu of lists.
   # The instance chooses the mark; the rule is given as a stylesheet in the head (no script).
+  # custom_mark: a custom field's submenu in core's right click menu is marked. Core gives each such submenu the classes
+  # folder and cf_<the field's id>; the rule names the own class of every custom field of the kinds the menus show, so
+  # that it never guesses at a part of a class name. No such custom field, no rule.
   module CustomMark
     STYLES = %w[diamond stripe italic].freeze
-    SEL = '#context-menu li.folder[class*="cf_"] > a.submenu'
 
     module_function
 
     def style
-      s = Switches.settings['custom_mark_style'].to_s
+      s = Switches.value('custom_mark', 'custom_mark_style', 'diamond').to_s
       STYLES.include?(s) ? s : 'diamond'
     end
 
-    def css
+    # The kinds of custom field core's right click menus show as a submenu (context_menus/issues and time_entries)
+    MENU_TYPES = %w[IssueCustomField TimeEntryCustomField].freeze
+
+    # The ids of the custom fields of those kinds; the other kinds (users, projects, versions ...) never stand in the menu
+    def ids = ::CustomField.where(type: MENU_TYPES).order(:id).pluck(:id)
+
+    # The submenus of those custom fields: [folder selector, its link's selector] per field
+    def selectors(list = ids)
+      list.map { |id| ["#context-menu li.folder.cf_#{id.to_i}", "#context-menu li.folder.cf_#{id.to_i} a.submenu"] }
+    end
+
+    def css(list = ids)
+      sel = selectors(list)
+      return '' if sel.empty?
+
+      folders = sel.map(&:first).join(', ')
+      links = sel.map(&:last)
       case style
-      when 'stripe' then "#context-menu li.folder[class*=\"cf_\"] { box-shadow: inset 3px 0 0 var(--oc-violet-6); }"
-      when 'italic' then "#{SEL} { font-style: italic; }"
+      when 'stripe' then "#{folders} { box-shadow: inset 3px 0 0 var(--oc-violet-6); }"
+      when 'italic' then "#{links.join(', ')} { font-style: italic; }"
       else
+        after = links.map { |s| "#{s}::after" }.join(', ')
         # the mark is an icon from icons when it is installed (drawn as a mask in the mark's colour), else the character
         if defined?(::GkIcons) && ::GkIcons.exists?('own-field')
-          "#{SEL}::after { content: \"\"; display: inline-block; inline-size: .8em; block-size: .8em; margin-inline-start: 6px; background-color: var(--oc-violet-6); " \
+          "#{after} { content: \"\"; display: inline-block; inline-size: .8em; block-size: .8em; margin-inline-start: 6px; background-color: var(--oc-violet-6); " \
             "-webkit-mask: url(#{::GkIcons.url('own-field')}) center / contain no-repeat; mask: url(#{::GkIcons.url('own-field')}) center / contain no-repeat; }"
         else
-          "#{SEL}::after { content: \"◇\"; margin-inline-start: 6px; font-size: .75em; color: var(--oc-violet-6); vertical-align: .1em; }"
+          "#{after} { content: \"◇\"; margin-inline-start: 6px; font-size: .75em; color: var(--oc-violet-6); vertical-align: .1em; }"
         end
       end
     end

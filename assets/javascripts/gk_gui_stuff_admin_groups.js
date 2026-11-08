@@ -7,8 +7,8 @@
   var opt = GkGui.opt('admin_groups'), rows = opt.rows || [], groups = opt.groups || [];
   if (!rows.length || !groups.length) return;
 
-  function linkOf(ul, cls) {
-    try { return ul.querySelector(':scope > li > a.' + CSS.escape(cls)); } catch (e) { return null; }
+  function linkOf(menu, cls) {
+    try { return menu.querySelector('a.' + CSS.escape(cls)); } catch (e) { return null; }
   }
   // the word only: core's icon in the link stays
   function rename(a, text) {
@@ -20,47 +20,27 @@
     }
     a.appendChild(document.createTextNode(text));
   }
-  // The page of the row one is on carries the row's word too: its heading (or the heading's first link, when the
-  // heading is a trail such as "Layouts » Edit") and the window's title, where they say the row's own word
-  function retitle(was, text) {
-    if (!was || was === text) return;
-    var h2 = document.querySelector('#content > h2');
-    if (h2) {
-      var link = h2.querySelector('a');
-      if (link && link.textContent.trim() === was) link.textContent = text;
-      else {
-        for (var i = 0; i < h2.childNodes.length; i++) {
-          var n = h2.childNodes[i];
-          if (n.nodeType === 3 && n.nodeValue.trim().indexOf(was) === 0) { n.nodeValue = n.nodeValue.replace(was, text); break; }
-        }
-      }
-    }
-    // the title may start with the instance's mark ("[development] Layouts - Redmine"): the first "<word> - " in it
-    var t = document.title, at = t.indexOf(was + ' - ');
-    if (at < 0 && t.indexOf(was) === 0) at = 0;
-    if (at >= 0) document.title = t.slice(0, at) + text + t.slice(at + was.length);
-  }
+  // The page of a renamed row carries the row's word in its heading and the window's title too: that is the server's
+  // to write as the page is drawn, never this script's by finding the old word in core's heading or title
   function setClosed(sec, btn, closed) {
     sec.classList.toggle('gk-gui-stuff-ag-closed', closed);
     btn.setAttribute('aria-expanded', closed ? 'false' : 'true');
   }
   function build(menu) {
     if (menu.getAttribute('data-gk-gui-stuff-ag')) return;
-    var ul = menu.querySelector(':scope > ul');
+    // core's rows are found by the class core gives each link of the menu (its item's name); the row is the li core
+    // draws around the link, and core's list is the one that holds those rows
+    var by = {}, ul = null;
+    rows.forEach(function (r) {
+      var a = linkOf(menu, r.cls), li = a && a.closest('li');
+      if (!li) return; // a row core does not draw right now (its condition), or not for this person
+      if (!ul) ul = li.parentNode;
+      if (r.caption) rename(a, r.caption);
+      (by[r.group] = by[r.group] || []).push(li);
+    });
     if (!ul) return;
     menu.setAttribute('data-gk-gui-stuff-ag', '1');
-    var by = {};
-    rows.forEach(function (r) {
-      var a = linkOf(ul, r.cls);
-      if (!a) return; // a row core does not draw right now (its condition), or not for this person
-      if (r.caption) {
-        var was = a.textContent.trim();
-        rename(a, r.caption);
-        if (a.classList.contains('selected')) retitle(was, r.caption);
-      }
-      (by[r.group] = by[r.group] || []).push(a.parentNode);
-    });
-    var wrap = GkGui.node('div', 'gk-gui-stuff-ag');
+    var wrap = GkGui.effect(GkGui.node('div', 'gk-gui-stuff-ag'), 'admin_groups');
     groups.forEach(function (g) {
       var list = by[g.key];
       if (!list || !list.length) return;
@@ -89,7 +69,7 @@
       wrap.appendChild(sec);
     });
     if (!wrap.children.length) return;
-    menu.insertBefore(wrap, ul);
+    ul.parentNode.insertBefore(wrap, ul);
     // a row the server did not name stays in core's list, which then stands last; an emptied list is hidden
     if (!ul.children.length) ul.hidden = true;
   }

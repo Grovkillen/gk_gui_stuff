@@ -1,0 +1,7 @@
+<%# core's tabs (render_tabs) with two small tabs of the guide's own %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_tabs), "render_tabs([{ name:, label:, partial: }], selected)", mode: :nosave) do %>
+    <%= render_tabs [{ name: 'sg_a', label: :label_gk_gui_stuff_sg_example_tab_a, partial: 'gk_gui_stuff_styleguide/core/tab' },
+                     { name: 'sg_b', label: :label_gk_gui_stuff_sg_example_tab_b, partial: 'gk_gui_stuff_styleguide/core/tab' }], 'sg_a' %>
+  <% end %>
+</div>

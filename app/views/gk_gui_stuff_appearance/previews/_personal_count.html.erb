@@ -1,0 +1,4 @@
+<%# Visa for the count at the name: the name alone, as Redmine has it; with the setting, the same name with the count in
+    the middle of its text (the primitive's count, a made-up number). row: the setting %>
+<% name = content_tag(:span, l(:label_user)) %>
+<%= gk_gui_stuff_appearance_preview(row, off: name, on: safe_join([name, gk_gui_stuff_count(3, role: :notice)], ' '), mid_line: true) %>

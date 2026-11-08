@@ -12,7 +12,7 @@ module GkGuiStuff
     def gk_gui_stuff_choices_box(key, title, open: false, hint: nil, &block)
       inner = capture(&block)
       legend = content_tag(:legend, safe_join([sprite_icon(open ? 'angle-down' : 'angle-right', rtl: !open), ' ', title]),
-                           onclick: 'toggleFieldset(this);', class: "icon icon-#{open ? 'expanded' : 'collapsed'}",
+                           onclick: 'toggleFieldset(this);', class: "icon icon-#{open ? 'expanded' : 'collapsed'} gk-gui-stuff-box-legend",
                            title: hint.presence || ::I18n.t(:text_gk_gui_stuff_box_toggle))
       box = content_tag(:fieldset, legend + content_tag(:div, inner, style: open ? nil : 'display: none;'),
                         class: "collapsible gk-gui-stuff-box#{' collapsed' unless open}", data: { gk_gui_stuff_box: key, gk_gui_stuff_box_forced: (open ? '1' : nil) })
@@ -32,7 +32,7 @@ module GkGuiStuff
           function save(f) { try { window.localStorage.setItem(key(f), open(f) ? '1' : '0'); } catch (e) { /* no memory */ } }
           function start() {
             document.querySelectorAll('fieldset[data-gk-gui-stuff-box]').forEach(function (f) {
-              var lg = f.querySelector(':scope > legend');
+              var lg = f.querySelector(':scope > legend.gk-gui-stuff-box-legend');
               if (!lg || f.dataset.gkGuiStuffBoxReady) return;
               f.dataset.gkGuiStuffBoxReady = '1';
               var want = read(f);

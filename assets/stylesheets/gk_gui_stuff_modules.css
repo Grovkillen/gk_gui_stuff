@@ -1,17 +1,36 @@
 /* gk_gui_stuff: the small modules (kernel notice, fold, copy, time, issue, history, footer, login warning).
    Logical properties; nothing folded and no buttons in print. */
-/* the whisper ("Kodblock kopierat"): small, dark, dim; nothing to click, nothing counting */
-.gk-gui-stuff-notice { position: fixed; inset-block-end: calc(28px + var(--gk-gui-stuff-savebar-size, 0px)); inset-inline-start: 50%; transform: translateX(-50%) translateY(6px); background: rgba(var(--oc-gray-9-rgb), .78); color: var(--oc-gray-1);
+/* the whisper ("Kopierat: kodblock"): small, in the role info, low in the middle in either direction;
+   nothing to click, nothing counting */
+.gk-gui-stuff-notice { position: fixed; inset-block-end: calc(28px + var(--gk-gui-stuff-savebar-size, 0px)); inset-inline: 0; margin-inline: auto; inline-size: max-content;
+  transform: translateY(6px); background: var(--gk-role-alert-info-soft); color: var(--gk-role-alert-info);
   padding-block: 5px; padding-inline: 12px; border-radius: 999px; font-size: .88em; letter-spacing: .01em; opacity: 0; pointer-events: none;
-  transition: opacity .18s, transform .18s; z-index: 1000; max-inline-size: 80vw; backdrop-filter: blur(2px); white-space: nowrap; }
-.gk-gui-stuff-notice-on { opacity: 1; transform: translateX(-50%) translateY(0); }
+  transition: opacity .18s, transform .18s; z-index: 1000; max-inline-size: 80vw; white-space: nowrap; }
+.gk-gui-stuff-notice-on { opacity: 1; transform: translateY(0); }
+/* the whisper at the place it was copied from: under that element, centred on it (top and left set by the script,
+   in the window's coordinates, so that it never adds to the page's length) */
+.gk-gui-stuff-notice.gk-gui-stuff-notice-at { position: fixed; inset-block-end: auto; inset-inline: auto; margin-inline: 0; transform: translate(-50%, -4px); }
+.gk-gui-stuff-notice.gk-gui-stuff-notice-at.gk-gui-stuff-notice-on { transform: translate(-50%, 0); }
+/* the whisper in the middle of the window at its top, under the band, or in its very middle (GkGui.whisper's place) */
+.gk-gui-stuff-notice.gk-gui-stuff-notice-top { inset-block: calc(28px + var(--gk-gui-stuff-band-h, 0px)) auto; }
+.gk-gui-stuff-notice.gk-gui-stuff-notice-center { inset-block: 50% auto; transform: translateY(calc(6px - 50%)); }
+.gk-gui-stuff-notice.gk-gui-stuff-notice-center.gk-gui-stuff-notice-on { transform: translateY(-50%); }
 .gk-gui-stuff-offscreen { position: fixed; inset-block-start: -1000px; }
 
-.gk-gui-stuff-fold { overflow: hidden; position: relative; }
-/* the shade at the fold: a darkening laid over the block, so it is the block's own background in a darker tone
-   whatever that background is, in every theme, light or dark */
-.gk-gui-stuff-fold:not(.gk-gui-stuff-fold-closed)::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0; block-size: 22px; pointer-events: none;
-  background: linear-gradient(to bottom, rgba(var(--oc-black-rgb),0), rgba(var(--oc-black-rgb),.2)); }
+/* clip, not hidden: hidden starts a new formatting context, so the first paragraph's margin would stay inside the
+   block and the text would stand lower folded than unfolded; clip cuts the same and lets margins collapse as core */
+.gk-gui-stuff-fold { overflow: hidden; overflow: clip; position: relative; }
+/* the shade at the fold: the block's own content fades out towards the cut (a mask, not a colour laid over it), so
+   the line the cut goes through never shows half and nothing under the fade shows through, on whatever background,
+   in every theme, light or dark; the bar under it marks the edge */
+.gk-gui-stuff-fold:not(.gk-gui-stuff-fold-closed) { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent); }
+/* a block with its own frame or background (a code block): the mask would fade its frame and background too and leave
+   a gap above the framed bar, so there the fade is laid inside the frame in the block's own background, which the
+   script gives as --gk-gui-fold-bg; frame and background go on unbroken down to the bar */
+.gk-gui-stuff-fold.gk-gui-stuff-fold-framed:not(.gk-gui-stuff-fold-closed) { -webkit-mask-image: none; mask-image: none; }
+.gk-gui-stuff-fold.gk-gui-stuff-fold-framed:not(.gk-gui-stuff-fold-closed)::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0;
+  block-size: 2.4em; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--gk-gui-fold-bg, transparent)); }
 .gk-gui-stuff-fold-btn { display: block; margin-block: 4px 8px; padding-block: 2px; padding-inline: 8px; font-size: .9em; cursor: pointer;
   background: transparent; border: 1px solid var(--oc-gray-4); border-radius: 3px; color: inherit; }
 .gk-gui-stuff-fold-btn:hover, .gk-gui-stuff-fold-btn:focus-visible { border-color: var(--oc-gray-6); }
@@ -24,6 +43,12 @@
 .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar::before { content: "\25BE\00A0"; }
 .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar[aria-expanded="true"]::before { content: "\25B4\00A0"; }
 .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:hover, .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:focus-visible { background: rgba(var(--oc-black-rgb),.08); }
+/* the fold list's slot (GkGui.fold.slot, data-gk-gui-fold-slot-for): first on the bar and beside its button, never in it,
+   so that a press there does not fold. The bar keeps its whole width and the slot's height, and its word stays in the
+   middle. Only a bar with something in its slot has this. */
+.gk-gui-stuff-fold-list { position: relative; }
+.gk-gui-stuff-fold-list > .gk-gui-stuff-fold-btn { margin: 0; min-block-size: 26px; padding-inline: calc(24px + 0.5em); }
+.gk-gui-stuff-fold-slot { position: absolute; inset-block: 0; inset-inline-start: 0.25em; display: flex; align-items: center; gap: 0.25em; }
 
 .gk-gui-stuff-copy-btn { margin-inline-start: 4px; padding: 0 4px; border: 0; background: transparent; cursor: pointer; color: inherit; opacity: .55; font-size: .95em; }
 .gk-gui-stuff-copy-btn:hover, .gk-gui-stuff-copy-btn:focus-visible { opacity: 1; }
@@ -41,7 +66,7 @@ div.pre-wrapper:hover a.copy-pre-content-link.gk-gui-stuff-copy-pre, div.pre-wra
 /* core lays the top menu's lists out in a row: this one is a column, one page per line, and scrolls when long */
 #top-menu ul.gk-gui-stuff-history-list { position: absolute; inset-block-start: 100%; inset-inline-start: 0; z-index: 900; display: block; inline-size: max-content;
   min-inline-size: 280px; max-inline-size: min(460px, calc(100vw - 24px)); max-block-size: 70vh; overflow-y: auto; margin: 0; padding-block: 4px; padding-inline: 0;
-  list-style: none; background: var(--oc-white); border: 1px solid var(--oc-gray-4); box-shadow: 0 2px 6px rgba(var(--oc-black-rgb),.2); }
+  list-style: none; background: var(--oc-white); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4)); box-shadow: 0 2px 6px rgba(var(--oc-black-rgb),.2); }
 #top-menu ul.gk-gui-stuff-history-list[hidden] { display: none; }
 #top-menu ul.gk-gui-stuff-history-list > li { float: none; display: block; inline-size: auto; margin: 0; padding: 0; }
 #top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a { display: block; padding-block: 5px; padding-inline: 12px; color: var(--oc-gray-9); font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -74,8 +99,10 @@ html.gk-gui-stuff-lw-phone-on div#sticky-issue-header { inset-block-start: calc(
 
 @media print {
   .gk-gui-stuff-fold { max-block-size: none !important; overflow: visible; }
-  .gk-gui-stuff-fold::after { display: none !important; }
+  .gk-gui-stuff-fold { -webkit-mask-image: none !important; mask-image: none !important; }
+  .gk-gui-stuff-fold::after { content: none !important; }
   .gk-gui-stuff-fold-row { display: revert !important; }
+  .gk-gui-stuff-fold-slot { display: none !important; }
   .gk-gui-stuff-fold-btn, .gk-gui-stuff-copy-btn, .gk-gui-stuff-copy-pre, .gk-gui-stuff-week, .gk-gui-stuff-quick-done, .gk-gui-stuff-history, .gk-gui-stuff-lw, .gk-gui-stuff-notice { display: none !important; }
 }
 
@@ -121,3 +148,6 @@ div.flash .gk-gui-stuff-flash-tools svg.icon-svg { margin-inline: 0; }
 .gk-gui-stuff-opener-button { margin-block-start: 4px; cursor: pointer; }
 .gk-gui-stuff-opener-body { block-size: 100%; display: flex; flex-direction: column; }
 .gk-gui-stuff-opener-body > * { flex: 1; min-block-size: 0; }
+
+/* whisper_tooltip: while a whisper shows, a tooltip of Redmine's that comes late stays out of sight */
+.gk-gui-stuff-tip-held .ui-tooltip { visibility: hidden; }

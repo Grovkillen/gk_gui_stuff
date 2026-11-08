@@ -1,0 +1,16 @@
+<%# core's buttons at rest and disabled (hover and focus are tried, never shown still), Save beside Cancel, core's
+    delete link (to the guide's address, which stores nothing) and the sprite's icons %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_buttons), "button_tag(label), button_tag(label, disabled: true)") do %>
+    <%= button_tag l(:button_save), type: 'button' %> <%= button_tag l(:button_apply), type: 'button', disabled: true %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_save_cancel), "submit_tag(l(:button_save)) link_to(l(:button_cancel), …)", mode: :server) do %>
+    <%# Spara asks the guide's address; Avbryt would leave the page, so here it says that it leads nowhere %>
+    <%= form_tag(save) do %><%= submit_tag l(:button_save), name: nil %> <span data-gk-gui-sg-example-links><%= link_to l(:button_cancel), gk_gui_stuff_styleguide_path %></span><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_delete), "delete_link(url)", mode: :server) do %><%= delete_link save %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_icons), "sprite_icon(name), link_to(sprite_icon(name, text), url, class: 'icon icon-edit')") do %>
+    <% %w[edit copy del add reload lock fav attachment].each do |ic| %><%= sprite_icon(ic, nil) %> <% end %>
+    <%= link_to sprite_icon('edit', l(:button_edit)), gk_gui_stuff_styleguide_path, class: 'icon icon-edit' %>
+  <% end %>
+</div>

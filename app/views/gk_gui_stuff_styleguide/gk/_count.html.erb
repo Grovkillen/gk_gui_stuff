@@ -1,0 +1,6 @@
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_by_name), "gk_gui_stuff_count(3, role: :warning)") do %><%= User.current.name %> <%= gk_gui_stuff_count(3, role: :warning, title: l(:label_gk_gui_stuff_sg_by_name)) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_alerts), "role: :alarm") do %><%= gk_gui_stuff_count(1, role: :alarm) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_count_split), "gk_gui_stuff_count(2, shared: 3, role: :alarm); GkGui.count({n, shared, role, title})") do %><%= gk_gui_stuff_count(2, shared: 3, role: :alarm) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_quiet), "gk_gui_stuff_count(12)") do %><%= l(:label_gk_gui_stuff_sg_heading) %> <%= gk_gui_stuff_count(12) %><% end %>
+</div>

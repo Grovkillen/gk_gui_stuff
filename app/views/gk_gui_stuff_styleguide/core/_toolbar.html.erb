@@ -1,0 +1,13 @@
+<%# core's toolbar, div.contextual with its links and the three dots (actions_dropdown); the links lead nowhere %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_toolbar), "div.contextual, actions_dropdown { … }", mode: :nosave) do %>
+    <div class="contextual gk-gui-stuff-sg-contextual">
+      <%= link_to sprite_icon('edit', l(:button_edit)), '#', class: 'icon icon-edit', data: { gk_gui_sg_noop: '1' } %>
+      <%= link_to sprite_icon('fav', l(:button_watch)), '#', class: 'icon icon-fav-off', data: { gk_gui_sg_noop: '1' } %>
+      <%= actions_dropdown do %>
+        <%= link_to sprite_icon('copy', l(:button_copy)), '#', class: 'icon icon-copy', data: { gk_gui_sg_noop: '1' } %>
+        <%= link_to sprite_icon('del', l(:button_delete)), '#', class: 'icon icon-del', data: { gk_gui_sg_noop: '1' } %>
+      <% end %>
+    </div>
+  <% end %>
+</div>

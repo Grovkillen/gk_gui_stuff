@@ -21,15 +21,21 @@ module GkGuiStuff
 
     def providers = (@providers ||= {})
 
-    def register(key, plugin:, &block)
-      providers[key.to_s] = { plugin: plugin.to_s, block: block }
+    # anonymous: true lets the block answer for one not logged in too (a page of a public project); such a block gives
+    # only what the page itself shows that reader, never anything of a person's own. Every other block is asked only
+    # for one logged in.
+    def register(key, plugin:, anonymous: false, &block)
+      providers[key.to_s] = { plugin: plugin.to_s, block: block, anonymous: anonymous ? true : false }
     end
 
+    # The blocks to ask: all for one logged in, only the anonymous ones otherwise
+    def providers_for(logged) = logged ? providers : providers.select { |_k, p| p[:anonymous] }
+
     # The answers for this page: { key => data }, a block that fails or answers nil gives nothing
-    def build(view, controller)
+    def build(view, controller, logged: true)
       users = Array(view&.instance_variable_get(:@gk_gui_stuff_users)).uniq
       ctx = { view: view, controller: controller, request: controller&.request, users: users }
-      providers.each_with_object({}) do |(key, p), out|
+      providers_for(logged).each_with_object({}) do |(key, p), out|
         v = p[:block].call(ctx)
         out[key] = v unless v.nil?
       rescue StandardError => e
@@ -70,8 +76,7 @@ module GkGuiStuff
     end
 
     def seconds
-      v = Switches.settings['beat_seconds'].to_s
-      v.empty? ? 30 : [v.to_i, 10].max
+      [Switches.value('beat', 'beat_seconds', 30), 10].max
     end
   end
 end

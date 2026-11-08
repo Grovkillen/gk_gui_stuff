@@ -1,0 +1,27 @@
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_choices_box), "gk_gui_stuff_choices_box(key, title, open:, hint:) { … }") do %>
+    <%= gk_gui_stuff_choices_box('gui_stuff.styleguide.box', l(:label_gk_gui_stuff_sg_choices_box)) do %><p><%= l(:text_gk_gui_stuff_sg_remembered) %></p><% end %>
+  <% end %>
+  <%# the pencil stays in the row, the rare actions go to the menu; the script takes only this inner table's row; the
+      actions themselves lead nowhere and say so (data-gk-gui-sg-noop) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_rowmenu_keep), "data: { gk_gui_row_action: 'keep' } / true, gk_gui_stuff_row_menu") do %>
+    <table class="list" data-gk-gui-rowmenu><tbody>
+      <tr data-gk-gui-row-menu-label="<%= sample.call(:p16) %>"><td><%= gk_gui_stuff_pill(sample.call(:p16), role: 1) %></td>
+        <td class="buttons"><%= link_to sprite_icon('edit', l(:button_edit)), '#', class: 'icon icon-edit', data: { gk_gui_row_action: 'keep', gk_gui_sg_noop: '1' } %>
+          <%= link_to l(:label_gk_gui_stuff_sg_example_card), '#', data: { gk_gui_row_action: true, gk_gui_sg_noop: '1' } %>
+          <%= link_to l(:label_gk_gui_stuff_sg_example_alarm_card), '#', data: { gk_gui_row_action: true, gk_gui_sg_noop: '1' } %></td></tr>
+    </tbody></table>
+    <%= gk_gui_stuff_row_menu %>
+  <% end %>
+  <%# an entry in a menu never opens a fly: one that asks opens a surface in the upper layer under its row and ends
+      with "…" (the guide's script opens it, gk_gui_stuff_styleguide.js) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_rowmenu_layer), "GkGui.layer.open({key, title, content, anchor}); \"#{l(:button_gk_gui_stuff_sg_replace)}…\"") do %>
+    <table class="list" data-gk-gui-rowmenu><tbody>
+      <tr data-gk-gui-row-menu-label="<%= sample.call(:can) %>"><td><%= gk_gui_stuff_pill(sample.call(:can), role: 2) %></td>
+        <td class="buttons"><%= link_to sprite_icon('edit', l(:button_edit)), '#', class: 'icon icon-edit', data: { gk_gui_row_action: 'keep', gk_gui_sg_noop: '1' } %>
+          <%= link_to "#{l(:button_gk_gui_stuff_sg_replace)}…", '#', data: { gk_gui_row_action: true, gk_gui_sg_try: 'layer', gk_gui_sg_title: l(:button_gk_gui_stuff_sg_replace),
+                                                                          gk_gui_sg_text: l(:text_gk_gui_stuff_sg_rowmenu_layer) } %></td></tr>
+    </tbody></table>
+  <% end %>
+</div>

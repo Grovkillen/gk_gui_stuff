@@ -1,0 +1,10 @@
+<%# core's issue list (issues/_list) with issues in memory, grouped by status with the sum of the estimated time;
+    its context menu asks the guide's own address, which the guide's script sets; its links lead to issues made up in
+    memory, so the script says that they lead nowhere (data-gk-gui-sg-example-links) %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_tables), "render partial: 'issues/list', locals: { issues:, query: }", mode: :server) do %>
+    <div class="gk-gui-stuff-sg-cm" data-gk-gui-sg-cm="<%= gk_gui_stuff_styleguide_context_menu_path %>" data-gk-gui-sg-example-links>
+      <%= render partial: 'issues/list', locals: { issues: demo[:issues], query: demo[:query] } %>
+    </div>
+  <% end %>
+</div>

@@ -1,0 +1,11 @@
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%# a button that opens the twelve in a grid and Ingen; with the text in a form, the swatch alone in a row %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_category_text), "gk_gui_stuff_category_picker(name, selected)") do %><%= gk_gui_stuff_category_picker('sg_category', 3) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_category_row), "text: false") do %>
+    <%= text_field_tag 'sg_mark', l(:label_gk_gui_stuff_sg_example_mark), size: 20, id: nil, 'aria-label': l(:field_name) %>
+    <%= gk_gui_stuff_category_picker('sg_category2', 10, text: false) %>
+    <%= button_tag l(:button_save), type: 'button', data: { gk_gui_sg_noop: '1' } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_category_none), "gk_gui_stuff_category_picker(name, nil)") do %><%= gk_gui_stuff_category_picker('sg_category3', nil) %><% end %>
+</div>

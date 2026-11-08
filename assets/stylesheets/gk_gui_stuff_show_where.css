@@ -1,0 +1,35 @@
+/* Visa var (gk_gui_stuff_show_where.js): the arrow in the window's edge towards what came up, Tillbaka in the lower edge,
+   and the ring on the target. In the role ui-effect, so that a dark theme changes the colours and nothing else. The edges
+   lie over the drawer and under the notices (the scale in primitives.css) and let the pointer through beside their
+   buttons. An arrow up stands under Redmine's fixed header (its height measured), the instance band and a bar the page
+   holds at the top of the window (--gk-gui-stuff-where-keep, set by that page); the lower edge stands above the sticky
+   Save bar. */
+.gk-gui-stuff-where-edge { position: fixed; inset-inline: 0; z-index: 1850; display: flex; flex-direction: column; align-items: center; gap: 0.4em; pointer-events: none; }
+.gk-gui-stuff-where-edge-top { inset-block-start: calc(max(var(--gk-gui-stuff-band-h, 0px), var(--gk-gui-stuff-where-head, 0px), var(--gk-gui-stuff-where-keep, 0px)) + 0.5em); }
+.gk-gui-stuff-where-edge-bottom { inset-block-end: calc(0.5em + var(--gk-gui-stuff-savebar-size, 0px)); flex-direction: column-reverse; }
+.gk-gui-stuff-where-edge > * { max-inline-size: calc(100vw - 2em); pointer-events: auto; }
+.gk-gui-stuff-where-one { display: contents; }
+.gk-gui-stuff-where-one > * { max-inline-size: calc(100vw - 2em); pointer-events: auto; }
+
+/* the arrow and Tillbaka: at least the 24 px a finger needs, otherwise by the text; the mark in the middle of the row */
+button.gk-gui-stuff-where-arrow { display: inline-flex; align-items: center; gap: 0.35em; box-sizing: border-box; min-block-size: 24px; min-inline-size: 24px; margin: 0;
+  padding-block: 0.25em; padding-inline: 0.7em 0.9em; border: 1px solid var(--gk-role-ui-effect); border-radius: 1.2em; background: var(--gk-role-ui-surface); color: var(--gk-role-ui-effect);
+  font: inherit; font-weight: bold; line-height: 1.4; cursor: pointer; box-shadow: 0 0.15em 0.45em color-mix(in srgb, var(--gk-role-ui-shadow) 18%, transparent); }
+button.gk-gui-stuff-where-arrow:is(:hover, :focus-visible) { background: var(--gk-role-ui-effect-soft); color: var(--gk-role-ui-effect); }
+button.gk-gui-stuff-where-arrow[data-gk-gui-where="here"] { padding-inline: 0.9em; }
+.gk-gui-stuff-where-mark { display: inline-flex; flex: none; align-items: center; justify-content: center; line-height: 1; }
+.gk-gui-stuff-where-mark svg { display: block; inline-size: 1em; block-size: 1em; }
+
+/* a step: the arrow, the cross at the end, the text and Nästa in one box */
+.gk-gui-stuff-where-step { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.4em; box-sizing: border-box; inline-size: 26em; padding: 0.5em 0.6em; border: 1px solid var(--gk-role-ui-effect);
+  border-radius: 0.5em; background: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529); box-shadow: 0 0.15em 0.45em color-mix(in srgb, var(--gk-role-ui-shadow) 18%, transparent); }
+.gk-gui-stuff-where-step > button.gk-gui-stuff-where-arrow { justify-self: start; box-shadow: none; }
+.gk-gui-stuff-where-text { grid-column: 1 / -1; margin: 0; }
+button.gk-gui-stuff-where-close { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-block-size: 24px; min-inline-size: 24px; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; }
+button.gk-gui-stuff-where-next { grid-column: 1 / -1; justify-self: end; margin: 0; }
+
+/* the ring: an outline, so that nothing moves; it closes in twice, and stands still with reduced motion */
+.gk-gui-stuff-where-ring { outline: 0.2em solid var(--gk-role-ui-effect) !important; outline-offset: 0.3em; animation: gk-gui-stuff-where-pulse 1.2s ease-out 2; }
+@keyframes gk-gui-stuff-where-pulse { 0% { outline-offset: 0.9em; } 100% { outline-offset: 0.3em; } }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-where-ring { animation: none; } }
+@media print { .gk-gui-stuff-where-edge { display: none !important; } }

@@ -1,0 +1,11 @@
+<%# every colour role as a tile, one group per row across the whole width (GkGuiStuff::Primitives::ROLES): both
+    tones large, the name and the custom property; a role without a soft tone shows stripes and "ingen", and the
+    shadow is a surface casting it. The roles as pills are in the pill's section %>
+<div class="gk-gui-stuff-sg-tiles">
+  <% GkGuiStuff::Primitives::ROLES.each_key do |g| %>
+    <%= gk_gui_stuff_sg_row(l(:"label_gk_gui_stuff_sg_role_group_#{g}"), "gk_gui_stuff_role_swatches(['#{g}'], large: true)", wide: true) do %><%= gk_gui_stuff_role_swatches([g], large: true) %><% end %>
+  <% end %>
+  <%# one swatch alone, small, as it stands beside a setting: the code names the role it draws, the first category, so
+      that the tile is never read as a role picked at random %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_role_swatch), "gk_gui_stuff_role_swatch('category', 1, label: nil)") do %><%= gk_gui_stuff_role_swatch('category', 1) %><% end %>
+</div>

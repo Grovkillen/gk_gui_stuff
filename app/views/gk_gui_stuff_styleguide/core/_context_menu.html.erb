@@ -1,0 +1,12 @@
+<%# core's context menu on a small issue list of its own (issues/_list with two issues in memory, no groups), so that
+    the menu opens beside the text that tells of it; a right click on a row or Prova opens it. Core's script draws it
+    from the guide's own address with the issues in memory, and the guide's script stops its links and the list's, and
+    says that they lead nowhere %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_context_menu), "render template: 'context_menus/issues'", mode: :server) do %>
+    <p><span class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_context_menu) %></span> <%= gk_gui_stuff_sg_try('context_menu') %></p>
+    <div class="gk-gui-stuff-sg-cm" data-gk-gui-sg-cm="<%= gk_gui_stuff_styleguide_context_menu_path %>" data-gk-gui-sg-example-links>
+      <%= render partial: 'issues/list', locals: { issues: demo[:cm_issues], query: demo[:cm_query] } %>
+    </div>
+  <% end %>
+</div>

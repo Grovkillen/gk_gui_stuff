@@ -1,0 +1,42 @@
+<p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_form) %></p>
+<%# a form with two boxes, each with its own Save and its text by it; the same form posting to the address that
+    fails (the page comes back with the error notice, the written values, the rails and the text) %>
+<% two_boxes = lambda do |url, n|
+     form_tag(url, data: gk_gui_stuff_form_changes, id: "gk-gui-stuff-sg-form-#{n}") do
+       safe_join([
+         content_tag(:fieldset, safe_join([content_tag(:legend, l(:label_gk_gui_stuff_sg_box_tag)),
+                                           content_tag(:p, label_tag("gk_gui_stuff_sg_name_#{n}", l(:field_name)) +
+                                                           text_field_tag('name', sample.call(:p16).delete_prefix('#').upcase, id: "gk_gui_stuff_sg_name_#{n}", size: 30)),
+                                           content_tag(:p, label_tag("gk_gui_stuff_sg_desc_#{n}", l(:field_description)) +
+                                                           text_area_tag('description', l(:text_gk_gui_stuff_sg_example_note), id: "gk_gui_stuff_sg_desc_#{n}", rows: 2, cols: 40)),
+                                           content_tag(:p, submit_tag(l(:button_save), name: nil))]), class: 'box tabular'),
+         content_tag(:fieldset, safe_join([content_tag(:legend, l(:label_gk_gui_stuff_sg_box_type)),
+                                           content_tag(:p, label_tag("gk_gui_stuff_sg_type_#{n}", l(:label_gk_gui_stuff_sg_type)) +
+                                                           select_tag('type', options_for_select([[l(:label_gk_gui_stuff_category_none), '']] + (1..3).map { |c| [l(:label_gk_gui_stuff_category_n, n: c), c] }, 1),
+                                                                      id: "gk_gui_stuff_sg_type_#{n}")),
+                                           content_tag(:p, label_tag("gk_gui_stuff_sg_marking_#{n}", l(:label_gk_gui_stuff_sg_marking)) +
+                                                           select_tag('marking', options_for_select([[l(:label_gk_gui_stuff_category_none), ''], [l(:label_gk_gui_stuff_role_alert_warning), 'warning'],
+                                                                                                     [l(:label_gk_gui_stuff_role_alert_alarm), 'alarm']], ''), id: "gk_gui_stuff_sg_marking_#{n}")),
+                                           content_tag(:p, submit_tag(l(:button_save), name: nil))]), class: 'box tabular')
+       ])
+     end
+   end %>
+<% @gk_gui_stuff_sg_mode = :server %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_form_boxes), "form_tag(url, data: gk_gui_stuff_form_changes) { fieldset.box … submit_tag }") do %><%= two_boxes.call(save, 1) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_form_fail), "url: …?fail=1") do %><%= two_boxes.call(fail, 2) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_form_direct), "gk_gui_stuff_direct_note, gk_gui_stuff_rail(url:) { … }") do %>
+    <div class="box">
+      <%= gk_gui_stuff_direct_note %>
+      <%= gk_gui_stuff_rail(url: save) do %><%= l(:label_gk_gui_stuff_sg_example_events) %> <%= gk_gui_stuff_switch('events', true, label: l(:label_gk_gui_stuff_sg_example_events)) %><% end %>
+    </div>
+    <%= two_boxes.call(save, 3) %>
+  <% end %>
+  <%# a form with radio buttons in columns: each column's heading centred over its choices, as the buttons under it %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_choice_col), "th class: 'gk-gui-stuff-choice-col', td class: 'gk-gui-stuff-choice-col'", mode: :nosave) do %>
+    <% modes = [[l(:label_gk_gui_stuff_sg_off), 'off'], [l(:label_gk_gui_stuff_sg_optional), 'optional'], [l(:label_gk_gui_stuff_sg_forced), 'forced']] %>
+    <table class="list" data-gk-gui-filter="off"><thead><tr><th><%= l(:field_name) %></th><% modes.each do |text, _| %><th class="gk-gui-stuff-choice-col"><%= text %></th><% end %></tr></thead>
+      <tbody><tr><td><%= l(:label_gk_gui_stuff_sg_example_events) %></td>
+        <% modes.each do |text, v| %><td class="gk-gui-stuff-choice-col"><%= radio_button_tag('gk_gui_stuff_sg_choice_col', v, v == 'off', id: nil, 'aria-label': text) %></td><% end %></tr></tbody></table>
+  <% end %>
+</div>

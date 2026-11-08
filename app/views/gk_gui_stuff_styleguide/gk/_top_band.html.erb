@@ -1,0 +1,46 @@
+<%# The top band as a row of parts (gk_gui_stuff_top_band): the instance's role first, then the parts by weight, each
+    with its icon, short word and at most one count, and a panel under it for the one that opens. Made-up parts: a
+    person at a shared computer, the preview, an operation that runs and one more; the real band stands at the top of
+    every page where a part's condition holds (GkGuiStuff::TopBand), also in production and when the instance band is
+    off. Here the examples stand in the page, without the landmark. %>
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<% instance = content_tag(:span, safe_join([l(:label_gk_gui_stuff_sg_top_band_role), content_tag(:small, l(:label_gk_gui_stuff_sg_top_band_name))], ' '),
+                          class: 'gk-gui-stuff-instance gk-gui-stuff-instance-test gk-gui-stuff-band-part gk-gui-stuff-band-instance', role: 'note') %>
+<% person_panel = safe_join([content_tag(:p, l(:label_gk_gui_stuff_sg_top_band_detail)),
+                             content_tag(:div, safe_join([button_tag(l(:label_gk_gui_stuff_sg_top_band_change), type: 'button'),
+                                                          button_tag(l(:label_gk_gui_stuff_sg_top_band_done), type: 'button')]), class: 'gk-gui-stuff-fly-buttons')]) %>
+<% person = { key: 'sg.person', role: :info, icon: 'user', weight: :shared_computer, full: l(:label_gk_gui_stuff_sg_top_band_text),
+              short: l(:label_gk_gui_stuff_sg_top_band_short), title: l(:label_gk_gui_stuff_sg_top_band_title), panel: person_panel } %>
+<% nobody = { key: 'sg.nobody', role: :quiet, icon: 'user', weight: :shared_computer, full: l(:label_gk_gui_stuff_sg_top_band_none_text),
+              short: l(:label_gk_gui_stuff_sg_top_band_none_short),
+              panel: content_tag(:div, button_tag(l(:label_gk_gui_stuff_sg_top_band_who), type: 'button'), class: 'gk-gui-stuff-fly-buttons') } %>
+<% preview = gk_gui_stuff_band_preview_part(setting: l(:label_gk_gui_stuff_sg_top_band_setting), from: l(:label_gk_gui_stuff_sg_top_band_from),
+                                            to: l(:label_gk_gui_stuff_sg_top_band_to), places: 14,
+                                            marker: { scope: 'example', html: { data: { gk_gui_sg_marker_noop: '1' } } }) %>
+<% backup = { key: 'sg.backup', role: :quiet, icon: 'reload', weight: :operation, full: l(:label_gk_gui_stuff_sg_top_band_backup),
+              short: l(:label_gk_gui_stuff_sg_top_band_backup_short), count: '62 %' } %>
+<% later = { key: 'sg.later', role: :quiet, icon: 'time', weight: :other, full: l(:label_gk_gui_stuff_sg_top_band_later),
+             short: l(:label_gk_gui_stuff_sg_top_band_later_short),
+             panel: content_tag(:p, l(:text_gk_gui_stuff_sg_top_band_later)) } %>
+<% register = 'GkGuiStuff::TopBand.register(key, plugin:, role:, icon:, full:, short:, count:, weight:, panel:, condition:)' %>
+<p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_top_band) %></p>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_top_band_one), register) do %>
+    <%= gk_gui_stuff_top_band([person], landmark: false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_top_band_two), register) do %>
+    <%= gk_gui_stuff_top_band([person], instance: instance, landmark: false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_top_band_none), "role: :quiet, panel: …") do %>
+    <%= gk_gui_stuff_top_band([nobody], instance: instance, landmark: false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_top_band_four), "weight: :preview | :shared_computer | :operation", id: 'sg-tile-top-band-four') do %>
+    <%= gk_gui_stuff_top_band([preview, person, backup], instance: instance, landmark: false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_top_band_crowded), "+N") do %>
+    <%= gk_gui_stuff_top_band([preview, person, backup, later], instance: instance, landmark: false, html: { class: 'gk-gui-stuff-sg-band-narrow' }) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_top_band_preview), 'gk_gui_stuff_band_preview_part(setting:, from:, to:, places:)') do %>
+    <%= gk_gui_stuff_top_band([preview], instance: instance, landmark: false) %>
+  <% end %>
+</div>

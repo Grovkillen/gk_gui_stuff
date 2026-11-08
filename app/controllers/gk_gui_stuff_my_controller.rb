@@ -1,82 +1,68 @@
 # frozen_string_literal: true
 
-# The person's own choices in gui_stuff: Core-like for me, and each module the administrator lets users switch
+# My account > Appearance: the appearance settings that are optional in the instance, in the groups of Administration >
+# Utseende, and Like Redmine for me first. Each row saves at once by its rail and needs no reason; every change is an
+# event on the person's own row in gk_records. Refused when the setting is not optional now.
 class GkGuiStuffMyController < ApplicationController
   # a page of the person's own, as core's My account: no project menu (core's MyController does the same)
   self.main_menu = false
   before_action :require_login
+  before_action :find_register
+  helper :gk_gui_stuff_appearance
+  # Påverkar under each row (gk_gui_stuff_affects)
+  helper :gk_gui_stuff_form_page
 
   def show
-    @row = GkGuiStuffUserSetting.for(User.current)
+    # a core page type's view is chosen on the page itself and put back under My account, not here
+    @rows = @register ? @register.optional.reject { |r| r.key.start_with?(GkGuiStuff::Meaning.row_key('')) } : []
+    @groups = @register ? @register.by_group.filter_map { |g, rows| (list = rows & @rows).any? ? [g, list] : nil } : []
   end
 
-  def update
-    row = GkGuiStuffUserSetting.for(User.current)
-    before = row.data
-    after = before.deep_dup
-    changes = {}
-    if GkGuiStuff::Switches.user_core_like_allowed?
-      new = params[:core_like].to_s == '1' ? '1' : '0'
-      changes['core_like'] = [before['core_like'].presence || '0', new] if (before['core_like'].presence || '0') != new
-      after['core_like'] = new
-    end
-    # Own and shared apart in the counter at the name
-    split = params[:count_split].to_s == '1' ? '1' : '0'
-    changes['count_split'] = [before['count_split'].presence || '0', split] if (before['count_split'].presence || '0') != split
-    after['count_split'] = split
-    mode = GkGuiStuff::Personal::COUNT_MODES.include?(params[:count_mode].to_s) ? params[:count_mode].to_s : 'waiting'
-    changes['count_mode'] = [before['count_mode'].presence || 'waiting', mode] if (before['count_mode'].presence || 'waiting') != mode
-    after['count_mode'] = mode
-    # Each row out or in the menu as the person chooses; empty follows the default
-    if params[:placements].respond_to?(:to_unsafe_h) || params[:placements].is_a?(Hash)
-      given = params[:placements].respond_to?(:to_unsafe_h) ? params[:placements].to_unsafe_h : params[:placements]
-      own = {}
-      GkGuiStuff::Menu.all.each_key do |k|
-        v = given[k].to_s
-        own[k] = v if GkGuiStuff::Menu::PLACEMENTS.include?(v)
+  # One optional setting: on (1 or 0) from a switch; choice (off, or one of the person's value's choices) from a
+  # segment; values { name => value } from a row with its own Spara
+  def choose
+    row = @register&.find(params[:key])
+    return answer(false, l(:text_gk_gui_stuff_not_optional)) unless row && @register.mode(row.key) == 'optional' && @register.available?(row) &&
+                                                                     !row.key.start_with?(GkGuiStuff::Meaning.row_key(''))
+
+    on = nil
+    values = params[:values]
+    values = values.to_unsafe_h if values.respond_to?(:to_unsafe_h)
+    values = values.is_a?(Hash) ? values.to_h : nil
+    if params.key?(:choice)
+      choice = params[:choice].to_s
+      if choice == 'off'
+        on = false
+      else
+        v = row.values.values.find(&:person)
+        return answer(false, l(:text_gk_gui_stuff_not_optional)) unless v
+
+        on = true
+        values = { v.name => choice }
       end
-      # core's own buttons: out or icon only
-      GkGuiStuff::Menu::CORE_BUTTONS.each do |b|
-        v = given[b.key].to_s
-        own[b.key] = v if GkGuiStuff::Menu::CORE_PLACEMENTS.include?(v)
-      end
-      changes['placements'] = [before['placements'] || {}, own] if (before['placements'] || {}) != own
-      after['placements'] = own
+    elsif params.key?(:on)
+      on = params[:on].to_s == '1'
     end
-    # icons by area (the project tabs, the issue page, other pages); empty follows the default
-    GkGuiStuff::Menu::ICON_AREAS.each do |area|
-      name = "icons_#{area}"
-      next unless params.key?(name)
+    @register.set_person!(User.current, row.key, on: on, values: values)
+    answer(true)
+  rescue GkRecords::AppearanceSettings::Invalid, ArgumentError => e
+    Rails.logger.info("[gk_gui_stuff] a person's appearance choice refused: #{e.message}")
+    answer(false, l(:text_gk_gui_stuff_not_saved))
+  end
 
-      v = params[name].to_s
-      v = '' unless GkGuiStuff::Menu::ICON_MODES.include?(v)
-      changes[name] = [before[name].to_s, v] if before[name].to_s != v
-      v.empty? ? after.delete(name) : after[name] = v
-    end
-    # the sidebar's place and the header's height; empty follows the default
-    GkGuiStuff::Menu::LAYOUT.each do |key, values|
-      name = "layout_#{key}"
-      next unless params.key?(name)
+  # Like Redmine for me, while the administrator allows it
+  def redmine
+    return answer(false, l(:text_gk_gui_stuff_not_optional)) unless @register&.redmine_granted?
 
-      v = params[name].to_s
-      v = '' unless values.include?(v)
-      changes[name] = [before[name].to_s, v] if before[name].to_s != v
-      v.empty? ? after.delete(name) : after[name] = v
-    end
-    after['modules'] = (before['modules'] || {}).dup
-    # only the modules that are there: what was chosen for one that is not stays as it was
-    GkGuiStuff::Registry.present.each_value do |m|
-      next unless GkGuiStuff::Switches.user_choice?(m)
+    @register.set_redmine_for!(User.current, params[:on].to_s == '1')
+    answer(true)
+  end
 
-      new = (params[:modules] || {})[m.key].to_s == '1' ? '1' : '0'
-      old = after['modules'][m.key].presence || '1'
-      changes[m.key] = [old, new] if old != new
-      after['modules'][m.key] = new
-    end
-    row.data = after
-    row.save!
-    GkGuiStuff::Choices.record(User.current, changes)
-    flash[:notice] = l(:notice_successful_update)
-    redirect_to action: 'show'
+  private
+
+  def find_register = (@register = GkGuiStuff.appearance_settings)
+
+  def answer(ok, message = nil)
+    render json: { ok: ok, message: message }, status: ok ? :ok : :unprocessable_entity
   end
 end

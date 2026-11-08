@@ -1,0 +1,666 @@
+/* gk_gui_stuff: the design language's primitives, drawn by the helpers in
+   primitives.rb and bound by gk_gui_stuff_primitives.js. Logical properties only; every colour is a role, the hex
+   only the fallback in var(). The roles are declared here on the lowest specificity, so that theme_engine's palette
+   takes them over with no change here; their defaults are Open Color, which also gives the dark mode. */
+:where(:root) {
+  /* categories of data: text, edge and a filled pill take the strong role, a background the -soft one; red and
+     orange are left out, they are alarm and warning. Every strong role holds at least 4.5:1 against white text
+     (test/role_contrast_test.rb): a tone too light is mixed towards --oc-black, which is black in the light and the
+     text's colour in a dark theme, where the ink on a filled surface is the dark surface, so the contrast holds there
+     too */
+  --gk-role-category-1: var(--oc-blue-9, #1864ab);    --gk-role-category-1-soft: var(--oc-blue-1, #d0ebff);
+  --gk-role-category-2: var(--oc-teal-9, #087f5b);    --gk-role-category-2-soft: var(--oc-teal-1, #c3fae8);
+  --gk-role-category-3: var(--oc-grape-9, #862e9c);   --gk-role-category-3-soft: var(--oc-grape-1, #f3d9fa);
+  --gk-role-category-4: color-mix(in srgb, var(--oc-lime-9, #5c940d), var(--oc-black, #000) 12%);    --gk-role-category-4-soft: var(--oc-lime-1, #e9fac8);
+  --gk-role-category-5: var(--oc-pink-9, #a61e4d);    --gk-role-category-5-soft: var(--oc-pink-1, #ffdeeb);
+  --gk-role-category-6: var(--oc-cyan-9, #0b7285);    --gk-role-category-6-soft: var(--oc-cyan-1, #c5f6fa);
+  --gk-role-category-7: var(--oc-violet-9, #5f3dc4);  --gk-role-category-7-soft: var(--oc-violet-1, #e5dbff);
+  --gk-role-category-8: color-mix(in srgb, var(--oc-green-9, #2b8a3e), var(--oc-black, #000) 4%);   --gk-role-category-8-soft: var(--oc-green-1, #d3f9d8);
+  --gk-role-category-9: var(--oc-indigo-9, #364fc7);  --gk-role-category-9-soft: var(--oc-indigo-1, #dbe4ff);
+  --gk-role-category-10: color-mix(in srgb, var(--oc-yellow-9, #e67700), var(--oc-black, #000) 22%); --gk-role-category-10-soft: var(--oc-yellow-1, #fff3bf);
+  --gk-role-category-11: var(--oc-gray-7, #495057);   --gk-role-category-11-soft: var(--oc-gray-1, #f1f3f5);
+  --gk-role-category-12: var(--oc-gray-9, #212529);   --gk-role-category-12-soft: var(--oc-gray-3, #dee2e6);
+  /* alert levels, lowest first; critical is the alarm filled, white text on it, its soft tone the
+     alarm's */
+  --gk-role-alert-tip: var(--oc-gray-7, #495057);        --gk-role-alert-tip-soft: var(--oc-gray-1, #f1f3f5);
+  --gk-role-alert-info: var(--oc-blue-8, #1971c2);       --gk-role-alert-info-soft: var(--oc-blue-0, #e7f5ff);
+  --gk-role-alert-notice: color-mix(in srgb, var(--oc-green-8, #2f9e44), var(--oc-black, #000) 15%);    --gk-role-alert-notice-soft: var(--oc-green-1, #d3f9d8);
+  --gk-role-alert-warning: color-mix(in srgb, var(--oc-orange-9, #d9480f), var(--oc-black, #000) 4%);  --gk-role-alert-warning-soft: var(--oc-orange-1, #ffe8cc);
+  --gk-role-alert-alarm: var(--oc-red-9, #c92a2a);       --gk-role-alert-alarm-soft: var(--oc-red-1, #ffe3e3);
+  --gk-role-alert-critical: var(--oc-red-9, #c92a2a);    --gk-role-alert-critical-soft: var(--oc-red-1, #ffe3e3);
+  /* the neutral interface: the surface of a box, the frame around boxes, flies and fields, a divider between rows,
+     the shadow's base colour (each rule mixes it to its own strength), code text as a chip (its edge and, -soft, its
+     background) and what is possible but not chosen (the dashed pill); their defaults are the values the rules had
+     before */
+  --gk-role-ui-surface: var(--oc-white, #fff);           --gk-role-ui-divider: var(--oc-gray-3, #dee2e6);
+  --gk-role-ui-frame: var(--oc-gray-4, #ced4da);         --gk-role-ui-shadow: var(--oc-black, #000);
+  --gk-role-ui-code: var(--oc-gray-4, #ced4da);          --gk-role-ui-code-soft: var(--oc-gray-1, #f1f3f5);
+  --gk-role-ui-possible: var(--oc-gray-6, #868e96);
+  /* what only administrators see, the same as the step up's edge */
+  --gk-role-ui-admin: var(--oc-violet-8, #6741d9);          --gk-role-ui-admin-soft: var(--oc-violet-0, #f3f0ff);
+  /* on core's dark menus (the account's links in the top menu, the menu with three bars on a phone): the admin role
+     and the alarm mixed lighter, so that an edge or an underline shows there; no -soft */
+  --gk-role-ui-admin-on-dark: color-mix(in srgb, var(--gk-role-ui-admin, var(--oc-violet-8, #6741d9)) 40%, var(--gk-role-ui-admin-soft, var(--oc-violet-0, #f3f0ff)));
+  --gk-role-alert-alarm-on-dark: color-mix(in srgb, var(--gk-role-alert-alarm, var(--oc-red-9, #c92a2a)) 60%, var(--gk-role-alert-alarm-soft, var(--oc-red-1, #ffe3e3)));
+  /* the rail of quick save */
+  --gk-role-save-direct: var(--oc-gray-5, #adb5bd);      --gk-role-save-changed: var(--oc-yellow-5, #fcc419);
+  --gk-role-save-saved: var(--oc-green-6, #40c057);      --gk-role-save-failed: var(--oc-red-6, #fa5252);
+  --gk-role-ui-muted: color-mix(in srgb, var(--oc-gray-6, #868e96), var(--oc-black, #000) 20%);
+  /* a muted surface with white text on it (the top band's part when nothing is chosen): the muted role mixed
+     40 % towards black; a theme may set it as any other role; no -soft */
+  --gk-role-ui-muted-fill: color-mix(in srgb, var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)), #000 40%);
+  /* the line's bands, light so that text can be read on them; no -soft */
+  --gk-role-band-incoming: var(--oc-gray-2, #e9ecef);  --gk-role-band-active: var(--oc-blue-0, #e7f5ff);
+  --gk-role-band-settled: var(--oc-teal-1, #c3fae8);   --gk-role-band-closed: var(--oc-green-1, #d3f9d8);
+  --gk-role-band-archived: var(--oc-gray-1, #f1f3f5);
+  /* the line; now-soft and next-soft are roles of their own */
+  --gk-role-line-done: var(--gk-role-ui-muted, #6f767d);     --gk-role-line-now: var(--oc-blue-8, #1971c2);
+  --gk-role-line-now-soft: var(--oc-blue-0, #e7f5ff); --gk-role-line-next: color-mix(in srgb, var(--oc-blue-7, #1c7ed6), var(--oc-black, #000) 6%);
+  --gk-role-line-next-soft: var(--oc-blue-0, #e7f5ff); --gk-role-line-expected: var(--oc-violet-6, #7950f2);
+  --gk-role-line-stroke: var(--oc-gray-9, #212529);   --gk-role-line-track: var(--oc-gray-6, #868e96);
+  /* where a change shows: the marker's outline and the flags new, changed and gone; the info role by default, with
+     -soft its light tone, so that a theme and the dark mode carry it as they carry info */
+  --gk-role-ui-effect: var(--gk-role-alert-info, var(--oc-blue-8, #1971c2));
+  --gk-role-ui-effect-soft: var(--gk-role-alert-info-soft, var(--oc-blue-0, #e7f5ff));
+  /* what one has chosen, with -soft, also a switch that is on; the sentence's logic */
+  --gk-role-ui-choice: var(--oc-blue-8, #1971c2);     --gk-role-ui-choice-soft: var(--oc-blue-0, #e7f5ff);
+  --gk-role-logic-and: var(--oc-gray-7, #495057);     --gk-role-logic-or: var(--oc-violet-8, #6741d9);
+  --gk-role-logic-not: var(--oc-red-8, #e03131);
+  /* a link that leads out of the instance, with -soft for a card's head */
+  --gk-role-link-external: var(--oc-cyan-9, #0b7285); --gk-role-link-external-soft: var(--oc-cyan-0, #e3fafc);
+}
+.gk-gui-stuff-cat-1 { --gk-gui-fg: var(--gk-role-category-1); --gk-gui-bg: var(--gk-role-category-1-soft); }
+.gk-gui-stuff-cat-2 { --gk-gui-fg: var(--gk-role-category-2); --gk-gui-bg: var(--gk-role-category-2-soft); }
+.gk-gui-stuff-cat-3 { --gk-gui-fg: var(--gk-role-category-3); --gk-gui-bg: var(--gk-role-category-3-soft); }
+.gk-gui-stuff-cat-4 { --gk-gui-fg: var(--gk-role-category-4); --gk-gui-bg: var(--gk-role-category-4-soft); }
+.gk-gui-stuff-cat-5 { --gk-gui-fg: var(--gk-role-category-5); --gk-gui-bg: var(--gk-role-category-5-soft); }
+.gk-gui-stuff-cat-6 { --gk-gui-fg: var(--gk-role-category-6); --gk-gui-bg: var(--gk-role-category-6-soft); }
+.gk-gui-stuff-cat-7 { --gk-gui-fg: var(--gk-role-category-7); --gk-gui-bg: var(--gk-role-category-7-soft); }
+.gk-gui-stuff-cat-8 { --gk-gui-fg: var(--gk-role-category-8); --gk-gui-bg: var(--gk-role-category-8-soft); }
+.gk-gui-stuff-cat-9 { --gk-gui-fg: var(--gk-role-category-9); --gk-gui-bg: var(--gk-role-category-9-soft); }
+.gk-gui-stuff-cat-10 { --gk-gui-fg: var(--gk-role-category-10); --gk-gui-bg: var(--gk-role-category-10-soft); }
+.gk-gui-stuff-cat-11 { --gk-gui-fg: var(--gk-role-category-11); --gk-gui-bg: var(--gk-role-category-11-soft); }
+.gk-gui-stuff-cat-12 { --gk-gui-fg: var(--gk-role-category-12); --gk-gui-bg: var(--gk-role-category-12-soft); }
+.gk-gui-stuff-alert-info { --gk-gui-fg: var(--gk-role-alert-info); --gk-gui-bg: var(--gk-role-alert-info-soft); }
+.gk-gui-stuff-alert-warning { --gk-gui-fg: var(--gk-role-alert-warning); --gk-gui-bg: var(--gk-role-alert-warning-soft); }
+.gk-gui-stuff-alert-alarm { --gk-gui-fg: var(--gk-role-alert-alarm); --gk-gui-bg: var(--gk-role-alert-alarm-soft); }
+.gk-gui-stuff-alert-tip { --gk-gui-fg: var(--gk-role-alert-tip); --gk-gui-bg: var(--gk-role-alert-tip-soft); }
+.gk-gui-stuff-alert-notice { --gk-gui-fg: var(--gk-role-alert-notice); --gk-gui-bg: var(--gk-role-alert-notice-soft); }
+/* critical is filled: its background is the strong tone too, with white text */
+.gk-gui-stuff-alert-critical { --gk-gui-fg: var(--gk-role-alert-critical); --gk-gui-bg: var(--gk-role-alert-critical); }
+.gk-gui-stuff-pill.gk-gui-stuff-alert-critical { color: var(--oc-white, #fff); }
+.gk-gui-stuff-role-admin { --gk-gui-fg: var(--gk-role-ui-admin); --gk-gui-bg: var(--gk-role-ui-admin-soft); }
+.gk-gui-stuff-role-muted { --gk-gui-fg: var(--gk-role-ui-muted); --gk-gui-bg: var(--oc-gray-0, #f8f9fa); }
+.gk-gui-stuff-role-choice { --gk-gui-fg: var(--gk-role-ui-choice); --gk-gui-bg: var(--gk-role-ui-choice-soft); }
+.gk-gui-stuff-role-effect { --gk-gui-fg: var(--gk-role-ui-effect); --gk-gui-bg: var(--gk-role-ui-effect-soft); }
+/* a band as a role for a pill: the band's light background, the text and edge the pill's own neutral ones
+   (a band has no strong role); the line's own bands take --gk-gui-band from data-gk-gui-band (gk_gui_stuff_line.css),
+   apart, so that a band never meets a fly's role on the same element; the line's next and now as the role of what a
+   step opens */
+.gk-gui-stuff-role-band-incoming { --gk-gui-bg: var(--gk-role-band-incoming); }
+.gk-gui-stuff-role-band-active { --gk-gui-bg: var(--gk-role-band-active); }
+.gk-gui-stuff-role-band-settled { --gk-gui-bg: var(--gk-role-band-settled); }
+.gk-gui-stuff-role-band-closed { --gk-gui-bg: var(--gk-role-band-closed); }
+.gk-gui-stuff-role-band-archived { --gk-gui-bg: var(--gk-role-band-archived); }
+.gk-gui-stuff-role-line-next { --gk-gui-fg: var(--gk-role-line-next); --gk-gui-bg: var(--gk-role-line-next-soft); }
+.gk-gui-stuff-role-line-now { --gk-gui-fg: var(--gk-role-line-now); --gk-gui-bg: var(--gk-role-line-now-soft); }
+.gk-gui-stuff-sr-only { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* Bricka: one pill, the parts after the text parted by a thin line in its colour; a count inside, quieter */
+.gk-gui-stuff-pill { display: inline-flex; align-items: center; max-inline-size: 100%; padding-inline: 0.45em; border-radius: 9px;
+  font-size: 0.9em; line-height: 1.5; vertical-align: middle; white-space: nowrap;
+  border: 1px solid var(--gk-gui-fg, var(--oc-gray-6, #868e96)); background: var(--gk-gui-bg, var(--oc-gray-0, #f8f9fa));
+  color: var(--gk-gui-fg, var(--oc-gray-8, #343a40)); }
+/* an icon the server draws (sprite_icon, gk_gui_stuff_icon) takes the colour of the text on what carries it, as one a
+   script draws does; Redmine strokes every svg.icon-svg in its dark grey, which is unreadable on a filled surface */
+:is(.gk-gui-stuff-pill, .gk-gui-stuff-icon-button, button.gk-gui-stuff-round-check, .gk-gui-stuff-line-dot, .gk-gui-stuff-banner, .gk-gui-stuff-note-mark) svg.icon-svg:not(.icon-svg-filled) { stroke: currentColor; }
+:is(.gk-gui-stuff-pill, .gk-gui-stuff-icon-button, button.gk-gui-stuff-round-check, .gk-gui-stuff-line-dot, .gk-gui-stuff-banner, .gk-gui-stuff-note-mark) svg.icon-svg-filled { fill: currentColor; }
+.gk-gui-stuff-pill > a { color: inherit; text-decoration: none; }
+.gk-gui-stuff-pill > a:hover, .gk-gui-stuff-pill > a:focus-visible { text-decoration: underline; }
+/* the whole pill one link; a long name is cut short with … while the count and the arrow always stay */
+a.gk-gui-stuff-pill-main { display: inline-flex; align-items: center; align-self: stretch; min-inline-size: 0; }
+.gk-gui-stuff-pill-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-inline-size: 0; unicode-bidi: plaintext; }
+.gk-gui-stuff-pill-count { margin-inline-start: 0.3em; font-size: 0.85em; opacity: 0.8; font-variant-numeric: tabular-nums; }
+/* the text and its smaller count share a baseline, and as one part stand in the middle of the pill whatever else it
+   holds (a type icon, a taller part): a baseline in the pill's own row would lay them at the row's start */
+.gk-gui-stuff-pill-words { display: inline-flex; align-items: baseline; min-inline-size: 0; }
+/* every divider runs over the pill's whole height, also before a part that is an icon, a button or a fold-out box:
+   the part stretches to the pill's inner height and draws the divider itself */
+.gk-gui-stuff-pill-part { align-self: stretch; margin-inline-start: 0.35em; padding-inline-start: 0.35em; border-inline-start: 1px solid currentColor; }
+.gk-gui-stuff-pill-count, .gk-gui-stuff-pill-part { flex: none; }
+.gk-gui-stuff-pill-note { overflow: hidden; text-overflow: ellipsis; max-inline-size: 14em; }
+/* the type's icon, first in the pill and only to read, with no divider between it and the name, only a gap */
+.gk-gui-stuff-pill-type { display: inline-flex; align-items: center; align-self: stretch; flex: none; margin-inline-end: 0.35em; }
+.gk-gui-stuff-pill-type svg, .gk-gui-stuff-pill-note-button svg { flex: none; }
+/* the note as a button that opens a small fly with the whole note; written out, the icon and the text are one part */
+details.gk-gui-stuff-fly.gk-gui-stuff-pill-note-fly { display: inline-flex; align-self: stretch; flex: none; margin-inline-start: 0.35em; vertical-align: baseline; }
+details.gk-gui-stuff-pill-note-fly > summary.gk-gui-stuff-pill-part { display: inline-flex; align-items: center; margin-inline-start: 0; }
+details.gk-gui-stuff-fly.gk-gui-stuff-pill-note-fly[open] > summary.gk-gui-stuff-pill-part { background: none; color: inherit; border-color: currentColor; }
+details.gk-gui-stuff-pill-note-fly > summary:focus-visible { outline: 2px solid var(--gk-role-alert-info); outline-offset: 1px; border-radius: 2px; }
+.gk-gui-stuff-pill-note-button.gk-gui-stuff-pill-note-open { gap: 0.3em; max-inline-size: 14em; min-inline-size: 0; }
+.gk-gui-stuff-pill-note-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-inline-size: 0; unicode-bidi: plaintext; }
+details.gk-gui-stuff-pill-note-fly > .gk-gui-stuff-fly-box { inline-size: max-content; max-inline-size: min(20em, 92vw); border-radius: 4px; white-space: normal;
+  font-size: calc(1em / 0.9); line-height: 1.4; }
+.gk-gui-stuff-fly-box > p.gk-gui-stuff-pill-note-head { margin-block: 0 0.3em; }
+.gk-gui-stuff-fly-box > p.gk-gui-stuff-pill-note-full { margin-block: 0 0.4em; unicode-bidi: plaintext; overflow-wrap: anywhere; }
+/* Ändra lappen: a fold in the note's box, its button drawn as a link; opened, the field, Spara and Avbryt, and the
+   server's error in the alarm role */
+details.gk-gui-stuff-pill-note-change > summary { display: inline; list-style: none; cursor: pointer; text-decoration: underline; }
+details.gk-gui-stuff-pill-note-change > summary::-webkit-details-marker { display: none; }
+details.gk-gui-stuff-pill-note-change[open] > summary { display: none; }
+.gk-gui-stuff-pill-note-form > .gk-gui-stuff-fly-field { inline-size: 100%; box-sizing: border-box; }
+.gk-gui-stuff-pill-note-form > p { margin-block: 0.4em 0; }
+.gk-gui-stuff-pill-note-form > p.gk-gui-stuff-pill-note-error { font-size: 0.9em; color: var(--gk-role-alert-alarm); }
+/* parts that are buttons: the text (a mark to click, or what opens a layer) and the parts after it;
+   (0,2,1) over core's, compat's and theme_engine's button rules; the part that opened a layer stands out (-open), and
+   the dashed pill is possible but not chosen (-dashed); pills to click flow on a row */
+.gk-gui-stuff-pill.gk-gui-stuff-pill-buttons { padding-inline: 0; }
+.gk-gui-stuff-pill button.gk-gui-stuff-pill-button { margin: 0; padding-block: 0; padding-inline: 0.45em; border: 0; border-radius: 0;
+  background: none; font: inherit; line-height: inherit; color: inherit; cursor: pointer; block-size: auto; vertical-align: baseline; }
+.gk-gui-stuff-pill button.gk-gui-stuff-pill-main { display: inline-flex; align-items: center; align-self: stretch; min-inline-size: 0; }
+.gk-gui-stuff-pill-buttons > button.gk-gui-stuff-pill-part { margin-inline-start: 0; border-inline-start: 1px solid currentColor; }
+.gk-gui-stuff-pill button.gk-gui-stuff-pill-button:first-child { border-start-start-radius: 9px; border-end-start-radius: 9px; }
+.gk-gui-stuff-pill button.gk-gui-stuff-pill-button:last-child { border-start-end-radius: 9px; border-end-end-radius: 9px; }
+.gk-gui-stuff-pill button.gk-gui-stuff-pill-button:hover { background: color-mix(in srgb, var(--gk-gui-fg, var(--oc-gray-6, #868e96)) 10%, transparent); }
+.gk-gui-stuff-pill button.gk-gui-stuff-pill-button:focus-visible { outline: 2px solid var(--gk-gui-fg, var(--oc-gray-6, #868e96)); outline-offset: -2px; }
+.gk-gui-stuff-pill.gk-gui-stuff-pill-open > button[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--gk-gui-fg, var(--oc-gray-6, #868e96)) 18%, var(--gk-gui-bg, var(--oc-gray-0, #f8f9fa))); }
+.gk-gui-stuff-pill.gk-gui-stuff-pill-dashed { border-style: dashed; border-color: var(--gk-role-ui-possible); background: none; color: var(--gk-role-ui-possible); }
+/* a pill whose one button is its text, in a chooser (a mark to click): at rest as a pill, the text underlined on
+   hover, a ring in its role 2 px outside on keyboard focus, chosen filled in its role with the check first */
+.gk-gui-stuff-pill.gk-gui-stuff-pill-choice button.gk-gui-stuff-pill-main:hover { background: none; text-decoration: underline; }
+@supports selector(:has(a)) {
+  .gk-gui-stuff-pill.gk-gui-stuff-pill-choice:has(> button.gk-gui-stuff-pill-main:focus-visible) { outline: 2px solid var(--gk-gui-fg, var(--oc-gray-6, #868e96));
+    outline-offset: 2px; }
+  .gk-gui-stuff-pill.gk-gui-stuff-pill-choice button.gk-gui-stuff-pill-main:focus-visible { outline: 0; }
+}
+.gk-gui-stuff-pill-choice button.gk-gui-stuff-pill-main > .gk-gui-stuff-pill-check { display: inline-flex; flex: none; margin-inline-end: 0.25em; }
+.gk-gui-stuff-pill-row { display: flex; flex-wrap: wrap; gap: 4px; }
+/* a quiet pill among quiet text (an issue's history): dimmed like the text around it in its own role, so it follows
+   the light and the dark scheme alike, and clear under the pointer or in focus; struck, a tag taken away */
+.gk-gui-stuff-pill.gk-gui-stuff-pill-quiet { opacity: 0.75; }
+.gk-gui-stuff-pill.gk-gui-stuff-pill-quiet:hover, .gk-gui-stuff-pill.gk-gui-stuff-pill-quiet:focus-within { opacity: 1; }
+.gk-gui-stuff-pill.gk-gui-stuff-pill-struck .gk-gui-stuff-pill-text { text-decoration: line-through; }
+/* the system's suggestion: the pill dashed in the role info with "Förslag" last, and its row */
+.gk-gui-stuff-pill.gk-gui-stuff-pill-suggested { --gk-gui-fg: var(--gk-role-alert-info); --gk-gui-bg: var(--gk-role-alert-info-soft); border-style: dashed; }
+.gk-gui-stuff-suggestion { display: inline-block; margin-block: 4px 0; padding-block: 2px; padding-inline: 8px; border: 1px dashed var(--gk-role-alert-info);
+  border-radius: 3px; background: var(--gk-role-alert-info-soft); font-size: 12px; }
+/* the last part with the arrow to the page, mirrored right to left; each link shows its focus */
+a.gk-gui-stuff-pill-page { display: inline-flex; align-items: center; align-self: stretch; padding-inline: 0.3em; }
+a.gk-gui-stuff-pill-page svg { inline-size: 11px; block-size: 11px; }
+[dir="rtl"] a.gk-gui-stuff-pill-page svg { transform: scaleX(-1); }
+.gk-gui-stuff-pill > a:focus-visible { outline: 2px solid var(--gk-role-alert-info); outline-offset: 1px; border-radius: 2px; }
+a.gk-gui-stuff-pill-x { display: inline-flex; align-items: center; }
+a.gk-gui-stuff-pill-x:hover { text-decoration: none; opacity: 0.7; }
+/* the x as a button (GkGui.pill in a field): the part's divider stays */
+button.gk-gui-stuff-pill-x { display: inline-flex; align-items: center; margin-block: 0; margin-inline-end: 0; padding-block: 0; padding-inline-end: 0;
+  border-block: 0; border-inline-end: 0; background: none; color: inherit; font: inherit; cursor: pointer; }
+button.gk-gui-stuff-pill-x:hover { opacity: 0.7; }
+.gk-gui-stuff-pill-chosen { background: var(--gk-gui-fg, var(--oc-gray-7, #495057)); color: var(--oc-white, #fff); }
+/* a condition's operator and value: the value cut with … and whole in its tooltip */
+.gk-gui-stuff-pill-op { opacity: 0.8; }
+.gk-gui-stuff-pill-value { display: inline-block; max-inline-size: 14em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+
+/* Meningen: a frame (or none, inline) around the lead, the pills, the words, the parentheses, the quiet text
+   and "+ Villkor", a plain button as core's; a rail with no address, its bar changed while something waits;
+   the words in the logic roles, the parentheses quiet; it only wraps on a narrow screen */
+.gk-gui-stuff-sentence.gk-gui-stuff-rail { display: flex; flex-wrap: wrap; gap: 5px; align-items: center; padding-block: 5px; padding-inline: 8px 20px;
+  border: 1px solid var(--gk-role-ui-divider); border-radius: 4px; background: var(--oc-gray-0, #f8f9fa); }
+.gk-gui-stuff-sentence.gk-gui-stuff-rail.gk-gui-stuff-sentence-inline { border: 0; background: none; padding-block: 0; padding-inline: 0 20px; }
+.gk-gui-stuff-sentence-inline > .gk-gui-stuff-rail-bar { visibility: hidden; }
+.gk-gui-stuff-sentence-inline[data-gk-gui-save="changed"] > .gk-gui-stuff-rail-bar { visibility: visible; }
+.gk-gui-stuff-sentence-lead { margin-inline-end: 0.2em; }
+.gk-gui-stuff-sentence-empty, .gk-gui-stuff-sentence-text, .gk-gui-stuff-sentence-keys { color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-sentence-text, .gk-gui-stuff-sentence-keys { font-size: 0.9em; }
+.gk-gui-stuff-sentence-keys { margin-block: 0.4em 0; }
+.gk-gui-stuff-sentence button.gk-gui-stuff-sentence-word, .gk-gui-stuff-sentence span.gk-gui-stuff-sentence-word { margin: 0; padding-block: 0; padding-inline: 4px;
+  border: 1px dashed transparent; border-radius: 3px; background: none; font: inherit; font-style: italic; cursor: pointer; color: var(--gk-role-logic-and); }
+.gk-gui-stuff-sentence button.gk-gui-stuff-sentence-word:is(:hover, :focus-visible) { border-color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-sentence .gk-gui-stuff-sentence-word.gk-gui-stuff-sentence-or { color: var(--gk-role-logic-or); font-weight: bold; }
+.gk-gui-stuff-sentence .gk-gui-stuff-sentence-word.gk-gui-stuff-sentence-not { color: var(--gk-role-logic-not); font-weight: bold; }
+.gk-gui-stuff-sentence span.gk-gui-stuff-sentence-word-fixed { cursor: default; }
+.gk-gui-stuff-sentence-paren { display: inline-flex; flex-wrap: wrap; gap: 5px; align-items: center; }
+.gk-gui-stuff-sentence-paren::before, .gk-gui-stuff-sentence-paren::after { color: var(--gk-role-ui-muted); font-size: 1.2em; }
+.gk-gui-stuff-sentence-paren::before { content: "("; }
+.gk-gui-stuff-sentence-paren::after { content: ")"; }
+.gk-gui-stuff-sentence button.gk-gui-stuff-sentence-add { display: inline-flex; align-items: center; gap: 0.3em; }
+a.gk-gui-stuff-sentence-remove { align-self: center; color: var(--gk-role-alert-alarm); }
+
+/* Innehållsförteckningen: the row that follows at the top, under the row menu (z-index 35) */
+.gk-gui-stuff-toc { position: sticky; inset-block-start: 0; z-index: 35; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; padding-block: 6px; padding-inline: 10px;
+  margin-block-end: 0.6em; border-block-end: 1px solid var(--gk-role-ui-divider); background: var(--gk-role-ui-surface); font-size: 0.9em; }
+/* on a phone core's header is fixed over #main: the row sticks under it, the instance band and the login warning */
+@media (max-width: 899px) {
+  .gk-gui-stuff-toc { inset-block-start: calc(64px + var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
+}
+.gk-gui-stuff-toc-part { color: var(--gk-role-ui-muted); font-weight: bold; font-size: 0.85em; text-transform: uppercase; }
+.gk-gui-stuff-toc a { text-decoration: none; }
+.gk-gui-stuff-toc a[aria-current="location"] { font-weight: bold; border-block-end: 2px solid currentColor; }
+
+/* Färgrollerna som rutor: the strong tone and the soft one, striped where there is none, the name and the
+   custom property; the names stand at the start beside their tones wherever the swatches are put (a centred table
+   cell as core's lists has them included), so that they never move sideways from one row to the next */
+.gk-gui-stuff-role-swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 6px; text-align: start; }
+.gk-gui-stuff-role-swatch { display: flex; gap: 4px; align-items: center; text-align: start; }
+.gk-gui-stuff-role-swatch-tone { flex: none; inline-size: 28px; block-size: 28px; box-sizing: border-box; border-radius: 4px;
+  border: 1px solid color-mix(in srgb, var(--oc-black, #000) 10%, transparent); background: var(--gk-gui-fg); }
+.gk-gui-stuff-role-swatch-tone.gk-gui-stuff-role-swatch-soft { background: var(--gk-gui-bg); }
+.gk-gui-stuff-role-swatch-tone.gk-gui-stuff-role-swatch-none { background: repeating-linear-gradient(45deg, var(--gk-role-ui-surface) 0 4px, var(--oc-gray-2, #e9ecef) 4px 8px); }
+.gk-gui-stuff-role-swatch-name { display: flex; flex-direction: column; min-inline-size: 0; font-size: 0.9em; }
+/* the custom property as a chip of code text */
+.gk-gui-stuff-role-swatch-name code { align-self: start; padding-inline: 3px; border: 1px solid var(--gk-role-ui-code); border-radius: 3px;
+  background: var(--gk-role-ui-code-soft); font-size: 0.85em; overflow-wrap: anywhere; }
+/* the shadow's base colour reads as nothing filled: its swatch is a surface that casts it, close and dark enough to
+   be seen at the swatch's size (a wide soft shadow on a 28 px box read as a white box) */
+.gk-gui-stuff-role-swatch-shadow .gk-gui-stuff-role-swatch-tone:first-child { border-color: var(--gk-role-ui-divider); background: var(--gk-role-ui-surface);
+  box-shadow: 2px 3px 5px color-mix(in srgb, var(--gk-role-ui-shadow) 45%, transparent); }
+/* the tile (large: true): a frame with both tones large side by side, each with its word, the name and the property
+   under them; "ingen" over the stripes; the shadow's surface stands inset so that the shadow it casts is seen */
+.gk-gui-stuff-role-swatches-large { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.gk-gui-stuff-role-swatch-large { display: flex; flex-direction: column; align-items: stretch; gap: 0; overflow: hidden; border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-3, #dee2e6));
+  border-radius: 6px; background: var(--gk-role-ui-surface, var(--oc-white, #fff)); }
+.gk-gui-stuff-role-swatch-tones { display: grid; grid-template-columns: 1fr 1fr; block-size: 52px; }
+.gk-gui-stuff-role-swatch-large .gk-gui-stuff-role-swatch-tone { display: flex; align-items: flex-end; inline-size: auto; block-size: auto; border: 0; border-radius: 0; padding: 2px 6px; }
+.gk-gui-stuff-role-swatch-word { font-size: 0.75em; line-height: 1.3; padding-inline: 3px; border-radius: 2px; background: var(--gk-role-ui-surface, var(--oc-white, #fff)); color: var(--oc-gray-7, #495057); }
+.gk-gui-stuff-role-swatch-large .gk-gui-stuff-role-swatch-name { padding: 6px 8px; }
+.gk-gui-stuff-role-swatch-large.gk-gui-stuff-role-swatch-shadow .gk-gui-stuff-role-swatch-tone:first-child { margin: 8px 10px 10px; border: 1px solid var(--gk-role-ui-divider); border-radius: 4px;
+  box-shadow: 2px 3px 8px color-mix(in srgb, var(--gk-role-ui-shadow) 45%, transparent); }
+
+/* Meningsvy och Klassisk vy: the administrator's row for all pages, a quiet tone */
+tr.gk-gui-stuff-meaning-all > * { background: var(--oc-gray-0, #f8f9fa); }
+/* a row's latest change, quiet, last in its name cell */
+.gk-gui-stuff-meaning-last { display: flex; align-items: center; gap: 4px; margin-block-start: 3px; font-size: 11px; font-weight: normal;
+  color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-meaning-last[hidden] { display: none; }
+.gk-gui-stuff-meaning-last-text { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-inline-size: 0; }
+/* A form with radio buttons in columns (Off, Optional, Forced): the column's heading stands centred over the choices,
+   as the radio buttons under it */
+table.list :is(th, td).gk-gui-stuff-choice-col { text-align: center; }
+
+/* Räknaren: filled in its alert role by a name; quiet as a plain number in a heading */
+.gk-gui-stuff-count { display: inline-flex; align-items: center; justify-content: center; min-inline-size: 18px; block-size: 18px; padding-inline: 5px;
+  border-radius: 9px; background: var(--gk-gui-fg, var(--gk-role-alert-warning)); color: var(--oc-white, #fff); font-size: 11px; font-weight: bold;
+  font-variant-numeric: tabular-nums; vertical-align: middle; }
+.gk-gui-stuff-count.gk-gui-stuff-count-quiet { min-inline-size: 0; padding-inline: 0; background: none; color: var(--gk-role-ui-muted); font-size: 0.9em; font-weight: normal; }
+
+/* Grupp: a 3 px edge and the heading in the role, the heading a button that folds */
+.gk-gui-stuff-group { --gk-gui-fg-group: var(--gk-gui-fg, var(--gk-role-ui-muted)); border-inline-start: 3px solid var(--gk-gui-fg-group);
+  padding-inline-start: 6px; margin-block: 0 0.6em; }
+h2.gk-gui-stuff-group-head, h3.gk-gui-stuff-group-head, h4.gk-gui-stuff-group-head, h5.gk-gui-stuff-group-head, h6.gk-gui-stuff-group-head {
+  margin: 0; padding: 0; border: 0; background: none; font-size: 1em; }
+.gk-gui-stuff-group-toggle { display: inline-flex; align-items: center; gap: 0.3em; margin: 0; padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; font-weight: bold; color: var(--gk-gui-fg-group); }
+.gk-gui-stuff-group-toggle svg { transition: transform 0.15s; }
+.gk-gui-stuff-group-toggle[aria-expanded="false"] svg { transform: rotate(-90deg); }
+[dir="rtl"] .gk-gui-stuff-group-toggle[aria-expanded="false"] svg { transform: rotate(90deg); }
+.gk-gui-stuff-group-body { margin-block-start: 0.25em; }
+
+/* The layers over the page, one scale for all: inside an open fly its box 30 and its button 31; the sticky
+   table head 30; the table of contents 35; the row menu 40; the ribbon 50; an open fly 55, a rail's reason
+   box 55 and a mount's box 55, so that a box from the top menu lies over the ribbon; below 899 px the dimmed page
+   behind a sheet 59 and every sheet 60; the corner and the layer 60; the history list in the top menu 900; the
+   drawer 1800; Visa var's arrows and Tillbaka 1850; the notices 1900; the surface 2000; outside the scale, the ribbon below 899 px 10000, over core's
+   fixed header (9999), and the instance band 10001 over it. */
+/* GkGui.fly: the fold-out box fastened to its button like a tab. The open button and the box share a frame;
+   the box is laid over the page under the button, from its start edge (or its end edge when that side is short).
+   A fly never stands inside a <p> (the parser closes the p at the details) */
+details.gk-gui-stuff-fly { position: relative; display: inline-block; vertical-align: top; }
+details.gk-gui-stuff-fly[open] { z-index: 55; }
+/* the icon alone as the button (core's add icon), in the middle of its row */
+details.gk-gui-stuff-fly-icon-only { vertical-align: middle; margin-inline-start: 0.2em; }
+details.gk-gui-stuff-fly > summary { list-style: none; cursor: pointer; }
+details.gk-gui-stuff-fly > summary::-webkit-details-marker { display: none; }
+/* tap: the icon alone on a press surface of 24 x 24 px, the icon in em so that it follows the text and in the role's
+   colour, also open. The middle of a line's text lies about a third of the font's size over the baseline, and the box's
+   baseline is the icon's lower edge, so an icon of 1.2em stands in the middle at a quarter of the size below it. */
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-tap { vertical-align: -0.25em; margin-inline-start: 0; }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-tap > summary { display: flex; align-items: center; justify-content: center; box-sizing: border-box;
+  inline-size: 24px; block-size: 24px; border-radius: 4px; color: var(--gk-gui-fg, inherit); }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-tap > summary svg { display: block; inline-size: 1.2em; block-size: 1.2em; }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-tap > summary:is(:hover, :focus-visible) { background: var(--gk-gui-bg, transparent); }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-tap[open] > summary { border-radius: 4px; color: var(--gk-gui-fg, inherit); background: var(--gk-gui-bg, transparent); }
+details.gk-gui-stuff-fly[open] > summary { position: relative; z-index: 31; border-end-start-radius: 0; border-end-end-radius: 0;
+  border-block-end-color: var(--gk-role-ui-surface); background: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529); }
+/* plain text as the button (Visa): open, the word gets the box's frame as a tab on the sides that do not meet the box,
+   so that the box belongs to what opened it. The tab is drawn around the word and takes no room: nothing moves when it
+   comes. It reaches 4 px past the word on both sides and 1 px down over the box's upper edge, and the box moves out by
+   the same 4 px so that the frames meet; its colour is the box's edge, the role's with a role */
+details.gk-gui-stuff-fly[open] > summary.gk-gui-stuff-fly-plain::before { content: ""; position: absolute; z-index: -1;
+  inset-block: -2px -1px; inset-inline: -4px; border: 1px solid var(--gk-role-ui-frame); border-block-end: 0;
+  border-start-start-radius: 3px; border-start-end-radius: 3px; background: var(--gk-role-ui-surface); }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-roled[open] > summary.gk-gui-stuff-fly-plain::before { border-color: var(--gk-gui-fg); }
+details.gk-gui-stuff-fly:has(> summary.gk-gui-stuff-fly-plain) > .gk-gui-stuff-fly-box { inset-inline-start: -4px; }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-end:has(> summary.gk-gui-stuff-fly-plain) > .gk-gui-stuff-fly-box { inset-inline-start: auto; inset-inline-end: -4px; }
+details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box { position: absolute; z-index: 30; inset-block-start: calc(100% - 1px); inset-inline-start: 0;
+  inline-size: max-content; max-inline-size: min(32em, 92vw); padding: 0.6em 0.8em; text-align: start; color: var(--oc-gray-9, #212529);
+  background: var(--gk-role-ui-surface); border: 1px solid var(--gk-role-ui-frame); border-radius: 4px; border-start-start-radius: 0;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--gk-role-ui-shadow) 12%, transparent); }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-end > .gk-gui-stuff-fly-box { inset-inline-start: auto; inset-inline-end: 0; border-start-start-radius: 4px; border-start-end-radius: 0; }
+.gk-gui-stuff-fly-box > p, .gk-gui-stuff-fly-box > form > p { margin-block: 0 0.5em; }
+.gk-gui-stuff-fly-box textarea, .gk-gui-stuff-fly-box .gk-gui-stuff-fly-field { inline-size: 100%; box-sizing: border-box; }
+.gk-gui-stuff-fly-hint { margin: 0; font-size: 0.9em; color: var(--gk-role-ui-muted); }
+table.gk-gui-stuff-fly-table td { padding-block: 2px; padding-inline: 4px; }
+.gk-gui-stuff-fly-buttons { display: flex; flex-wrap: wrap; gap: 6px; margin-block-start: 0.6em; }
+/* The alarm button wins by its selector's specificity, never !important: (0,2,1) over core's
+   button[type="submit"] (0,1,1) and (0,3,1) over its :hover (0,2,1); a theme that overrides it answers for that */
+:is(button, input).gk-gui-stuff-btn-alarm[type], a.gk-gui-stuff-btn-alarm[href] {
+  background-color: var(--gk-role-alert-alarm, var(--oc-red-9, #c92a2a)); border-color: var(--gk-role-alert-alarm, var(--oc-red-9, #c92a2a));
+  color: var(--oc-white, #fff); }
+:is(button, input).gk-gui-stuff-btn-alarm[type]:is(:hover, :focus-visible), a.gk-gui-stuff-btn-alarm[href]:is(:hover, :focus-visible) {
+  background-color: color-mix(in srgb, var(--gk-role-alert-alarm, var(--oc-red-9, #c92a2a)) 85%, var(--oc-black, #000));
+  color: var(--oc-white, #fff); text-decoration: none; }
+/* core's button box (its input, select, textarea, button) for what core does not draw as one, since core has no
+   .button rule: the link Stega upp and the button that opens a fly, not the icon alone nor plain text; the
+   open fly's tab shape lies over it. Its word stays on one line as core's buttons do, also in a narrow cell */
+a.gk-gui-stuff-btn-admin[href], details.gk-gui-stuff-fly > summary:where(.gk-gui-stuff-fly-button:not(.icon-only, .gk-gui-stuff-fly-plain)) {
+  padding-block: 4px; padding-inline: 7px; border: 1px solid var(--gk-role-ui-frame); border-radius: 3px;
+  background-color: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529); text-decoration: none; white-space: nowrap; }
+details.gk-gui-stuff-fly:not([open]) > summary:where(.gk-gui-stuff-fly-button:not(.icon-only, .gk-gui-stuff-fly-plain)):hover { background-color: var(--oc-gray-2, #e9ecef); }
+a.gk-gui-stuff-btn-admin[href] { display: inline-block; border-color: var(--gk-role-ui-admin, var(--oc-violet-8, #6741d9));
+  color: var(--gk-role-ui-admin, var(--oc-violet-8, #6741d9)); }
+a.gk-gui-stuff-btn-admin[href]:is(:hover, :focus-visible) { color: var(--gk-role-ui-admin, var(--oc-violet-8, #6741d9));
+  background-color: var(--gk-role-ui-admin-soft, var(--oc-violet-0, #f3f0ff)); text-decoration: none; }
+/* the box's edge follows the role of the button that opened it, grey without one; the class roled, since an
+   enclosing group or pill also sets the role's colour. The button stays grey at rest; open, its tab shares the box's
+   frame and keeps its white bottom edge */
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-roled > .gk-gui-stuff-fly-box { border-color: var(--gk-gui-fg); }
+details.gk-gui-stuff-fly.gk-gui-stuff-fly-roled[open] > summary { border-color: var(--gk-gui-fg); border-block-end-color: var(--gk-role-ui-surface); }
+/* Knapp med skäl, Valfritt: [ Ordet | ✎ ] as one button in two parts, of core's submit height; as its own
+   form it stands in the line */
+.gk-gui-stuff-btn-split { display: inline-flex; align-items: center; vertical-align: middle; }
+/* the two buttons of the split (Valfritt's [ Spara | pen ] in place) take the same height, the taller one's, so that
+   their edges meet; a details half (the form's split) stays centred */
+.gk-gui-stuff-btn-split > button { align-self: stretch; }
+.gk-gui-stuff-btn-split > button.gk-gui-stuff-btn-split-main { margin-inline-end: 0; border-start-end-radius: 0; border-end-end-radius: 0; }
+.gk-gui-stuff-btn-split > details > summary.gk-gui-stuff-fly-button { display: inline-flex; align-items: center; box-sizing: border-box; block-size: 28px;
+  border-inline-start: 0; border-start-start-radius: 0; border-end-start-radius: 0; padding-inline: 5px; }
+form.gk-gui-stuff-reason-form { display: inline-block; vertical-align: middle; }
+/* The reason in a box: the heading, what the change does, the text, the line about the history,
+   the error; the quiet keys last among the buttons */
+.gk-gui-stuff-reason, .gk-gui-stuff-reason-head, .gk-gui-stuff-reason-what, .gk-gui-stuff-reason-hint, .gk-gui-stuff-reason-error { display: block; }
+.gk-gui-stuff-reason-head { margin-block: 0 0.2em; font-weight: bold; }
+.gk-gui-stuff-reason-optional-word { font-weight: normal; font-size: 0.9em; color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-reason-what, .gk-gui-stuff-reason-hint { margin-block: 0 0.4em; font-size: 0.9em; color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-reason-hint { margin-block: 0.2em 0; }
+.gk-gui-stuff-reason-error { margin-block: 0.2em 0; font-size: 0.9em; color: var(--gk-role-alert-alarm); }
+.gk-gui-stuff-reason-error[hidden] { display: none; }
+.gk-gui-stuff-reason textarea { inline-size: 100%; box-sizing: border-box; }
+.gk-gui-stuff-reason-keys { margin-inline-start: auto; align-self: center; font-size: 0.85em; color: var(--gk-role-ui-muted); }
+/* Every box with a reason: the question or the warning first, then the box's buttons, and the reason on its own
+   line under them. What a mount's change does is the box's first line, in the box's own text; buttons that open the
+   box take no room above them */
+.gk-gui-stuff-fly-buttons + :is(.gk-gui-stuff-reason, .gk-gui-stuff-save-reason-label) { margin-block-start: 0.6em; }
+.gk-gui-stuff-fly-box > .gk-gui-stuff-fly-buttons:first-child { margin-block-start: 0; }
+.gk-gui-stuff-mount-box > .gk-gui-stuff-reason-what { font-size: 1em; color: inherit; }
+
+/* Åtgärdskort: a heading, what it does, its button; in the role alarm for what cannot be undone */
+.gk-gui-stuff-action-card { padding: 0.6em 0.8em; margin-block: 0 0.6em; border: 1px solid var(--gk-role-ui-divider); border-radius: 4px;
+  background: var(--oc-gray-0, #f8f9fa); }
+.gk-gui-stuff-action-card-title { margin: 0 0 0.3em; font-size: 1em; }
+.gk-gui-stuff-action-card-text { margin: 0 0 0.5em; }
+.gk-gui-stuff-action-card-actions { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.gk-gui-stuff-action-card-alarm { border-color: var(--gk-role-alert-alarm); background: var(--gk-role-alert-alarm-soft); }
+.gk-gui-stuff-action-card-alarm > .gk-gui-stuff-action-card-title { color: var(--gk-role-alert-alarm); }
+
+/* Bara för administratörer: the crossed-out eye and a dashed edge in the role admin; a box also a soft tone */
+.gk-gui-stuff-admin-only { position: relative; border: 1px dashed var(--gk-role-ui-admin); border-radius: 4px; }
+.gk-gui-stuff-admin-only-box { display: block; padding: 0.4em 0.6em; margin-block: 0.3em; background: var(--gk-role-ui-admin-soft); }
+.gk-gui-stuff-admin-only-inline { display: inline-flex; align-items: center; gap: 0.25em; padding-inline: 0.3em; }
+.gk-gui-stuff-admin-only-eye { display: inline-flex; color: var(--gk-role-ui-admin); vertical-align: middle; margin-inline-end: 0.25em; }
+.gk-gui-stuff-admin-only-box > .gk-gui-stuff-admin-only-eye { float: inline-start; margin-block-start: 0.15em; }
+/* Låset: the action with a lock in the same dashed edge, opening the fly with Stega upp */
+summary.gk-gui-stuff-lock { display: inline-flex; align-items: center; gap: 0.35em; padding-block: 2px; padding-inline: 8px; border: 1px dashed var(--gk-role-ui-admin);
+  border-radius: 3px; background: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529); }
+summary.gk-gui-stuff-lock svg { color: var(--gk-role-ui-admin); }
+
+/* The save bar: 3 px on the row's end side, never the start where the issue lists' marks stand; the quiet word lies over the
+   row's empty end and takes no room. Saved stays 3 s and fades back in 2 s; failed stays until the row changes. */
+.gk-gui-stuff-rail { position: relative; padding-inline-end: 12px; }
+.gk-gui-stuff-rail-bar { position: absolute; inset-block: 3px; inset-inline-end: 0; inline-size: 3px; border-radius: 2px; background: var(--gk-role-save-direct);
+  transition: background-color 2s; }
+.gk-gui-stuff-rail[data-gk-gui-save="changed"] > .gk-gui-stuff-rail-bar { background: var(--gk-role-save-changed); transition: none; }
+.gk-gui-stuff-rail[data-gk-gui-save="saved"] > .gk-gui-stuff-rail-bar { background: var(--gk-role-save-saved); transition: none; }
+.gk-gui-stuff-rail[data-gk-gui-save="failed"] > .gk-gui-stuff-rail-bar { background: var(--gk-role-save-failed); transition: none; }
+.gk-gui-stuff-save-status { position: absolute; inset-inline-end: 10px; inset-block-end: 0; font-size: 0.8em; color: var(--gk-role-ui-muted);
+  pointer-events: none; white-space: nowrap; opacity: 0; transition: opacity 2s; }
+.gk-gui-stuff-save-status.gk-gui-stuff-save-status-on { opacity: 1; transition: none; }
+.gk-gui-stuff-rail[data-gk-gui-save="failed"] > .gk-gui-stuff-save-status { color: var(--gk-role-save-failed); }
+/* a rail in a line of text (tag: :span) is one box, so that its bar stands at its end and never runs through a control
+   that wraps inside it; a rail alone in a table cell hugs its controls, so that the bar and the word stand beside them
+   and not at the far edge of a wide or centred cell; there the word lies after the bar, still taking no room, and is
+   emptied when it has faded so that it never widens a scrolling list. Several rails in one cell hug the same way; a
+   line break between them stacks them. A rail that fills its row (the line, the sentence, an order that saves at once)
+   keeps its full width */
+span.gk-gui-stuff-rail { display: inline-block; vertical-align: middle; max-inline-size: 100%; }
+:is(td, th) > div.gk-gui-stuff-rail:not([hidden], .gk-gui-stuff-line, .gk-gui-stuff-sentence, :has(> .gk-gui-stuff-order)) {
+  display: inline-block; vertical-align: middle; max-inline-size: 100%; text-align: start; }
+:is(td, th) > div.gk-gui-stuff-rail:not([hidden], .gk-gui-stuff-line, .gk-gui-stuff-sentence, :has(> .gk-gui-stuff-order)) > .gk-gui-stuff-save-status { inset-inline: calc(100% + 6px) auto; inset-block: 50% auto; transform: translateY(-50%); }
+.gk-gui-stuff-rail[hidden] { display: none; }
+/* The sweep (GkGui.save, the setting save_sweep): a line along the row's lower edge, 3 px as the bar, from the control
+   (--gk-gui-sweep-from, measured by the script) to the row's end, under the bar. It grows in the role changed in 0.5 s,
+   takes the answer's state in 0.15 s and then its start runs to the end in 0.5 s, so that it shrinks into the bar. Only
+   its own insets move, in logical directions, so that right to left mirrors it and nothing else on the row is touched. */
+.gk-gui-stuff-rail-sweep { position: absolute; inset-block-end: 0; inset-inline-start: calc(var(--gk-gui-sweep-from, 0px) + 0.25em); inset-inline-end: calc(100% - var(--gk-gui-sweep-from, 0px) - 0.25em);
+  block-size: 3px; border-radius: 2px; background: var(--gk-role-save-changed); pointer-events: none; }
+.gk-gui-stuff-rail-sweep[data-gk-gui-sweep="saved"] { background: var(--gk-role-save-saved); }
+.gk-gui-stuff-rail-sweep[data-gk-gui-sweep="failed"] { background: var(--gk-role-save-failed); }
+.gk-gui-stuff-rail-sweep[data-gk-gui-sweep-step="grow"] { inset-inline-end: 0; transition: inset-inline-end 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.gk-gui-stuff-rail-sweep[data-gk-gui-sweep-step="shrink"] { inset-inline-start: 100%; inset-inline-end: 0; transition: inset-inline-start 0.5s cubic-bezier(0.4, 0, 0.2, 1) 0.15s, background-color 0.15s; }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-rail-sweep { display: none; } }
+.gk-gui-stuff-rail .gk-gui-stuff-save-reason { position: absolute; z-index: 55; inset-block-start: 100%; inset-inline-end: 0; min-inline-size: 18em; }
+.gk-gui-stuff-save-reason-label { display: block; font-weight: bold; margin-block-end: 0.2em; }
+.gk-gui-stuff-direct-note { margin-block: 0 0.4em; font-size: 0.9em; color: var(--gk-role-ui-muted); }
+/* a field of a GK form changed but not saved: the rail in the role changed beside the field's row; the line in a form
+   that is not GK's (core's issue form) marks itself */
+form[data-gk-gui-save-form] .gk-gui-stuff-field-changed, .gk-gui-stuff-line-field.gk-gui-stuff-field-changed { box-shadow: inset -3px 0 0 var(--gk-role-save-changed); }
+[dir="rtl"] form[data-gk-gui-save-form] .gk-gui-stuff-field-changed, [dir="rtl"] .gk-gui-stuff-line-field.gk-gui-stuff-field-changed { box-shadow: inset 3px 0 0 var(--gk-role-save-changed); }
+/* the quiet text by a box's Save: how many are changed, or Sparat for 3 s, fading in 2 */
+.gk-gui-stuff-form-status { margin-inline-start: 0.5em; font-size: 0.9em; color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-form-status.gk-gui-stuff-form-status-saved { opacity: 0; transition: opacity 2s; }
+.gk-gui-stuff-form-status.gk-gui-stuff-form-status-saved.gk-gui-stuff-form-status-on { opacity: 1; transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .gk-gui-stuff-rail-bar, .gk-gui-stuff-save-status, .gk-gui-stuff-group-toggle svg, .gk-gui-stuff-form-status.gk-gui-stuff-form-status-saved,
+  .gk-gui-stuff-switch-track, .gk-gui-stuff-switch-track::after { transition: none; }
+}
+
+/* The forms that save at once */
+/* Fäste: [ sign | switch ] in one rounded frame; the sign the pen (a red star when required) or the lock in
+   the dashed admin edge; the switch says its state in words; locked (required, step up) it is dimmed. The box opens
+   under the switch, a sheet at the bottom on a narrow screen. On takes the role choice. (0,2,1) over core's,
+   compat's and theme_engine's button rules; the [hidden] rules since a class's display would show what is hidden */
+.gk-gui-stuff-mount { position: relative; display: inline-flex; align-items: stretch; vertical-align: middle;
+  border: 1px solid var(--gk-role-ui-frame); border-radius: 999px; background: var(--oc-gray-1, #f1f3f5); }
+.gk-gui-stuff-mount button.gk-gui-stuff-mount-tab { display: inline-flex; align-items: center; gap: 1px; margin: 0; padding-block: 0;
+  padding-inline: 9px 6px; border: 0; border-inline-end: 1px solid var(--gk-role-ui-frame); border-radius: 0;
+  border-start-start-radius: 999px; border-end-start-radius: 999px; background: none; color: var(--gk-role-ui-muted); cursor: pointer; block-size: auto; }
+.gk-gui-stuff-mount button.gk-gui-stuff-mount-tab:hover, .gk-gui-stuff-mount button.gk-gui-stuff-mount-tab:focus-visible {
+  color: var(--oc-gray-9, #212529); background: var(--oc-gray-2, #e9ecef); }
+.gk-gui-stuff-mount button.gk-gui-stuff-switch { display: inline-flex; align-items: center; gap: 6px; margin: 0; padding-block: 3px;
+  padding-inline: 6px 8px; border: 0; border-radius: 0; border-start-end-radius: 999px; border-end-end-radius: 999px;
+  background: none; font: inherit; color: inherit; cursor: pointer; block-size: auto; inline-size: auto; }
+.gk-gui-stuff-mount-bare button.gk-gui-stuff-switch { border-radius: 999px; padding-inline-start: 8px; }
+.gk-gui-stuff-switch-track { position: relative; display: inline-block; inline-size: 30px; block-size: 16px; border-radius: 8px;
+  background: var(--oc-gray-5, #adb5bd); transition: background-color 0.12s; }
+.gk-gui-stuff-switch-track::after { content: ""; position: absolute; inset-block-start: 2px; inset-inline-start: 2px; inline-size: 12px;
+  block-size: 12px; border-radius: 50%; background: var(--oc-white, #fff); transition: inset-inline-start 0.12s; }
+button.gk-gui-stuff-switch[aria-checked="true"] .gk-gui-stuff-switch-track { background: var(--gk-role-ui-choice); }
+button.gk-gui-stuff-switch[aria-checked="true"] .gk-gui-stuff-switch-track::after { inset-inline-start: 16px; }
+.gk-gui-stuff-switch-word { font-size: 0.85em; color: var(--gk-role-ui-muted); min-inline-size: 1.8em; text-align: start; }
+.gk-gui-stuff-mount-locked button.gk-gui-stuff-switch, .gk-gui-stuff-mount-locked button.gk-gui-stuff-round-check { opacity: 0.55; }
+.gk-gui-stuff-mount-locked .gk-gui-stuff-switch-track { filter: grayscale(1); }
+.gk-gui-stuff-mount button.gk-gui-stuff-round-check { margin-block: 2px; margin-inline: 4px 6px; align-self: center; }
+.gk-gui-stuff-mount-elevate { border: 1px dashed var(--gk-role-ui-admin); }
+.gk-gui-stuff-mount-elevate > button.gk-gui-stuff-mount-tab { color: var(--gk-role-ui-admin); border-inline-end-style: dashed;
+  border-inline-end-color: var(--gk-role-ui-admin); }
+/* the box of a mount and of edit in place with a reason: under the control, from its end edge; a sheet below 899 px */
+:is(.gk-gui-stuff-mount, .gk-gui-stuff-inline-edit) > .gk-gui-stuff-mount-box { position: absolute; z-index: 55; inset-block-start: calc(100% + 4px);
+  inset-inline-end: 0; inline-size: min(340px, calc(100vw - 32px)); box-sizing: border-box; padding: 0.6em 0.8em; text-align: start; white-space: normal;
+  background: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529); border: 1px solid var(--gk-role-ui-frame); border-radius: 4px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--gk-role-ui-shadow) 12%, transparent); }
+:is(.gk-gui-stuff-mount, .gk-gui-stuff-inline-edit) > .gk-gui-stuff-mount-box[hidden] { display: none; }
+.gk-gui-stuff-mount > .gk-gui-stuff-mount-box.gk-gui-stuff-mount-box-start { inset-inline-end: auto; inset-inline-start: 0; }
+.gk-gui-stuff-mount > .gk-gui-stuff-mount-box.gk-gui-stuff-mount-box-roled { border-color: var(--gk-gui-fg); }
+/* the segment and the icon toggle in their mount: the frame as rounded as the segment, the segment's own frame
+   gone inside it; locked, the control dimmed with its state still seen: the segment's chosen part keeps its full
+   fill and word, since that is the value one reads and a press on it opens the box */
+.gk-gui-stuff-mount:is(.gk-gui-stuff-mount-segment, .gk-gui-stuff-mount-icon-toggle) { border-radius: 4px; }
+.gk-gui-stuff-mount:is(.gk-gui-stuff-mount-segment, .gk-gui-stuff-mount-icon-toggle) > button.gk-gui-stuff-mount-tab { padding-inline: 6px;
+  border-start-start-radius: 4px; border-end-start-radius: 4px; }
+.gk-gui-stuff-mount > .gk-gui-stuff-segment { border: 0; border-radius: 0; border-start-end-radius: 4px; border-end-end-radius: 4px; }
+.gk-gui-stuff-mount > button.gk-gui-stuff-icon-toggle { padding-block: 2px; padding-inline: 8px; }
+.gk-gui-stuff-mount-locked > .gk-gui-stuff-segment > button:not([aria-pressed="true"]), .gk-gui-stuff-mount-locked > button.gk-gui-stuff-icon-toggle { opacity: 0.55; }
+.gk-gui-stuff-segment { display: inline-flex; vertical-align: middle; border: 1px solid var(--oc-gray-5, #adb5bd); border-radius: 4px; overflow: hidden; }
+/* each part's word on one line: a segment never breaks a part in two in a narrow cell */
+.gk-gui-stuff-segment > button { margin: 0; padding-block: 2px; padding-inline: 10px; border: 0; border-inline-end: 1px solid var(--gk-role-ui-divider); border-radius: 0;
+  background: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529); font: inherit; cursor: pointer; white-space: nowrap; }
+.gk-gui-stuff-segment > button:last-child { border-inline-end: 0; }
+/* the chosen part */
+.gk-gui-stuff-segment > button[aria-pressed="true"] { background: var(--gk-role-ui-choice); border-color: var(--gk-role-ui-choice); color: var(--oc-white, #fff); }
+/* the line's pressed choice in a form, in the role of what one has chosen */
+button.gk-gui-stuff-line-choice[aria-pressed="true"] { background: var(--gk-role-ui-choice); border-color: var(--gk-role-ui-choice); color: var(--oc-white, #fff); }
+button.gk-gui-stuff-icon-toggle { display: inline-flex; margin: 0; padding: 2px; border: 0; background: none; cursor: pointer; color: var(--oc-gray-5, #adb5bd);
+  vertical-align: middle; }
+button.gk-gui-stuff-icon-toggle[aria-pressed="true"] { color: var(--gk-role-alert-warning); }
+/* Ikonknappen: core's icon in a round hit area, in the colour of the text around it; the hover and the focus
+   are a faint round of the same colour */
+:is(a, button).gk-gui-stuff-icon-button { display: inline-flex; align-items: center; justify-content: center; flex: none; box-sizing: border-box;
+  inline-size: 26px; block-size: 26px; margin: 0; padding: 0; border: 0; border-radius: 50%; background: transparent; color: inherit; font: inherit;
+  line-height: 1; cursor: pointer; vertical-align: middle; text-decoration: none; }
+:is(a, button).gk-gui-stuff-icon-button:hover, :is(a, button).gk-gui-stuff-icon-button:focus-visible { background: color-mix(in srgb, currentColor 12%, transparent);
+  color: inherit; text-decoration: none; }
+.gk-gui-stuff-icon-button svg { inline-size: 16px; block-size: 16px; }
+button.gk-gui-stuff-round-check { display: inline-flex; align-items: center; justify-content: center; inline-size: 20px; block-size: 20px; margin: 0; padding: 0;
+  border: 2px solid var(--oc-gray-5, #adb5bd); border-radius: 50%; background: var(--gk-role-ui-surface); color: transparent; cursor: pointer; vertical-align: middle; }
+button.gk-gui-stuff-round-check[aria-checked="true"] { background: var(--gk-role-alert-notice); border-color: var(--gk-role-alert-notice); color: var(--oc-white, #fff); }
+/* GK's round buttons stay round in the dark mode and under a theme: theme_engine gives every button the
+   theme's radius with html.gk-theme-on button (0,1,2), and its basic dark mode puts gk-theme-on on the page's root,
+   while these rules were (0,1,1) or less, so the round check was drawn as a square check box. :root lifts the shape
+   to (0,2,1); no native look either */
+:root button:is(.gk-gui-stuff-round-check, .gk-gui-stuff-icon-button, .gk-gui-stuff-lf-clear, .gk-gui-stuff-flash-count, .gk-gui-stuff-ribbon-action) {
+  -webkit-appearance: none; appearance: none; border-radius: 50%; }
+.gk-gui-stuff-inline-edit { position: relative; display: inline-flex; align-items: center; gap: 4px; }
+.gk-gui-stuff-inline-buttons { display: inline-flex; align-items: center; gap: 4px; }
+/* Valfritt's [ Spara | ✎ ]: the pen as the button's second part */
+.gk-gui-stuff-btn-split > button.gk-gui-stuff-inline-pen { display: inline-flex; align-items: center; margin-inline-start: 0; padding-inline: 5px;
+  border-inline-start: 0; border-start-start-radius: 0; border-end-start-radius: 0; }
+button.gk-gui-stuff-inline-value { margin: 0; padding-block: 1px; padding-inline: 4px; border: 1px dashed transparent; border-radius: 3px; background: none;
+  font: inherit; color: inherit; cursor: text; text-align: start; }
+button.gk-gui-stuff-inline-value:hover, button.gk-gui-stuff-inline-value:focus-visible { border-color: var(--gk-role-ui-frame); }
+/* an empty value says core's word for none, quiet */
+button.gk-gui-stuff-inline-value.gk-gui-stuff-inline-empty { color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-inline-edit input { font: inherit; }
+button.gk-gui-stuff-handle { display: inline-flex; margin: 0; padding: 2px; border: 0; background: none; color: var(--oc-gray-5, #adb5bd); cursor: grab; vertical-align: middle; }
+.gk-gui-stuff-order { list-style: none; margin: 0; padding: 0; }
+.gk-gui-stuff-order-item { display: flex; align-items: center; gap: 6px; padding-block: 2px; }
+.gk-gui-stuff-order-item.gk-gui-stuff-order-moving { opacity: 0.5; }
+/* an order that waits for Spara or Verkställ: an item out of its first place has the rail changed, also in a
+   layer with no GK form */
+.gk-gui-stuff-order-wait .gk-gui-stuff-order-item { padding-inline-end: 12px; }
+.gk-gui-stuff-order-wait .gk-gui-stuff-order-item.gk-gui-stuff-field-changed { box-shadow: inset -3px 0 0 var(--gk-role-save-changed); }
+[dir="rtl"] .gk-gui-stuff-order-wait .gk-gui-stuff-order-item.gk-gui-stuff-field-changed { box-shadow: inset 3px 0 0 var(--gk-role-save-changed); }
+
+/* GkGui.layer: a surface in the upper layer that moves nothing, no dark background; fastened to an element or an edge */
+.gk-gui-stuff-layer { position: fixed; z-index: 60; box-sizing: border-box; max-inline-size: min(40em, calc(100vw - 24px)); max-block-size: calc(100vh - 24px);
+  overflow: auto; padding: 0.6em 0.8em; text-align: start; background: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529);
+  border: 1px solid var(--gk-role-ui-frame); border-radius: 4px; box-shadow: 0 6px 18px color-mix(in srgb, var(--gk-role-ui-shadow) 18%, transparent); }
+/* a panel that needs room (the line's): at most 64em */
+.gk-gui-stuff-layer.gk-gui-stuff-layer-wide { max-inline-size: min(64em, calc(100vw - 24px)); }
+.gk-gui-stuff-layer-head { display: flex; align-items: center; gap: 8px; margin-block-end: 0.4em; }
+.gk-gui-stuff-layer-title { margin: 0; font-size: 1em; }
+.gk-gui-stuff-layer-close { margin-inline-start: auto; display: inline-flex; padding: 2px; border: 0; background: none; cursor: pointer; color: inherit; }
+
+/* Bladet: below 899 px every fly, the box of a mount, of a rail's reason and of edit in place, and every layer
+   opens as a sheet at the bottom of the window, with the grip on top (only drawn; it cannot be dragged), the same
+   content and Avbryt (the script adds it where the box has none); the page behind is dimmed by the open element's own
+   ::before (a press on it is a press outside) or, for a layer, by the element the script lays before it, and does not
+   scroll. The open fly's button keeps its place and its closed look */
+@media (max-width: 899px) {
+  details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box, :is(.gk-gui-stuff-mount, .gk-gui-stuff-inline-edit) > .gk-gui-stuff-mount-box,
+  .gk-gui-stuff-rail > .gk-gui-stuff-save-reason, .gk-gui-stuff-layer.gk-gui-stuff-sheet {
+    position: fixed; z-index: 60; inset-inline: 0; inset-block: auto 0; inline-size: auto; min-inline-size: 0; max-inline-size: none; max-block-size: 85vh;
+    overflow: auto; box-sizing: border-box; border: 0; border-block-start: 1px solid var(--gk-role-ui-frame); border-radius: 0;
+    border-start-start-radius: 12px; border-start-end-radius: 12px; padding-block: 6px 16px; padding-inline: 16px;
+    box-shadow: 0 -4px 14px color-mix(in srgb, var(--gk-role-ui-shadow) 14%, transparent); }
+  details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box::before, :is(.gk-gui-stuff-mount, .gk-gui-stuff-inline-edit) > .gk-gui-stuff-mount-box::before,
+  .gk-gui-stuff-rail > .gk-gui-stuff-save-reason::before, .gk-gui-stuff-layer.gk-gui-stuff-sheet::before {
+    content: ""; display: block; inline-size: 36px; block-size: 4px; margin-block: 0 8px; margin-inline: auto; border-radius: 2px;
+    background: var(--gk-role-ui-frame); }
+  details.gk-gui-stuff-fly[open]::before, :is(.gk-gui-stuff-mount, .gk-gui-stuff-inline-edit, .gk-gui-stuff-rail).gk-gui-stuff-sheet-open::before,
+  .gk-gui-stuff-layer-dim { content: ""; position: fixed; inset: 0; z-index: 59; background: color-mix(in srgb, var(--gk-role-ui-shadow) 40%, transparent); }
+  details.gk-gui-stuff-fly[open] > summary { position: static; }
+  /* a sheet is not fastened to the word: no tab, and the sheet keeps its place */
+  details.gk-gui-stuff-fly[open] > summary.gk-gui-stuff-fly-plain::before { content: none; }
+  details.gk-gui-stuff-fly:has(> summary.gk-gui-stuff-fly-plain) > .gk-gui-stuff-fly-box { inset-inline: 0; }
+  /* the button box back to its closed frame, also when roled (the :is weighs as the roled rule above) */
+  :is(details.gk-gui-stuff-fly.gk-gui-stuff-fly-roled, details.gk-gui-stuff-fly)[open] > summary:where(.gk-gui-stuff-fly-button:not(.icon-only, .gk-gui-stuff-fly-plain)) {
+    border-radius: 3px; border-color: var(--gk-role-ui-frame); }
+  /* the page behind kept from scrolling on the root only: core gives body the window's height below 899 px, so a
+     body that hid its overflow would cut the page to that height and send it back to its top */
+  html.gk-gui-stuff-sheet-lock { overflow: hidden; overscroll-behavior: none; scrollbar-gutter: stable; }
+}
+@media (min-width: 900px) { .gk-gui-stuff-layer-dim { display: none; } }
+
+/* A row only administrators see in core's account menu. Where the account is links in the top menu, the row is a link
+   after My account, underlined in the role admin; on a phone, in core's menu with three bars, it stands under the
+   account with an edge in the role admin. Both menus are dark, so they take the admin role on a dark surface. Where
+   the account is a dropdown (#account.dropdown), the step up stands in the top band on a computer's width and the
+   dropdown does not show the row. -off: the row of one who cannot use it, dimmed, with the reason in a small on its
+   own line; -alarm: the reserve account's row, with an edge in the alarm role on a dark surface */
+#account .gk-gui-stuff-menu-admin { border-block-end: 2px solid var(--gk-role-ui-admin-on-dark, var(--oc-violet-3, #b197fc)); }
+.flyout-menu .gk-gui-stuff-menu-admin { border-inline-start: 3px solid var(--gk-role-ui-admin-on-dark, var(--oc-violet-3, #b197fc)); }
+.flyout-menu .gk-gui-stuff-menu-alarm { border-inline-start: 3px solid var(--gk-role-alert-alarm-on-dark, var(--oc-red-5, #ff6b6b)); }
+:is(#account, .flyout-menu) .gk-gui-stuff-menu-admin.gk-gui-stuff-menu-off { opacity: 0.6; }
+:is(#account, .flyout-menu) :is(.gk-gui-stuff-menu-off, .gk-gui-stuff-menu-alarm) small { display: block; }
+/* the row core draws around the own item, at any depth below it (a wrapper core puts around a menu link changes nothing) */
+@media (min-width: 900px) { #account.dropdown li:has(.gk-gui-stuff-menu-admin) { display: none; } }
+
+/* Stapel i rutnät: one grid for all groups, a subgrid per group, so that every bar starts on the same vertical line */
+.gk-gui-stuff-bars { display: grid; grid-template-columns: max-content minmax(3em, 1fr); column-gap: 6px; row-gap: 2px; }
+.gk-gui-stuff-bars-group, .gk-gui-stuff-bars-row { display: grid; grid-column: 1 / -1; grid-template-columns: subgrid; align-items: center; row-gap: 2px; }
+.gk-gui-stuff-bars-group + .gk-gui-stuff-bars-group { margin-block-start: 0.4em; }
+.gk-gui-stuff-bars-title { grid-column: 1 / -1; font-weight: bold; color: var(--gk-gui-fg, inherit); }
+.gk-gui-stuff-bars-scale { grid-column: 2; display: flex; justify-content: space-between; font-size: 0.8em; color: var(--gk-role-ui-muted); font-variant-numeric: tabular-nums; }
+.gk-gui-stuff-bars-label { grid-column: 1; }
+.gk-gui-stuff-bars-bar { grid-column: 2; block-size: 6px; border-radius: 3px; overflow: hidden; background: var(--gk-gui-bg, var(--oc-gray-2, #e9ecef)); }
+.gk-gui-stuff-bars-bar > span { display: block; block-size: 100%; background: var(--gk-gui-fg, var(--oc-gray-6, #868e96)); }
+
+/* Kategoriväljaren: a button with the chosen swatch that opens a fly, the twelve in a grid of four, then Ingen; a
+   swatch with the category's number per choice (core's .tabular floats its labels; these are the choices, not the
+   field's label) */
+details.gk-gui-stuff-category-picker { vertical-align: middle; }
+.gk-gui-stuff-category-button { display: inline-flex; align-items: center; gap: 0.3em; }
+.gk-gui-stuff-category-grid { display: grid; grid-template-columns: repeat(4, auto); gap: 4px; }
+.gk-gui-stuff-category-none { margin-block: 0.5em 0; }
+.tabular .gk-gui-stuff-category-picker label.gk-gui-stuff-category-choice, label.gk-gui-stuff-category-choice { display: inline-flex; align-items: center; gap: 2px;
+  float: none; inline-size: auto; margin: 0; padding: 0; font-weight: normal; text-align: start; }
+.gk-gui-stuff-swatch { display: inline-block; min-inline-size: 1.6em; padding-inline: 0.3em; border-radius: 3px; text-align: center; font-size: 0.9em;
+  font-variant-numeric: tabular-nums; border: 1px solid var(--gk-gui-fg, var(--oc-gray-6, #868e96)); background: var(--gk-gui-bg, var(--oc-gray-0, #f8f9fa));
+  color: var(--gk-gui-fg, var(--oc-gray-7, #495057)); }
+/* A row of core's .tabular form that may hold a fly (the picker): a div with the metrics of core's .tabular p, which
+   a fly cannot stand in (the parser closes the p, and core's overflow on it would cut the box) */
+.tabular .gk-gui-stuff-tabular-row { margin: 0; padding-block: 3px; padding-inline: 180px 0; min-block-size: 2em; clear: inline-start; }
+@media (max-width: 899px) { .tabular .gk-gui-stuff-tabular-row { padding-inline-start: 0; } }
+/* An external link outside formatted text that is content (a custom field's link, an address pattern, the project's
+   homepage, people's and icons' links): the external look of formatted text, set by the server with the place in
+   data-gk-link-place only when the look and the place are on. The role for external links, a dotted underline and
+   Tabler's external-link icon after the text as a mask, never alone on a new line, mirrored right to left, not
+   printed. Core's own image on a.external is left out where the look is drawn. */
+a.gk-link-external[data-gk-link-place] {
+  background-image: none; padding-inline: 0;
+  color: var(--gk-role-link-external, var(--oc-cyan-9, #0b7285));
+  text-decoration-line: underline; text-decoration-style: dotted; text-underline-offset: 0.15em;
+}
+a.gk-link-external[data-gk-link-place]::after {
+  content: ""; margin-inline-start: 0.1em; padding-inline-start: 1em;
+  background-color: var(--gk-role-link-external, var(--oc-cyan-9, #0b7285));
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6'/%3E%3Cpath d='M11 13l9 -9'/%3E%3Cpath d='M15 4h5v5'/%3E%3C/svg%3E") no-repeat center / 1em;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h-6a2 2 0 0 0 -2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-6'/%3E%3Cpath d='M11 13l9 -9'/%3E%3Cpath d='M15 4h5v5'/%3E%3C/svg%3E") no-repeat center / 1em;
+}
+html[dir="rtl"] a.gk-link-external[data-gk-link-place]::after,
+html:lang(ar) a.gk-link-external[data-gk-link-place]::after,
+html:lang(fa) a.gk-link-external[data-gk-link-place]::after,
+html:lang(he) a.gk-link-external[data-gk-link-place]::after {
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h6a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6'/%3E%3Cpath d='M13 13l-9 -9'/%3E%3Cpath d='M9 4h-5v5'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 6h6a2 2 0 0 1 2 2v10a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-6'/%3E%3Cpath d='M13 13l-9 -9'/%3E%3Cpath d='M9 4h-5v5'/%3E%3C/svg%3E");
+}
+@media print { a.gk-link-external[data-gk-link-place]::after { content: none; } }

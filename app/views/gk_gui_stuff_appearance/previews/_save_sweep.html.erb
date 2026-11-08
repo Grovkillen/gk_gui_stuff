@@ -1,0 +1,6 @@
+<%# Visa for the sweep of the save bar: off, the same row with the save bar alone; with the setting, the line that grows
+    to the bar. Both are the style guide's row, one over the other for the row's length, with Prova beside the picture:
+    a made-up answer played on the row of the same side, which Prova finds by data-gk-gui-sg-sweep. row: the setting %>
+<%= gk_gui_stuff_appearance_preview(row, off: gk_gui_stuff_sg_sweep_row('never'), on: gk_gui_stuff_sg_sweep_row('always'), stack: true,
+                                         try_off: gk_gui_stuff_sg_sweep_tries('never', %w[saved]), try_on: gk_gui_stuff_sg_sweep_tries('always'),
+                                         note: l(:text_gk_gui_stuff_sg_sweep_show), side_data: { gk_gui_sg_sweep: true }) %>

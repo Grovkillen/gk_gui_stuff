@@ -1,8 +1,8 @@
-# config/registrations.yml: vad pluginet lägger i de gemensamma lagren
-# (miljömanifestet 8.1). Tomma listor betyder ingenting där; nycklarna
+# config/registrations.yml: vad pluginet lägger i de gemensamma lagren.
+# Tomma listor betyder ingenting där; nycklarna
 # får inte saknas. En kontrollerad utskrift av det koden registrerar:
 # init.rb och extensions/gk_gui_stuff/ är källan, och varje rad pekar
-# på något som finns (T-REG). Det som bara är planerat står inte här
+# på något som finns. Det som bara är planerat står inte här
 # förrän det är byggt.
 permissions: []
 menu:                   # rader i trepunktsmenyn (GkGuiStuff::Menu.register i init.rb)
@@ -24,11 +24,255 @@ waves:                  # vågens ord för core:s formulär som inte sparar (GkG
 surfaces: []
 color_roles:            # theme_engine and the palette give the colour (--gk-role-<group>-<key>)
   - {key: parent_row, group: ui, label: label_gk_gui_stuff_mod_parent_link}   # parent_link: the parent issue's row in the box of related issues
+  # the primitives' roles (gk_gui_stuff_primitives.css), declared on :where(:root) until theme_engine's palette takes them; the
+  # categories and the alert levels have -soft for a background, critical's being the alarm's
+  - {key: "1", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "2", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "3", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "4", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "5", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "6", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "7", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "8", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "9", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "10", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "11", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: "12", group: category, label: label_gk_gui_stuff_role_category}
+  - {key: tip, group: alert, label: label_gk_gui_stuff_role_alert_tip}
+  - {key: info, group: alert, label: label_gk_gui_stuff_role_alert_info}
+  - {key: notice, group: alert, label: label_gk_gui_stuff_role_alert_notice}
+  - {key: warning, group: alert, label: label_gk_gui_stuff_role_alert_warning}
+  - {key: alarm, group: alert, label: label_gk_gui_stuff_role_alert_alarm}
+  - {key: critical, group: alert, label: label_gk_gui_stuff_role_alert_critical}   # the alarm filled, white text on it
+  - {key: alarm-on-dark, group: alert, label: label_gk_gui_stuff_role_alert_alarm_on_dark}   # the alarm mixed lighter for core's dark menus; no -soft
+  - {key: admin, group: ui, label: label_gk_gui_stuff_role_admin}         # what only administrators see
+  - {key: admin-on-dark, group: ui, label: label_gk_gui_stuff_role_admin_on_dark}   # the admin role mixed lighter for core's dark menus; no -soft
+  - {key: muted, group: ui, label: label_gk_gui_stuff_role_muted}
+  - {key: muted-fill, group: ui, label: label_gk_gui_stuff_role_muted_fill}   # a muted surface with white text (the top band); no -soft
+  # the neutral interface; no -soft except code (the chip's background); shadow is the base colour each rule mixes
+  - {key: surface, group: ui, label: label_gk_gui_stuff_role_surface}
+  - {key: frame, group: ui, label: label_gk_gui_stuff_role_frame}        # around boxes, fold-out boxes and fields
+  - {key: divider, group: ui, label: label_gk_gui_stuff_role_divider}
+  - {key: shadow, group: ui, label: label_gk_gui_stuff_role_shadow}
+  - {key: code, group: ui, label: label_gk_gui_stuff_role_code}
+  - {key: possible, group: ui, label: label_gk_gui_stuff_role_possible}      # the dashed pill: possible, not chosen
+  - {key: effect, group: ui, label: label_gk_gui_stuff_role_effect}          # where a change shows (the marker, the flags new, changed, gone); with -soft, info by default
+  - {key: direct, group: save, label: label_gk_gui_stuff_role_save_direct}
+  - {key: changed, group: save, label: label_gk_gui_stuff_role_save_changed}
+  - {key: saved, group: save, label: label_gk_gui_stuff_role_save_saved}
+  - {key: failed, group: save, label: label_gk_gui_stuff_role_save_failed}
+  # the line's bands and the line, the chosen and the logic; gk_gui_stuff_primitives.css. No -soft,
+  # except ui choice; the line's now-soft and next-soft are keys of their own
+  - {key: incoming, group: band, label: label_gk_gui_stuff_role_band_incoming}
+  - {key: active, group: band, label: label_gk_gui_stuff_role_band_active}
+  - {key: settled, group: band, label: label_gk_gui_stuff_role_band_settled}
+  - {key: closed, group: band, label: label_gk_gui_stuff_role_band_closed}
+  - {key: archived, group: band, label: label_gk_gui_stuff_role_band_archived}
+  - {key: done, group: line, label: label_gk_gui_stuff_role_line_done}
+  - {key: now, group: line, label: label_gk_gui_stuff_role_line_now}
+  - {key: now-soft, group: line, label: label_gk_gui_stuff_role_line_now_soft}
+  - {key: next, group: line, label: label_gk_gui_stuff_role_line_next}
+  - {key: next-soft, group: line, label: label_gk_gui_stuff_role_line_next_soft}
+  - {key: expected, group: line, label: label_gk_gui_stuff_role_line_expected}
+  - {key: stroke, group: line, label: label_gk_gui_stuff_role_line_stroke}
+  - {key: track, group: line, label: label_gk_gui_stuff_role_line_track}
+  - {key: choice, group: ui, label: label_gk_gui_stuff_role_choice}        # has -soft
+  - {key: and, group: logic, label: label_gk_gui_stuff_role_logic_and}
+  - {key: or, group: logic, label: label_gk_gui_stuff_role_logic_or}
+  - {key: not, group: logic, label: label_gk_gui_stuff_role_logic_not}
+  - {key: external, group: link, label: label_gk_gui_stuff_role_link_external}   # has -soft; a link out of the instance
+personal: []
+features:               # records Features.register (init.rb); default: true only where a decision says so
+  - {key: gui_stuff.styleguide, label: label_gk_feature_gui_stuff_styleguide, help: text_gk_feature_gui_stuff_styleguide}
+reasons:                # records Reasons.register (init.rb)
+  - {key: gui_stuff.feature_switch, default: optional, admin: true, label: label_gk_reason_gui_stuff_feature_switch}
+  - {key: gui_stuff.meaning, default: optional, admin: true, label: label_gk_reason_gui_stuff_meaning}   # the modes under Administration, Meaning view and Classic view
+  - {key: gui_stuff.appearance, default: optional, admin: true, label: label_gk_reason_gui_stuff_appearance}   # the form under Administration, Appearance
+meaning: []             # GkGuiStuff::Meaning: no page types of its own; the page owner registers them
+appearance_settings:    # records AppearanceSettings (GkGuiStuff::Appearance.declare!, appearance.rb): every module but actions_menu, the settings that are not modules, the shared values and a setting per core page type of the Meaning register (none registered today); off from the start
+  - {key: gui_stuff.account_menu, group: instance, modes: ["off", forced], default: "off", proposal: forced, values: [], label: label_gk_gui_stuff_mod_account_menu}
+  - {key: gui_stuff.branch_jump, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_branch_jump}
+  - {key: gui_stuff.declutter, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [declutter], label: label_gk_gui_stuff_mod_declutter}
+  - {key: gui_stuff.footer_text, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [footer_text], label: label_gk_gui_stuff_mod_footer_text}
+  - {key: gui_stuff.fullscreen, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_fullscreen}
+  - {key: gui_stuff.help_link, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [help_link], label: label_gk_gui_stuff_mod_help_link}
+  - {key: gui_stuff.icons_other, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [mode], label: label_gk_gui_stuff_mod_icons_other}
+  - {key: gui_stuff.icons_tabs, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [mode], label: label_gk_gui_stuff_mod_icons_tabs}
+  - {key: gui_stuff.instance_band, group: instance, modes: ["off", forced], default: "off", proposal: forced, values: [], label: label_gk_gui_stuff_mod_instance_band}
+  - {key: gui_stuff.layout_header, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [height], label: label_gk_gui_stuff_mod_layout_header}
+  - {key: gui_stuff.layout_sidebar, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [side], label: label_gk_gui_stuff_mod_layout_sidebar}
+  - {key: gui_stuff.personal_count, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [shown_as], label: label_gk_gui_stuff_mod_personal_count}
+  - {key: gui_stuff.recent_pages, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_recent_pages}
+  - {key: gui_stuff.align, group: lists, modes: ["off", forced], default: "off", proposal: forced, values: [], label: label_gk_gui_stuff_mod_align}
+  - {key: gui_stuff.custom_mark, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [custom_mark_style], label: label_gk_gui_stuff_mod_custom_mark}
+  - {key: gui_stuff.hide_disabled, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_hide_disabled}
+  - {key: gui_stuff.list_filter, group: lists, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_list_filter}
+  - {key: gui_stuff.members_by_group, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_members_by_group}
+  - {key: gui_stuff.overdue_mark, group: lists, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_overdue_mark}
+  - {key: gui_stuff.report_clarity, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_report_clarity}
+  - {key: gui_stuff.scroll_shade, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_scroll_shade}
+  - {key: gui_stuff.select_search, group: lists, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_select_search}
+  - {key: gui_stuff.short_descriptions, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [description_lines], label: label_gk_gui_stuff_mod_short_descriptions}
+  - {key: gui_stuff.sticky_columns, group: lists, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_sticky_columns}
+  - {key: gui_stuff.attachments_collapse, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [fold_attachments, attachments_newest], label: label_gk_gui_stuff_mod_attachments_collapse}
+  - {key: gui_stuff.code_blocks, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_code_blocks}
+  - {key: gui_stuff.collapse_all, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_collapse_all}
+  - {key: gui_stuff.history_navigator, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_history_navigator}
+  - {key: gui_stuff.icons_issue, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [mode], label: label_gk_gui_stuff_mod_icons_issue}
+  - {key: gui_stuff.long_fields, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_long_fields}
+  - {key: gui_stuff.notes_collapse, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_notes_collapse}
+  - {key: gui_stuff.openers, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_openers}
+  - {key: gui_stuff.parent_link, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_parent_link}
+  - {key: gui_stuff.placements, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [placements], label: label_gk_gui_stuff_mod_placements}
+  - {key: gui_stuff.private_notes_collapse, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_private_notes_collapse}
+  - {key: gui_stuff.quick_done, group: issue, modes: ["off", optional, forced], default: "off", proposal: "off", values: [quick_done_status], label: label_gk_gui_stuff_mod_quick_done}
+  - {key: gui_stuff.image_crop, group: forms, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_image_crop}
+  - {key: gui_stuff.key_suggest, group: forms, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_key_suggest}
+  - {key: gui_stuff.save_sweep, group: forms, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_save_sweep}
+  - {key: gui_stuff.settings_frame, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_gui_stuff_mod_settings_frame}
+  - {key: gui_stuff.sticky_save, group: forms, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_gui_stuff_mod_sticky_save}
+  - {key: gui_stuff.week_number, group: forms, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_week_number}
+  - {key: gui_stuff.arrows, group: text, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_arrows}
+  - {key: gui_stuff.code_copy, group: text, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_code_copy}
+  - {key: gui_stuff.core_copy_whisper, group: text, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_core_copy_whisper}
+  - {key: gui_stuff.filled_badges, group: text, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_filled_badges}
+  - {key: gui_stuff.flag_icons, group: text, modes: ["off", forced], default: "off", proposal: "off", values: [icons], label: label_gk_gui_stuff_mod_flag_icons}
+  - {key: gui_stuff.inline_copy, group: text, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_inline_copy}
+  - {key: gui_stuff.link_preview, group: text, modes: ["off", optional, forced], default: "off", proposal: "off", values: [preview_delay_ms], label: label_gk_gui_stuff_mod_link_preview}
+  - {key: gui_stuff.link_preview_external, group: text, modes: ["off", optional, forced], default: "off", proposal: "off", values: [domains, bare_links, max_parallel, domain_interval_seconds, page_max_kb, image_max_kb, timeout_seconds, queue_max, refresh_days, forget_days, link_previews_dir, image_folder_max_mb, clear], label: label_gk_gui_stuff_mod_link_preview_external}   # a warning on the row, a sharper one with * in domains (then a reason is needed); clear is an action
+  - {key: gui_stuff.external_new_tab, group: text, modes: ["off", optional], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_external_new_tab}   # each person's own choice, off for each person until chosen; never forced
+  - {key: gui_stuff.mailto_copy, group: text, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_mailto_copy}
+  # no row of its own: the places outside formatted text that get the external look are the flags place_field_link, place_url_pattern, place_project_homepage, place_people and place_icons (default true), which GK Core Stuff declares under its own row core_stuff.external_links; this plugin only reads them (ExternalRel::Places, external_rel.rb) and adds no values to another plugin's row; a flag GK Core Stuff does not declare counts as on
+  - {key: gui_stuff.user_status, group: text, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_user_status}
+  - {key: gui_stuff.calendar_compact, group: calendar, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_calendar_compact}
+  - {key: gui_stuff.gantt_fill, group: calendar, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_gantt_fill}
+  - {key: gui_stuff.gantt_width, group: calendar, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_gantt_width}
+  - {key: gui_stuff.whisper_tooltip, group: notices, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_whisper_tooltip}
+  - {key: gui_stuff.corner, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [corner_max_entries], label: label_gk_gui_stuff_mod_corner}
+  - {key: gui_stuff.flash_timeout, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [flash_seconds], label: label_gk_gui_stuff_mod_flash_timeout}
+  - {key: gui_stuff.flash_icon, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_flash_icon}
+  - {key: gui_stuff.outcome_notice, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_outcome_notice}
+  - {key: gui_stuff.login_warning, group: notices, modes: ["off", forced], default: "off", proposal: "off", values: [login_warning_animate, login_warning_endless], label: label_gk_gui_stuff_mod_login_warning}
+  - {key: gui_stuff.wave, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [wave_opacity_pct, wave_first_ms, wave_ms, wave_min_ms, wave_start_delay_ms, loading_delay_ms, wave_hide_flash], label: label_gk_gui_stuff_mod_wave}
+  - {key: gui_stuff.admin_groups, group: admin, modes: ["off", optional, forced], default: "off", proposal: forced, values: [admin_rows], label: label_gk_gui_stuff_mod_admin_groups}
+  - {key: gui_stuff.attachment_sizes, group: admin, modes: ["off", optional, forced], default: "off", proposal: forced, values: [], label: label_gk_gui_stuff_mod_attachment_sizes}
+  - {key: gui_stuff.fold_height, group: shared, values: [fold_height_px], label: label_gk_gui_stuff_shared_fold_height}
+  - {key: gui_stuff.notices, group: shared, values: [notice_seconds, notice_max, notice_countdown], label: label_gk_gui_stuff_shared_notices}
+  - {key: gui_stuff.due_soon, group: shared, values: [due_soon_days], label: label_gk_gui_stuff_shared_due_soon}
+  - {key: gui_stuff.beat, group: shared, values: [beat_seconds], label: label_gk_gui_stuff_shared_beat}
+  - {key: gui_stuff.network, group: shared, values: [closed_network], label: label_gk_gui_stuff_shared_network}   # used by link_preview_external; other plugins may read it
+footprints:             # records AppearanceSettings and Features (footprint: and applies:, GkGuiStuff::Footprints in footprints.rb): what each setting and the function change on the pages; a key not here has no line Affects
+  gui_stuff.instance_band: {applies: [server], footprint: {anchors: ['.gk-gui-stuff-instance'], elements: [top_band], pages: [all]}}
+  gui_stuff.footer_text: {applies: [server], footprint: {anchors: ['.gk-gui-stuff-footer-text'], pages: [all]}}
+  gui_stuff.help_link: {applies: [script], footprint: {anchors: ['#top-menu a.help'], pages: [all]}}
+  gui_stuff.declutter: {applies: [server], footprint: {pages: [all], removes: [{anchor: '#top-menu a.help', label: label_gk_gui_stuff_dc_top_help}, {anchor: '#footer', label: label_gk_gui_stuff_dc_footer_powered}, {anchor: '#content .contextual a.icon-time-add', label: label_gk_gui_stuff_dc_issue_log_time}, {anchor: '#content .contextual a.icon-copy', label: label_gk_gui_stuff_dc_issue_copy}, {anchor: '#sidebar #watchers', label: label_gk_gui_stuff_dc_sidebar_watchers}, {anchor: '[data-field="estimated_hours"]', label: label_gk_gui_stuff_dc_form_estimated_hours}, {anchor: '[data-field="done_ratio"]', label: label_gk_gui_stuff_dc_form_done_ratio}]}}
+  gui_stuff.recent_pages: {applies: [server, script], footprint: {anchors: ['#top-menu a.gk-gui-stuff-history-toggle', '#gk-gui-stuff-history'], pages: [all]}}
+  gui_stuff.branch_jump: {applies: [script], footprint: {anchors: ['#header .site-title .gk-gui-stuff-branch-btn', '.gk-gui-stuff-branch']}}
+  gui_stuff.fullscreen: {applies: [script], footprint: {anchors: ['html.gk-gui-stuff-fullscreen'], pages: [all]}}
+  gui_stuff.account_menu: {applies: [server], footprint: {anchors: ['#account .dropdown-content a[data-menu="account_menu"]'], pages: [all]}}
+  gui_stuff.icons_tabs: {applies: [script], footprint: {anchors: ['#main-menu']}}
+  gui_stuff.layout_sidebar: {applies: [script], footprint: {anchors: ['#sidebar'], pages: [all]}}
+  gui_stuff.layout_header: {applies: [script], footprint: {anchors: ['#header'], pages: [all]}}
+  gui_stuff.link_preview: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-preview']}}
+  gui_stuff.link_preview_external: {applies: [script, data], footprint: {anchors: ['.gk-gui-stuff-preview']}}
+  gui_stuff.user_status: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-status']}}
+  gui_stuff.arrows: {applies: [server], footprint: {anchors: [.wiki]}}
+  gui_stuff.mailto_copy: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-copy-btn'], elements: [copy]}}
+  gui_stuff.inline_copy: {applies: [script], footprint: {anchors: ['.wiki .gk-gui-stuff-copy-code'], elements: [copy]}}
+  gui_stuff.code_copy: {applies: [script], footprint: {anchors: ['.pre-wrapper .gk-gui-stuff-copy-pre'], elements: [copy]}}
+  gui_stuff.core_copy_whisper: {applies: [script], footprint: {anchors: ['.pre-wrapper .copy-pre-content-link'], elements: [copy]}}
+  gui_stuff.whisper_tooltip: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-notice'], elements: [copy]}}
+  gui_stuff.filled_badges: {applies: [script], footprint: {anchors: [.badge], elements: [core_badges], pages: [all]}}
+  gui_stuff.flag_icons: {applies: [server], footprint: {elements: [flag], pages: [all]}}
+  gui_stuff.short_descriptions: {applies: [server, script], footprint: {anchors: ['table.list td.short_description'], elements: [core_tables]}}
+  gui_stuff.overdue_mark: {applies: [server, script], footprint: {anchors: ['tr.issue.overdue td.checkbox', 'tr.issue.gk-gui-stuff-due-soon td.checkbox', div.issue.overdue, div.issue.gk-gui-stuff-due-soon], elements: [core_tables]}}
+  gui_stuff.sticky_columns: {applies: [script], footprint: {anchors: [table.list, '.gk-gui-stuff-sticky-clone'], elements: [core_tables]}}
+  gui_stuff.list_filter: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-lf']}}
+  gui_stuff.custom_mark: {applies: [server], footprint: {elements: [core_context_menu]}}
+  gui_stuff.hide_disabled: {applies: [script], footprint: {removes: ['#context-menu a.disabled'], elements: [core_context_menu]}}
+  gui_stuff.members_by_group: {applies: [server], footprint: {anchors: [div.members.box]}}
+  gui_stuff.report_clarity: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-rep-groups', '.gk-gui-stuff-rep-chart-head']}}
+  gui_stuff.openers: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-opener-body']}}
+  gui_stuff.align: {applies: [server], footprint: {anchors: ['.gk-gui-stuff-align-start', '.gk-gui-stuff-align-end']}}
+  gui_stuff.long_fields: {applies: [script], footprint: {anchors: ['div.issue .description .wiki'], pages: [core.issue]}}
+  gui_stuff.notes_collapse: {applies: [script], footprint: {anchors: ['#history .journal .wiki'], pages: [core.issue]}}
+  gui_stuff.private_notes_collapse: {applies: [script], footprint: {anchors: ['#history .journal.private-notes .wiki'], pages: [core.issue]}}
+  gui_stuff.code_blocks: {applies: [script], footprint: {anchors: ['.wiki .gk-gui-stuff-fold-btn']}}
+  gui_stuff.attachments_collapse: {applies: [script], footprint: {anchors: [.attachments], pages: [core.issue]}}
+  gui_stuff.quick_done: {applies: [script], footprint: {anchors: ['#issue-form .gk-gui-stuff-quick-done'], pages: [core.issue]}}
+  gui_stuff.parent_link: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-parent'], pages: [core.issue]}}
+  gui_stuff.collapse_all: {applies: [server, script], footprint: {anchors: ['.gk-gui-stuff-sec-toggle', '.gk-gui-stuff-sec-all', '#content .contextual [data-gk-gui-stuff-menu-key="collapse_all"]'], pages: [core.issue]}}
+  gui_stuff.week_number: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-week'], elements: [core_forms]}}
+  gui_stuff.key_suggest: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-key-examples']}}
+  gui_stuff.image_crop: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-crop-stage']}}
+  gui_stuff.sticky_save: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-savebar']}}
+  gui_stuff.save_sweep: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-rail'], elements: [rail], pages: [all]}}
+  gui_stuff.settings_frame: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-sf-bar', '.gk-gui-stuff-sf-section', '.gk-gui-stuff-sf-key']}}
+  gui_stuff.attachment_sizes: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-sizes']}}
+  gui_stuff.calendar_compact: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-cal-mode', '.gk-gui-stuff-cal-compact']}}
+  gui_stuff.gantt_width: {applies: [script], footprint: {anchors: [td.gantt_subjects_column, td.gantt_selected_column]}}
+  gui_stuff.gantt_fill: {applies: [script], footprint: {anchors: ['#gantt_area']}}
+  gui_stuff.wave: {applies: [script], footprint: {anchors: ['#gk-gui-stuff-wave'], pages: [all]}}
+  gui_stuff.flash_timeout: {applies: [script], footprint: {anchors: ['#content .flash.notice', '.gk-gui-stuff-flash'], elements: [core_flash]}}
+  gui_stuff.flash_icon: {applies: [script], footprint: {anchors: [.flash], elements: [core_flash], pages: [all]}}
+  gui_stuff.outcome_notice: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-notices'], elements: [messages], pages: [all]}}
+  gui_stuff.corner: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-corner'], pages: [core.issue]}}
+  gui_stuff.login_warning: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-lw']}}
+  gui_stuff.admin_groups: {applies: [script], footprint: {anchors: ['#admin-menu', '.gk-gui-stuff-ag']}}
+  gui_stuff.external_new_tab: {applies: [server, script], footprint: {anchors: ['.gk-gui-stuff-preview-external .gk-gui-stuff-preview-title']}}
+  gui_stuff.history_navigator: {applies: [script], footprint: {anchors: ['#history .journal', '.gk-gui-stuff-hn-at'], pages: [core.issue]}}
+  gui_stuff.icons_issue: {applies: [server, script], footprint: {anchors: ['#content .contextual a.icon'], pages: [core.issue]}}
+  gui_stuff.icons_other: {applies: [server, script], footprint: {anchors: ['#content .contextual a.icon']}}
+  gui_stuff.placements: {applies: [server, script], footprint: {anchors: ['#content .contextual a.icon', '#content .contextual [data-gk-gui-stuff-menu-key]']}}
+  gui_stuff.personal_count: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-count[data-gk-gui-stuff-painted]'], elements: [count], pages: [all]}}
+  gui_stuff.scroll_shade: {applies: [script], footprint: {anchors: ['.autoscroll.gk-gui-stuff-shaded'], elements: [core_tables]}}
+  gui_stuff.select_search: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-ss'], elements: [ss]}}
+  gui_stuff.styleguide: {applies: [server], footprint: {pages: [gui_stuff.styleguide], adds: [{anchor: '[data-gk-gui-stuff-effect~="styleguide"]', label: label_gk_gui_stuff_styleguide}]}}
+styleguide:             # GkGuiStuff::Styleguide.register_own!: gui_stuff's sections
+  - {key: core_forms, part: core, group: forms, label: label_gk_gui_stuff_sg_core_forms, order: 10}
+  - {key: core_buttons, part: core, group: buttons, label: label_gk_gui_stuff_sg_core_buttons, order: 20}
+  - {key: core_tables, part: core, group: tables, label: label_gk_gui_stuff_sg_core_tables, order: 30}
+  - {key: core_journals, part: core, group: journals, label: label_gk_gui_stuff_sg_core_journals, order: 40}
+  - {key: core_tabs, part: core, group: tabs, label: label_gk_gui_stuff_sg_core_tabs, order: 50}
+  - {key: core_flash, part: core, group: flash, label: label_gk_gui_stuff_sg_core_flash, order: 60}
+  - {key: core_pagination, part: core, group: pagination, label: label_gk_gui_stuff_sg_core_pagination, order: 70}
+  - {key: core_toolbar, part: core, group: toolbar, label: label_gk_gui_stuff_sg_core_toolbar, order: 80}
+  - {key: core_context_menu, part: core, group: context_menu, label: label_gk_gui_stuff_sg_core_context_menu, order: 90}
+  - {key: core_tooltip, part: core, group: tooltip, label: label_gk_gui_stuff_sg_core_tooltip, order: 100}
+  - {key: core_badges, part: core, group: badges, label: label_gk_gui_stuff_sg_core_badges, order: 110}
+  - {key: core_dialog, part: core, group: dialog, label: label_gk_gui_stuff_sg_core_dialog, order: 120}
+  - {key: roles, part: gk, group: roles, label: label_gk_gui_stuff_sg_roles, order: 10}
+  - {key: pill, part: gk, group: pill, label: label_gk_gui_stuff_sg_pill, order: 20}
+  - {key: ss, part: gk, group: lists, label: label_gk_gui_stuff_sg_ss, order: 30}
+  - {key: count, part: gk, group: pill, label: label_gk_gui_stuff_sg_count_h, order: 40}
+  - {key: group, part: gk, group: pill, label: label_gk_gui_stuff_sg_group, order: 50}
+  - {key: fly, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_fly, order: 60}
+  - {key: card, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_card, order: 70}
+  - {key: admin, part: gk, group: admin, label: label_gk_gui_stuff_sg_admin, order: 80}
+  - {key: rail, part: gk, group: save, label: label_gk_gui_stuff_sg_rail, order: 90}
+  - {key: mount, part: gk, group: save, label: label_gk_gui_stuff_sg_mount, order: 100}
+  - {key: reason_buttons, part: gk, group: save, label: label_gk_gui_stuff_sg_reason_buttons, order: 110}
+  - {key: words, part: gk, group: save, label: label_gk_gui_stuff_sg_words, order: 120}
+  - {key: form, part: gk, group: save, label: label_gk_gui_stuff_sg_form, order: 130}
+  - {key: layer, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_layer, order: 140}
+  - {key: bars, part: gk, group: composites, label: label_gk_gui_stuff_sg_bars, order: 150}
+  - {key: line, part: gk, group: line, label: label_gk_gui_stuff_sg_line, order: 160}
+  - {key: sentence, part: gk, group: sentence, label: label_gk_gui_stuff_sg_sentence, order: 170}
+  - {key: meaning, part: gk, group: meaning, label: label_gk_gui_stuff_sg_meaning_switch, order: 180}
+  - {key: category_picker, part: gk, group: lists, label: label_gk_gui_stuff_sg_category_picker, order: 190}
+  - {key: lists, part: gk, group: lists, label: label_gk_gui_stuff_sg_lists, order: 200}
+  - {key: copy, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_copy, order: 210}
+  - {key: messages, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_messages, order: 220}
+  - {key: icon_button, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_icon_button, order: 230}
+  - {key: elements, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_elements, order: 240}
+  - {key: ribbon, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_ribbon, order: 250}
 records:
   targets: []             # funktionerna under Administration, Funktioner är records register (feature)
   note_kinds: []
   event_kinds:
     - {key: gui_choice_changed, target: user, label: label_gk_gui_stuff_event_choice_changed}
+    - {key: gui_meaning_changed, target: setting, label: label_gk_gui_stuff_event_meaning_changed}   # an administrator's change of view, with the reason
+    - {key: link_previews_cleared, target: appearance_setting, label: label_gk_gui_stuff_event_link_previews_cleared}   # the external previews emptied (button, off, domains), on the setting's own row, with the reason
   link_kinds: []
 strings:
   terms: []
@@ -36,7 +280,9 @@ text_levels: []
 templates:
   kinds: []
 scenario_steps: []
-jobs: []
+jobs:                   # GK Ops (External::Jobs.register!, after_initialize); without ops a reader's request starts one fetch
+  - {key: gk_gui_stuff.link_preview_fetch, schedule: "every 1 minute", label: label_gk_gui_stuff_job_link_preview_fetch}
+  - {key: gk_gui_stuff.link_preview_forget, schedule: "daily 03:40", label: label_gk_gui_stuff_job_link_preview_forget}
 corners: []             # gui_stuff corner (hörnvik): {key, context, source, level}
 timeline: []
 queries: []
@@ -50,9 +296,11 @@ copies:                 # kopiera (gk_gui_stuff_copy.js)
   - {key: mailto_copy, label: gk_gui_stuff_copy_address}
   - {key: inline_copy, label: gk_gui_stuff_copy_click}
   - {key: code_copy, label: gk_gui_stuff_copy_code}
+  - {key: core_copy_whisper, label: gk_gui_stuff_copied}
 view_states:
   - {key: fullscreen, context: any, values: [off, on], default: off, label: label_gk_gui_stuff_mod_fullscreen}
   - {key: calendar_compact, context: calendar, values: [off, on], default: off, label: label_gk_gui_stuff_mod_calendar_compact, storage: preference}   # core:s inställningar, gk_gui_stuff_calendar_compact
+  - {key: gui_stuff.styleguide_line, context: styleguide, values: [closed, open], default: closed, label: label_gk_gui_stuff_sg_line}   # linjens panel öppen eller stängd
 decorations: []
 content_transforms:
   - {key: branch_jump, selector: "h1 .breadcrumbs .separator", print: strip}   # separatorn blir knapp som visar grenen av projektträdet
@@ -66,6 +314,7 @@ triggers: []
 trigger_actions: []
 gis_layers: []
 gis_columns: []
-disk_areas: []
+disk_areas:             # the external link previews' pictures; setting: appearance:<row>.<value> names a value under an appearance row
+  - {key: link_previews, setting: "appearance:link_preview_external.link_previews_dir", default: "<attachments>/gk/gui_stuff/link_previews", kind: byproduct}   # never in an export; thinned by the plugin's own job, capped by image_folder_max_mb
 appearances: {}
 access_items: []

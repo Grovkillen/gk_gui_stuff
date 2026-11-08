@@ -1,0 +1,15 @@
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_box), "gk_gui_stuff_admin_only { … }") do %>
+    <%= gk_gui_stuff_admin_only do %><%= l(:text_gk_gui_stuff_sg_admin_box) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_inline), "gk_gui_stuff_admin_only(tag: :span) { … }") do %>
+    <%= l(:field_category) %>: <%= gk_gui_stuff_admin_only(tag: :span) do %><%= l(:text_gk_gui_stuff_sg_admin_inline) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_locked), "gk_gui_stuff_lock(label, purpose: …) { … }", mode: :nosave) do %>
+    <%# the box opens; its Stega upp leads to the real step up, so here it says that it leads nowhere %>
+    <span data-gk-gui-sg-example-links><%= gk_gui_stuff_lock(l(:label_gk_gui_stuff_sg_example_admin_action), purpose: l(:text_gk_gui_stuff_sg_admin_purpose), state: :locked) do %><% end %></span>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_stepped_up), "gk_gui_stuff_lock(label, purpose: …) { … } # GkGuiStuff::Primitives.elevated? → capture(&block)") do %>
+    <%= button_tag l(:label_gk_gui_stuff_sg_example_admin_action), type: 'button' %>
+  <% end %>
+</div>

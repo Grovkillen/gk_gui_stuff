@@ -1,0 +1,14 @@
+<%# the whisper in the role info, "Kopierat: <sak>", one tile for each place it can stand in: a still picture, and Prova
+    for the live one in that place; core's tips are among Redmine's forms %>
+<% whisper = l(:label_gk_gui_stuff_sg_whisper) %>
+<div class="gk-gui-stuff-sg-tiles">
+  <% [[:label_gk_gui_stuff_sg_whisper_place_element, nil], [:label_gk_gui_stuff_sg_whisper_place_top, 'top'], [:label_gk_gui_stuff_sg_whisper_place_center, 'center'],
+      [:label_gk_gui_stuff_sg_whisper_place_bottom, 'bottom'], [:label_gk_gui_stuff_sg_whisper_place_pointer, 'pointer']].each do |name, place| %>
+    <% call = place ? "GkGui.copy(text, said, { at, place: '#{place}' }), GkGui.whisper(text, { at, place: '#{place}' })" : 'GkGui.copy(text, said, at), GkGui.whisper(text, at)' %>
+    <%= gk_gui_stuff_sg_row("#{whisper}: #{l(name)}", call, mode: :live) do %>
+      <%= gk_gui_stuff_sg_still(:whisper, text: l(:text_gk_gui_stuff_sg_copied_link)) %>
+      <% if place == 'pointer' %><p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_whisper_place_pointer) %></p><% end %>
+      <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('copy', text: gk_gui_stuff_styleguide_url, said: l(:text_gk_gui_stuff_sg_copied_link), place: place) %></p>
+    <% end %>
+  <% end %>
+</div>

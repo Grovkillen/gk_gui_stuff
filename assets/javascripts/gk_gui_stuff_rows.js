@@ -24,8 +24,12 @@
 //   (a saved row, Rails' _destroy) makes Ta bort set it to 1 and hide the row instead of taking it out of the form.
 //   Optional anywhere: an element with data-gk-gui-rows-add="plugin.list" is where the add link goes (else after the
 //   table or container). The template may also stand outside: template[data-gk-gui-row-template="plugin.list"].
+//   Optional in a row: data-gk-gui-row-label is what the note names when the row has moved (else its first field's value).
 // Keyboard: the handle is focusable, arrow up and down move its row. Every change says gk-gui-rows:change on the
-// container (detail.action: add, remove, move). window.gkGuiStuffRows.init(el) and .add(el) for a script that draws rows.
+// container (detail.action: add, remove, move). The rows wait for the form's Spara: a row out of its first
+// place has the rail changed, the note under the list says the order holds when one saves, and the container has
+// data-gk-gui-changed and says change, so that the text by a GK form's Save counts the list once.
+// window.gkGuiStuffRows.init(el) and .add(el) for a script that draws rows.
 (function () {
   if (window.gkGuiStuffRows) return;
   var PLACEHOLDER = /__INDEX__/g;
@@ -49,6 +53,33 @@
       document.querySelector('template[data-gk-gui-row-template="' + CSS.escape(c.getAttribute('data-gk-gui-rows')) + '"]');
   }
   function say(c, action) { c.dispatchEvent(new CustomEvent('gk-gui-rows:change', { bubbles: true, detail: { action: action } })); }
+  function label(row) {
+    var l = row.getAttribute('data-gk-gui-row-label');
+    if (l) return l;
+    var f = row.querySelector('input:not([type]), input[type=text], textarea, select');
+    if (f && f.tagName === 'SELECT') return f.selectedOptions[0] ? f.selectedOptions[0].text : '';
+    return f && f.value ? f.value : row.textContent.trim().replace(/\s+/g, ' '); // gk-r17 P4r: the row is in a container marked data-gk-gui-rows (GK's own form), its text names it in the note
+  }
+  // the rows out of their first place (among those that were there at first) and the note; row: the one that moved
+  function markMoved(c, row) {
+    var first = c._gkFirst || [], live = rows(c);
+    var was = first.filter(function (r) { return live.indexOf(r) >= 0; }), any = false;
+    live.filter(function (r) { return first.indexOf(r) >= 0; }).forEach(function (r, i) {
+      var off = was[i] !== r;
+      r.classList.toggle('gk-gui-stuff-field-changed', off);
+      any = any || off;
+    });
+    if (any && !c._gkNote && (c._gkNote = kit('note'))) {
+      var after = c.closest('table') || c;
+      after.parentNode.insertBefore(c._gkNote, after.nextSibling);
+    }
+    if (c._gkNote) {
+      if (any && row) c._gkNote.textContent = (c._gkNote.getAttribute('data-gk-gui-text') || '').replace('%{name}', label(row));
+      c._gkNote.hidden = !any;
+    }
+    if (any) c.setAttribute('data-gk-gui-changed', '1'); else c.removeAttribute('data-gk-gui-changed');
+    c.dispatchEvent(new Event('change', { bubbles: true }));
+  }
   function cells(row) { return Array.prototype.filter.call(row.children, function (n) { return n.tagName === 'TD' || n.tagName === 'TH'; }); }
 
   // the numbers in the names follow the order shown; the positions too
@@ -99,6 +130,7 @@
           h.focus();
           renumber(c);
           say(c, 'move');
+          markMoved(c, row);
         });
         h.addEventListener('pointerdown', function (e) { drag(c, row, h, e); });
       }
@@ -136,7 +168,7 @@
       handle.removeEventListener('pointerup', up);
       handle.removeEventListener('pointercancel', up);
       row.classList.remove('gk-gui-stuff-row-dragging');
-      if (moved) { renumber(c); say(c, 'move'); }
+      if (moved) { renumber(c); say(c, 'move'); markMoved(c, row); }
     }
     handle.addEventListener('pointermove', move);
     handle.addEventListener('pointerup', up);
@@ -162,6 +194,7 @@
     if (!f) f = c._gkAdd;
     if (f) f.focus();
     say(c, 'remove');
+    markMoved(c, null);
   }
 
   function add(c) {
@@ -186,6 +219,7 @@
     if (c.dataset.gkGuiRowsReady) return;
     c.dataset.gkGuiRowsReady = '1';
     c._gkNext = rows(c, true).length;
+    c._gkFirst = rows(c, true).slice();
     rows(c, true).forEach(function (row) { decorate(c, row); });
     if (template(c)) {
       var a = kit('add');

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # gk_gui_stuff: the small endpoints the shared elements use. The session's user, the same visibility as the
-# object's own page. view_state: remember a choice of view. beat: the heartbeat (what changed on the page one
+# object's own page. view_state: remember a choice of view. flag_seen: the new flags the person has seen. beat: the heartbeat (what changed on the page one
 # looks at since it was loaded; one call, shared by whoever needs it). branch: a project's branch of the tree.
 class GkGuiStuffApiController < ApplicationController
   before_action :require_login
@@ -22,6 +22,12 @@ class GkGuiStuffApiController < ApplicationController
     else
       head 422
     end
+  end
+
+  # A new flag's keys the person has now seen (GkGuiStuff::Flags), so that the flag is not drawn for them again
+  def flag_seen
+    keys = params[:keys].is_a?(Array) ? params[:keys] : [params[:keys]].compact
+    render json: { seen: GkGuiStuff::Flags.mark_seen(User.current, keys.map(&:to_s)) }
   end
 
   def beat

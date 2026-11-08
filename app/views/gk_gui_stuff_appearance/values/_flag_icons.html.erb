@@ -1,0 +1,17 @@
+<%# flag_icons: the common icon and one per sort, each a value's row with GK Icons' own picker, which needs nothing but its
+    data attribute and the assets. A row says so when its icon cannot be drawn just now (disabled, gone from disk), as the
+    pennant or the common icon then stands in. What the server found goes with the field, for the preview's first
+    picture. name: the value's field name, value: the stored table %>
+<% gk_icons_assets if respond_to?(:gk_icons_assets) %>
+<% GkGuiStuff::FlagIcons::PARTS.each do |part| %>
+  <% chosen = value[part].to_s %>
+  <% found = GkGuiStuff::FlagIcons.drawn(chosen) %>
+  <% word = l(:"label_gk_gui_stuff_flag_icon_#{part}") %>
+  <div class="gk-gui-stuff-form-page-value">
+    <span class="gk-gui-stuff-form-page-value-label"><%= word %>:</span>
+    <%= text_field_tag "#{name}[#{part}]", chosen, size: 30, maxlength: 120, id: nil, autocomplete: 'off', disabled: disabled, 'aria-label': word,
+                                                   data: { gk_icons_picker: '1', gk_gui_flag_icon: part, gk_gui_flag_icon_url: found && found[:url], gk_gui_flag_icon_w: found && found[:width] } %>
+    <% if chosen.present? && found.nil? %><span class="gk-gui-stuff-form-page-quiet"><%= l(:text_gk_gui_stuff_flag_icon_not_drawn) %></span><% end %>
+  </div>
+<% end %>
+<em class="info"><%= l(:text_gk_gui_stuff_flag_icons_order) %></em>

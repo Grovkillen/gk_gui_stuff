@@ -16,8 +16,10 @@
     var delta = w - px(td);
     if (!delta) return;
     var container = td.querySelector('.gantt_subjects_container');
-    var parts = container ? [container].concat(Array.prototype.slice.call(container.querySelectorAll(':scope > .gantt_hdr'))) : [];
+    // the container and its headings (core's class gantt_hdr inside it, at any depth)
+    var parts = container ? [container].concat(Array.prototype.slice.call(container.querySelectorAll('.gantt_hdr'))) : [];
     td.style.width = w + 'px';
+    G.effect(td, 'gantt_width');
     parts.forEach(function (el) { el.style.width = (px(el) + delta) + 'px'; });
     // as core does when the column is dragged: each row as wide as the column from where it starts
     td.querySelectorAll('.issue-subject, .project-name, .version-name').forEach(function (el) {
@@ -32,10 +34,11 @@
       var r = el.getBoundingClientRect(), from = rtl ? box.right - r.right : r.left - box.left;
       need = Math.max(need, from + el.scrollWidth);
     });
+    // the other chosen columns: core's class gantt_selected_column, wherever they stand in the table
     var table = td.closest('table'), others = 0;
     if (table) {
-      Array.prototype.forEach.call(td.parentNode.cells, function (c) {
-        if (c !== td && c.classList.contains('gantt_selected_column') && c.offsetWidth) others += c.offsetWidth;
+      table.querySelectorAll('td.gantt_selected_column').forEach(function (c) {
+        if (c !== td && c.offsetWidth) others += c.offsetWidth;
       });
     }
     var room = table ? table.getBoundingClientRect().width - others - KEEP_CHART : need + SLACK;

@@ -17,7 +17,7 @@
   G.onContent(function () {
     document.querySelectorAll('input[type="date"]:not([data-gk-gui-stuff-week])').forEach(function (input) {
       input.dataset.gkGuiStuffWeek = '1';
-      var tag = G.node('span', 'gk-gui-stuff-week');
+      var tag = G.effect(G.node('span', 'gk-gui-stuff-week'), 'week_number');
       input.insertAdjacentElement('afterend', tag);
       ['change', 'input'].forEach(function (ev) { input.addEventListener(ev, function () { paint(input, tag); }); });
       paint(input, tag);

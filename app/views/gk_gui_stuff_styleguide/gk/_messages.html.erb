@@ -1,0 +1,15 @@
+<%# the banner and the notice of each level: a still picture of each, as its script draws it, and Prova for the
+    live one (a notice goes to the corner of the window, the banner to the top of the page) %>
+<% @gk_gui_stuff_sg_mode = :live %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_banner), "GkGui.banner.show({key, level: 'alarm', text, dismiss: true})", wide: true) do %>
+    <%= gk_gui_stuff_sg_still(:banner, level: 'alarm', text: l(:text_gk_gui_stuff_sg_banner)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('banner', level: 'alarm', text: l(:text_gk_gui_stuff_sg_banner)) %></p>
+  <% end %>
+  <% %w[tip info notice warning alarm critical].each do |lv| %>
+    <%= gk_gui_stuff_sg_row(l(:"label_gk_gui_stuff_sg_notice_#{lv}"), "GkGui.notice.show({level: '#{lv}', text})") do %>
+      <%= gk_gui_stuff_sg_still(:notice, level: lv, text: l(:text_gk_gui_stuff_sg_notice)) %>
+      <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('notice', level: lv, text: l(:text_gk_gui_stuff_sg_notice)) %></p>
+    <% end %>
+  <% end %>
+</div>

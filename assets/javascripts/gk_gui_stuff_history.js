@@ -11,19 +11,24 @@
   function remember() {
     var path = location.pathname;
     if (/\/(new|edit|login|logout|admin|settings)(\/|$)/.test(path) || path === '/' ) return;
-    var title = document.title.replace(/^\[[^\]]+\]\s*/, '').replace(/\s+-\s+[^-]+$/, '').trim(); // without the instance band's prefix // drop the instance name at the end
+    // the page's name comes with the page (window.gkGuiStuffPage.data.page_title: the parts core's html_title was
+    // given, without the instance's name), never cut out of the window's title
+    var title = String(((window.gkGuiStuffPage || {}).data || {}).page_title || '').trim();
     if (!title) return;
     var list = read().filter(function (x) { return x.u !== path; });
     list.unshift({ u: path, t: title.slice(0, 120) });
     G.set(KEY, JSON.stringify(list.slice(0, MAX)));
   }
+  // The menu entry is the server's: an item of core's top menu (Redmine::MenuManager, :top_menu) whose link has the
+  // class gk-gui-stuff-history-toggle, so that core draws it among its own items wherever core puts them, and it can
+  // be renamed as every top menu entry. This script finds that link by its own class and hangs the list on the row
+  // core drew around it; it never looks for core's list.
   function build() {
-    var menu = document.querySelector('#top-menu .top-menu__links ul, #top-menu > ul');
-    if (!menu || document.getElementById('gk-gui-stuff-history')) return;
-    var li = G.node('li', 'gk-gui-stuff-history');
+    var a = document.querySelector('#top-menu a.gk-gui-stuff-history-toggle'), li = a && a.closest('li');
+    if (!li || document.getElementById('gk-gui-stuff-history')) return;
+    li.classList.add('gk-gui-stuff-history');
     li.id = 'gk-gui-stuff-history';
-    var a = G.node('a', 'gk-gui-stuff-history-toggle', G.t('history'));
-    a.href = '#';
+    G.effect(li, 'recent_pages');
     a.setAttribute('aria-haspopup', 'true');
     a.setAttribute('aria-expanded', 'false');
     var panel = G.node('ul', 'gk-gui-stuff-history-list');
@@ -52,9 +57,11 @@
     });
     document.addEventListener('focusin', function (e) { if (!panel.hidden && !li.contains(e.target)) toggle(false); });
     li.addEventListener('keydown', function (e) { if (e.key === 'Escape') { toggle(false); a.focus(); } });
-    li.appendChild(a); li.appendChild(panel);
-    menu.appendChild(li);
+    li.appendChild(panel);
   }
-  remember();
+  // The page's data is written at the end of the body (view_layouts_base_body_bottom), after this script in the head
+  // has run: the page is remembered once, on the first pass over the content (DOMContentLoaded), when the data is there
+  var remembered = false;
+  G.onContent(function () { if (!remembered) { remembered = true; remember(); } });
   G.onContent(build);
 })();

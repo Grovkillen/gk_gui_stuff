@@ -1,0 +1,6 @@
+<%# Visa for the flag's icons: every sort in both forms with the pennant, and with the icons the form has chosen, which
+    follow the pickers before anything is saved (gk_gui_stuff_form_page.js). Made-up names and words; the form is not
+    touched. row: the setting %>
+<% chosen = @register.value(row.key, GkGuiStuff::FlagIcons::VALUE) %>
+<%= gk_gui_stuff_appearance_preview(row, off: gk_gui_stuff_flag_sorts_table, on: gk_gui_stuff_flag_sorts_table(chosen, preview: true), stack: true) %>
+<p><em class="info"><%= l(:text_gk_gui_stuff_flag_icons_example) %></em></p>

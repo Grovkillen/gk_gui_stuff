@@ -1,0 +1,9 @@
+<%# core's history (issues/tabs/_history) with changes in memory, inert; each series draws its own header %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_journals), "render partial: 'issues/tabs/history', locals: { tab: { locals: { issue:, journals: } } }") do %>
+    <div class="gk-gui-stuff-sg-still" inert>
+      <%= render partial: 'issues/tabs/history', locals: { tab: { name: 'history', locals: { issue: demo[:issues].first, journals: demo[:journals] } } } %>
+    </div>
+  <% end %>
+</div>

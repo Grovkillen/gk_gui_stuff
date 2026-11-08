@@ -23,7 +23,7 @@
       table.dataset.gkGuiStuffGkAlign = '1';
       Array.prototype.forEach.call(head.cells, function (th, i) {
         if (side(th) !== 'center') return;
-        var sides = rows.map(function (r) { return r.cells[i].textContent.trim() === '' ? null : side(r.cells[i]); }).filter(Boolean);
+        var sides = rows.map(function (r) { return r.cells[i].textContent.trim() === '' ? null : side(r.cells[i]); }).filter(Boolean); // gk-r17 P4r: nothing is found by text; only whether a cell holds any text is asked, never what it says, so a change of words, language, style or order leaves the answer as it is
         if (!sides.length || sides.some(function (s) { return s !== sides[0]; }) || sides[0] === 'center') return;
         th.style.textAlign = sides[0];
       });

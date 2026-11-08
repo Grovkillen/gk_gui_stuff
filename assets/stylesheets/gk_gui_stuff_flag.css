@@ -1,0 +1,131 @@
+/* gk_gui_stuff: the flag (gk_gui_stuff_flag, flag.rb; placed by gk_gui_stuff_flag.js). A small pennant in full
+   colour in its role and the word after it, small bold text at 70 % with a thin outline in the surface colour, fully
+   visible on hover; no plate and no frame. Laid on top in the layer for pills and tips (under the table of contents,
+   35), so it never takes room in a row and nothing moves when it comes or goes. The script sets the place in px
+   (coordinates, not layout), the side of the word and the short form at an edge where the word has no room; the pennant
+   is mirrored for a target written right to left. Never clickable: only the pennant takes the pointer, for the hover
+   frame, and in the short form an invisible surface round it for a finger; the pointer is never a hand. */
+
+/* drawn by the server where the caller stands, it waits there taking no room until the script lays it on its target */
+.gk-gui-stuff-flag:not(.gk-gui-stuff-flag-placed) { display: none; }
+
+/* the layer the script lays the flags and their frames in, at the end of the page, of no size */
+.gk-gui-stuff-flags { position: absolute; inset-block-start: 0; inset-inline-start: 0; inline-size: 0; block-size: 0; overflow: visible; pointer-events: none; }
+
+.gk-gui-stuff-flag { position: absolute; z-index: 30; display: flex; flex-direction: row; align-items: flex-start; gap: 3px; direction: ltr;
+  margin: 0; padding: 0; color: var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057))); font-family: inherit; font-size: 10px; font-weight: bold;
+  line-height: 10px; white-space: nowrap; pointer-events: none; }
+.gk-gui-stuff-flag.gk-gui-stuff-flag-word-first { flex-direction: row-reverse; }
+/* hidden, its word and its surface take no room in the page, while the script can still read the word's width */
+.gk-gui-stuff-flag.gk-gui-stuff-flag-off { visibility: hidden; inline-size: 0; overflow: hidden; }
+
+/* the pennant: a swallowtail whose two tips lie on the hover frame's edge, the notch inwards; striped for a
+   temporary kind. The setting for the flag's icons (flag_icons.rb) gives a flag its icon through the four custom
+   properties, per sort: the mask, no clip, the icon's width at the pennant's height, and for a sort with an icon of its
+   own a solid fill in place of the stripes. An icon is not mirrored right to left: unlike the swallowtail it may hold
+   a sign that reads one way */
+.gk-gui-stuff-flag-pennant { flex: none; display: inline-block; inline-size: var(--gk-gui-flag-w, 8px); block-size: 10px; background: currentColor;
+  clip-path: var(--gk-gui-flag-clip, polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%));
+  -webkit-mask: var(--gk-gui-flag-mask, none) center / contain no-repeat; mask: var(--gk-gui-flag-mask, none) center / contain no-repeat; }
+.gk-gui-stuff-flag-rtl .gk-gui-stuff-flag-pennant { clip-path: var(--gk-gui-flag-clip, polygon(0 0, 100% 0, 100% 100%, 0 100%, 40% 50%)); }
+.gk-gui-stuff-flag-temp .gk-gui-stuff-flag-pennant { background: var(--gk-gui-flag-fill, repeating-linear-gradient(135deg, currentColor 0 1.5px, transparent 1.5px 3px)); }
+.gk-gui-stuff-flag > .gk-gui-stuff-flag-pennant { pointer-events: auto; cursor: default; }
+
+/* the word: 70 % with a thin outline in the surface colour, so that it reads on top of whatever lies under it */
+.gk-gui-stuff-flag-word { opacity: 0.7; unicode-bidi: plaintext;
+  text-shadow: 0 0 2px var(--gk-role-ui-surface, var(--oc-white, #ffffff)), 0 0 2px var(--gk-role-ui-surface, var(--oc-white, #ffffff)),
+    0 0 3px var(--gk-role-ui-surface, var(--oc-white, #ffffff)); }
+.gk-gui-stuff-flag.gk-gui-stuff-flag-on .gk-gui-stuff-flag-word { opacity: 1; }
+/* a flag in the role ui-effect says where a change shows (the marker's label): the words are what it is there for, so
+   they stand fully visible, 4.5:1 or more on the surface in both modes; at 70 % they are under that */
+.gk-gui-stuff-flag.gk-gui-stuff-role-effect > .gk-gui-stuff-flag-word { opacity: 1; }
+/* the short form: only the pennant. On hover and while the target has focus the pennant gets a tone in its role with a
+   thin frame, and the word stands in the small box of the short form below (shared with the own element), so that it
+   reads on top of any text. The padding is there all the time and the margin takes it back, so the pennant stays
+   where it is. Not drawn while it is off, so that it takes no room at the window's edge; a screen reader has the
+   word from the target */
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short { padding: 2px 3px; margin: -2px -3px; border-radius: 4px; }
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on { background: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 14%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 45%, transparent); }
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short:not(.gk-gui-stuff-flag-on) .gk-gui-stuff-flag-word { display: none; }
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word { position: absolute; z-index: 30; left: calc(100% - 4px); bottom: calc(100% + 3px);
+  padding: 2px 6px; border: 1px solid var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)); border-radius: 3px; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff));
+  color: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 70%, var(--oc-gray-9, #212529));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); font-size: 0.8rem; font-weight: bold; line-height: 1.3; opacity: 1; text-shadow: none; pointer-events: none; }
+/* no room above the window's top: the box under the pennant instead (the script) */
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-tip-below > .gk-gui-stuff-flag-word { top: calc(100% + 3px); bottom: auto; }
+/* the padding would pass the window's edge and make the page wider: none at that side there (the script) */
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-flush { padding-inline-end: 0; margin-inline-end: 0; }
+/* the short form takes a finger on an invisible surface of 24 x 24 px round the pennant, in both forms: the pennant's
+   8 x 10 px in the padding of 3 and 2 px, so that the surface starts 5 px outside the padding's corner, and an icon
+   wider or narrower than the pennant keeps the surface centred round it. Laid over what
+   is there and taking no room, so that nothing is drawn or moved; only where a finger or a phone's width is at hand,
+   as a mouse has no need of it and it would take clicks from the target's corner for nothing. The script gives
+   -reach once it has read that the surface fits, and the sideways push at the window's edge. The pennant lies over
+   its surface, so that its own tooltip stays */
+@media (max-width: 899px), (any-pointer: coarse) {
+  .gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-reach::before,
+  .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-reach::before { content: ''; position: absolute; top: -5px; left: calc(var(--gk-gui-flag-reach-x, 0px) + 3px + (var(--gk-gui-flag-w, 8px) - 24px) / 2);
+    inline-size: 24px; block-size: 24px; pointer-events: auto; cursor: default; }
+  .gk-gui-stuff-flag-short.gk-gui-stuff-flag-reach > .gk-gui-stuff-flag-pennant { position: relative; }
+}
+
+/* under 899 px the dashed frame is what shows the focus on a flagged target: no solid outline in addition (the script
+   marks the element that has the focus) */
+.gk-gui-stuff-flag-focus-plain:focus, .gk-gui-stuff-flag-focus-plain:focus-visible { outline: none !important; }
+
+/* the frame the hover draws around the whole target, 4 px outside it, dashed in the pennant's role */
+.gk-gui-stuff-flag-frame { position: absolute; z-index: 29; box-sizing: border-box; border: 1.5px dashed var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057)));
+  border-radius: 4px; pointer-events: none; }
+.gk-gui-stuff-flag-frame:not(.gk-gui-stuff-flag-frame-on) { display: none; }
+
+/* the flag as an element of its own in the text's flow (gk_gui_stuff_flag(text, inline: true), GkGui.flag.inline):
+   a word in a sentence, a legend, a label or a table cell. The pennant before the word (mirrored right to left by the
+   script, which reads the computed direction), the word fully visible in the role's colour and bold with no outline,
+   since nothing lies under it, and the two together 2 px above the text's middle; in a row with a heading the row says
+   how it stands on the heading's line (--gk-gui-flag-shift). Never a button and never a pill */
+.gk-gui-stuff-flag-inline { position: relative; inset-block-start: var(--gk-gui-flag-shift, -2px); display: inline-flex; align-items: center; gap: 3px; vertical-align: middle;
+  color: var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057))); font-weight: bold; white-space: nowrap; cursor: default; }
+.gk-gui-stuff-flag-inline > .gk-gui-stuff-flag-word { font-size: 0.85em; opacity: 1; text-shadow: none; }
+/* its short form: only the pennant, on a tone of its own that the hover and a tap (-on, set by the script) fill in its
+   role with a thin frame; the padding is there all the time and the margin takes it back, so nothing moves. The
+   word stands in a small box just above the pennant in the form of core's tooltip (the surface, a 1 px edge, 3 px
+   corners, a small shadow) with its edge and text in the role, laid on top so that the text around it never moves.
+   Hidden by its opacity only, so that a screen reader always reads it. The surface and the role follow the dark mode
+   together (a light role on the dark surface). Its text is the role mixed 70 % with the page's text colour, so that
+   it reads at 4.5:1 or more on the surface in both modes (the plain green and orange roles are under that on
+   white); the hue stays the role's */
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short { padding: 2px 3px; margin-inline: -3px; border-radius: 4px; }
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short:hover, .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on {
+  background: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 14%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 45%, transparent); }
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word { position: absolute; z-index: 30; inset-inline-start: calc(100% - 4px); inset-block-end: calc(100% + 3px);
+  padding: 2px 6px; border: 1px solid var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)); border-radius: 3px; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff));
+  color: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 70%, var(--oc-gray-9, #212529));
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); font-size: 0.8rem; line-height: 1.3; opacity: 0; pointer-events: none; }
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short:hover > .gk-gui-stuff-flag-word,
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on > .gk-gui-stuff-flag-word,
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-lit > .gk-gui-stuff-flag-word { opacity: 1; }
+/* hidden it is as small as a hidden text for a screen reader, so that it never makes the page wider at the window's edge */
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short:not(:hover, .gk-gui-stuff-flag-on, .gk-gui-stuff-flag-lit) > .gk-gui-stuff-flag-word { inline-size: 1px; block-size: 1px; padding: 0; border: 0; overflow: hidden; }
+/* no room above the window's top: the box under the pennant instead (the script) */
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-tip-below > .gk-gui-stuff-flag-word { inset-block-start: calc(100% + 3px); inset-block-end: auto; }
+/* an own element of the sort a legend's row names, while the pointer is on the row: framed, dashed in its role, as an
+   outline so that nothing moves */
+.gk-gui-stuff-flag-inline.gk-gui-stuff-flag-lit { outline: 1.5px dashed currentColor; outline-offset: 3px; border-radius: 2px; }
+
+/* a legend of flags (gk_gui_stuff_flag_legend): own elements in a row that wraps, each with its count first; the
+   pointer on a row frames the flags of its sort in the legend's area (the script); a list, nothing to click */
+.gk-gui-stuff-flag-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 16px; margin: 0; padding: 0; list-style: none; }
+.gk-gui-stuff-flag-legend > li { margin: 0; padding: 0; cursor: default; }
+
+@media (forced-colors: active) {
+  .gk-gui-stuff-flag-pennant { background: CanvasText; }
+  /* the system's text colour in the stripes as well, and through an icon's mask; a solid fill is currentColor, which is that colour here */
+  .gk-gui-stuff-flag-temp .gk-gui-stuff-flag-pennant { background: var(--gk-gui-flag-fill, repeating-linear-gradient(135deg, CanvasText 0 1.5px, transparent 1.5px 3px)); }
+  .gk-gui-stuff-flag-frame { border-color: Highlight; }
+  .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short:hover, .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on, .gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on { outline-color: Highlight; }
+  .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word, .gk-gui-stuff-flag.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word { border-color: CanvasText; background: Canvas; color: CanvasText; }
+  .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-lit { outline-color: Highlight; }
+}
+@media print { .gk-gui-stuff-flags { display: none; } }

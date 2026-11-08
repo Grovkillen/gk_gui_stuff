@@ -23,6 +23,7 @@
     if (!tpl) return;
     var box = document.createElement('div');
     box.className = 'gk-gui-stuff-opener-body';
+    G.effect(box, 'openers');
     box.appendChild(tpl.content.cloneNode(true));
     var full = opener.getAttribute('data-gk-gui-stuff-open') === 'full';
     opener.classList.add('gk-gui-stuff-opener-open');

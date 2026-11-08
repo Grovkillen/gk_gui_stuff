@@ -1,0 +1,35 @@
+<%# Administration > Meningsvy och Klassisk vy: a row per page type the plugins register, its mode and the
+    default for Valbart, and the row that sets all pages. A row's segments save at once in their mount, with the reason
+    of the place gui_stuff.meaning; the row for all pages has three buttons with that reason (gk_gui_stuff_page.js turns
+    the rows when the mode changes). Each row says its latest change, quietly, in its name cell. The labels of the
+    modes are the view words. %>
+<h2><%= l(:label_gk_gui_stuff_meaning_admin) %></h2>
+<p class="info"><%= l(:text_gk_gui_stuff_meaning_admin) %></p>
+<% if @types.empty? %>
+  <p class="nodata"><%= l(:text_gk_gui_stuff_meaning_none) %></p>
+<% else %>
+  <% place = 'gui_stuff.meaning' %>
+  <%= gk_gui_stuff_direct_note %>
+  <table class="list gk-gui-stuff-meaning-table" data-gk-gui-filter="off">
+    <thead><tr><th><%= l(:label_gk_gui_stuff_meaning_page) %></th><th><%= l(:label_gk_gui_stuff_meaning_mode) %></th><th><%= l(:label_gk_gui_stuff_meaning_default) %></th></tr></thead>
+    <tbody>
+      <tr class="gk-gui-stuff-meaning-all"><th scope="row"><%= l(:label_gk_gui_stuff_meaning_all) %><%= gk_gui_stuff_meaning_last(@latest[GkGuiStuff::Meaning::ALL]) %></th>
+        <td colspan="2"><span class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_meaning_all) %></span>
+          <% gk_gui_stuff_meaning_modes.each do |text, v| %>
+            <%= gk_gui_stuff_reason_button(text, reason: place, url: gk_gui_stuff_meaning_admin_type_path(key: GkGuiStuff::Meaning::ALL), method: :patch, params: { mode: v }) %>
+          <% end %></td></tr>
+      <% @types.each do |t| %>
+        <% mode = GkGuiStuff::Meaning.mode(t.key) %>
+        <tr data-gk-gui-meaning-row="<%= t.key %>"><td><%= t.label %><%= gk_gui_stuff_meaning_last(@latest[t.key]) %></td>
+          <td><%= gk_gui_stuff_rail(url: gk_gui_stuff_meaning_admin_type_path(key: t.key), tag: :span) do %>
+                <%= gk_gui_stuff_segment('mode', gk_gui_stuff_meaning_modes, mode, label: l(:label_gk_gui_stuff_meaning_mode), reason: place) %>
+              <% end %></td>
+          <td data-gk-gui-meaning-default="1"><%= gk_gui_stuff_rail(url: gk_gui_stuff_meaning_admin_type_path(key: t.key), tag: :span, html: { hidden: mode != 'choice' }) do %>
+                <%= gk_gui_stuff_segment('default', gk_gui_stuff_meaning_views, GkGuiStuff::Meaning.default_view(t.key), label: l(:label_gk_gui_stuff_meaning_default), reason: place) %>
+              <% end %>
+              <%= content_tag(:span, l(:text_gk_gui_stuff_meaning_nobody), class: 'gk-gui-stuff-direct-note gk-gui-stuff-meaning-nobody', hidden: mode == 'choice') %></td></tr>
+      <% end %>
+    </tbody>
+  </table>
+<% end %>
+<% html_title l(:label_gk_gui_stuff_meaning_admin) %>

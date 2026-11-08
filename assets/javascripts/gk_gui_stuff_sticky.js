@@ -3,22 +3,27 @@
 // and #content overflow-x: auto, so position: sticky holds to them and never to the window), so the header is a
 // floating copy: shown when the real header has left the window and the list is still in it, with each column's
 // width measured from the list, and moved sideways with the list when it scrolls in its own box. Sorting links work
-// in the copy; a checkbox in the copy clicks the real one. In core's workflow matrix the first column (the current
-// status) also stays at the start when the matrix scrolls sideways (CSS sticky, which works inside the box).
+// in the copy; a checkbox in the copy clicks the real one. In core's workflow matrices the first column (the current
+// status in the transitions, the field in the field permissions) also stays at the start when the matrix scrolls
+// sideways (CSS sticky, which works inside the box). The column's heading cells are the ones GK Core Stuff's
+// anchor_marks marks current-status (transitions) or field-name (field permissions), its rows core's td.name;
+// a matrix without the marks scrolls as core's.
 // In core's narrow layout (phone) the header stands fixed at the top of the window, so the copy stands right under it
 // and shows when the real header has gone under it. Never in print.
 (function () {
   var G = window.GkGui;
   if (!G || !G.on('sticky_columns')) return;
   var items = [];
+  // the marks on the name column's heading cells (transitions, field permissions)
+  var FIRST = '.current-status, .field-name';
 
   function setup(root) {
     root.querySelectorAll('table.list').forEach(function (table) {
       if (table.dataset.gkGuiStuffSticky || !table.tHead || table.closest('.gk-gui-stuff-sticky-clone')) return;
       if (table.tBodies.length === 0 || table.tHead.classList.contains('related-issues')) return;
       table.dataset.gkGuiStuffSticky = '1';
-      var box = table.parentElement && table.parentElement.classList.contains('autoscroll') ? table.parentElement : null;
-      if (box && table.classList.contains('workflows')) box.classList.add('gk-gui-stuff-sticky-first');
+      var box = table.closest('.autoscroll'); // core's scrolling box around a list, at any depth
+      if (box && table.classList.contains('workflows') && table.tHead.querySelector(FIRST)) box.classList.add('gk-gui-stuff-sticky-first');
       var it = { table: table, box: box, clone: null, widths: null };
       items.push(it);
       if (box) box.addEventListener('scroll', function () { place(it); }, { passive: true });
@@ -26,7 +31,7 @@
   }
 
   function build(it) {
-    var wrap = G.node('div', 'gk-gui-stuff-sticky-clone');
+    var wrap = G.effect(G.node('div', 'gk-gui-stuff-sticky-clone'), 'sticky_columns');
     wrap.setAttribute('aria-hidden', 'true');
     var t = document.createElement('table');
     t.className = it.table.className;
@@ -66,11 +71,14 @@
     cbs.forEach(function (cb, i) { if (copies[i]) copies[i].checked = cb.checked; });
   }
 
-  // where the copy stands: under core's header when that one is fixed at the top (the narrow layout), else at the top
+  // where the copy stands: under core's header when that one is fixed at the top (the narrow layout), else at the top,
+  // or under the top band while it stays in the window with a panel open (a computer's width)
   function fixedTop() {
     var h = document.getElementById('header');
-    if (!h || window.getComputedStyle(h).position !== 'fixed') return 0;
-    return Math.max(0, h.getBoundingClientRect().bottom);
+    if (h && window.getComputedStyle(h).position === 'fixed') return Math.max(0, h.getBoundingClientRect().bottom);
+    var band = document.querySelector('body > .gk-gui-stuff-band');
+    if (band && window.getComputedStyle(band).position === 'sticky') return Math.max(0, band.getBoundingClientRect().bottom);
+    return 0;
   }
 
   function place(it) {
@@ -87,11 +95,10 @@
     var shift = tr.left - left;
     var t = it.clone.firstChild;
     t.style.transform = 'translateX(' + shift + 'px)';
-    // the matrix: the first column stays at the start in the copy too
+    // the matrix: the name column's heading cells (their mark, kept in the copy) stay at the start in the copy too
     if (it.box && it.box.classList.contains('gk-gui-stuff-sticky-first')) {
-      Array.prototype.forEach.call(t.tHead.rows, function (row) {
-        var first = row.cells[0];
-        if (first) { first.style.position = 'relative'; first.style.zIndex = '1'; first.style.transform = 'translateX(' + (-shift) + 'px)'; }
+      t.tHead.querySelectorAll(FIRST).forEach(function (cell) {
+        cell.style.position = 'relative'; cell.style.zIndex = '1'; cell.style.transform = 'translateX(' + (-shift) + 'px)';
       });
     }
     it.clone.classList.add('gk-gui-stuff-sticky-on');
@@ -117,6 +124,10 @@
   G.onContent(function (root) { setup(root); all(true); });
   window.addEventListener('scroll', function () { all(false); }, { passive: true });
   window.addEventListener('resize', function () { all(true); });
+  // a panel in the top band opens or closes: the band stays in the window or lets go, and the copy moves with it
+  document.addEventListener('toggle', function (e) {
+    if (e.target && e.target.closest && e.target.closest('.gk-gui-stuff-band')) all(false);
+  }, true);
   document.addEventListener('change', function (e) {
     if (e.target && e.target.type === 'checkbox') all(true); // keep "check all" in the copy as it is in the list
   });

@@ -1,0 +1,9 @@
+<%# quick_done: the status each tracker's issues get from the button, or none. name: the value's field name, value: the
+    stored table %>
+<div class="gk-gui-stuff-form-page-grid gk-gui-stuff-form-page-grid-wide">
+<% Tracker.sorted.each do |tr| %>
+  <span class="gk-gui-stuff-form-page-check"><label for="gk-gui-stuff-qd-<%= tr.id %>"><%= tr.name %></label>
+    <%= select_tag "#{name}[#{tr.id}]", options_for_select([[l(:label_gk_gui_stuff_quick_done_no_status), '']] + tr.issue_statuses.map { |s| [s.name + (s.is_closed? ? " (#{l(:label_closed_issues)})" : ''), s.id.to_s] }, value[tr.id.to_s].to_s),
+                   id: "gk-gui-stuff-qd-#{tr.id}", disabled: disabled %></span>
+<% end %>
+</div>

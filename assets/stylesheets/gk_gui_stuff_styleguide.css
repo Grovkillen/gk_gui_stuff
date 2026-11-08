@@ -1,0 +1,330 @@
+/* gk_gui_stuff: the style guide's own page (/gk_gui_stuff/styleguide); the primitives it shows have their own
+   stylesheets. Both forms of the page share their look with the icon library through GK GUI Stuff's library
+   (gk_gui_stuff_library.css, the icon library's form made general): its tones (the page stands in
+   .gk-gui-stuff-lib-tokens or in the library itself), its search field, its chips for the groups with their counts,
+   its chequered ground in a 1 px frame with 3 px corners, its copy button. Every colour is a role or core's variable,
+   mixed for the ground and the squares, so that a theme and the dark mode carry it. Logical properties. */
+.gk-gui-stuff-sg-page {
+  --gk-gui-sg-frame: var(--gk-gui-lib-frame, var(--oc-gray-4, #ced4da));
+  --gk-gui-sg-divider: var(--gk-gui-lib-divider, var(--oc-gray-3, #dee2e6));
+  --gk-gui-sg-ground: var(--gk-gui-lib-ground, var(--oc-white, #ffffff));
+  --gk-gui-sg-square: var(--gk-gui-lib-square, var(--oc-gray-2, #e9ecef));
+  --gk-gui-sg-quiet: var(--gk-gui-lib-quiet, var(--oc-gray-0, #f8f9fa));
+  --gk-gui-sg-muted: var(--gk-gui-lib-muted, var(--oc-gray-7, #495057));
+  --gk-gui-sg-on: var(--gk-gui-lib-on, var(--oc-blue-8, #1971c2));
+  /* the top of the window that is free is the library's (--gk-gui-lib-top: under GK's band and under core's header
+     where it is fixed, a phone, measured by the library's script, 64 px on a phone until it has); a jump to an element
+     also clears the page's bar (--gk-gui-sg-bar-h, measured), so that the heading and its choices are seen, and the
+     library form's items get the same through the library's own scroll-margin (--gk-gui-lib-jump-more) */
+  --gk-gui-sg-top: var(--gk-gui-lib-top, 8px);
+  --gk-gui-sg-jump: calc(var(--gk-gui-sg-top) + var(--gk-gui-sg-bar-h, 0px) + 4px);
+  --gk-gui-lib-jump-more: var(--gk-gui-sg-bar-h, 0px);
+  display: grid; grid-template-columns: minmax(12em, 15em) minmax(0, 1fr); gap: 16px; align-items: start;
+}
+/* the library form: the library takes the whole width; its panel holds the element's choices, Används för and Inte
+   för, and the tiles as the page form has them */
+.gk-gui-stuff-sg-page.gk-gui-stuff-sg-lib { display: block; }
+/* the element's choices are a part of the panel's head, in its flow and always shown, so that their place is kept
+   whatever is chosen and nothing moves on a choice, and they never lie on the example. In a panel beside the grid the
+   head has no room for them beside the name: they are its last row. In a panel under the grid they stand in the head's
+   row before the close button, and a long name or legend wraps before them */
+.gk-gui-stuff-sg-lib .gk-gui-stuff-lib-panel-head { flex-wrap: wrap; }
+.gk-gui-stuff-sg-lib-tools { display: flex; flex: 0 0 100%; order: 10; justify-content: flex-end; margin: 0; }
+.gk-gui-stuff-lib-panel-under .gk-gui-stuff-sg-lib-tools { flex: none; order: 0; }
+.gk-gui-stuff-sg-lib-tools .gk-gui-stuff-sg-element-tools { opacity: 1; pointer-events: auto; }
+/* in a panel beside the grid (16 to 26em) a tile takes the panel's width and its canvas scrolls sideways rather than
+   push the panel wider; under the grid the tiles stand as in the page form */
+.gk-gui-stuff-sg-lib .gk-gui-stuff-lib-with-panel .gk-gui-stuff-sg-tiles { grid-template-columns: minmax(0, 1fr); }
+.gk-gui-stuff-sg-lib .gk-gui-stuff-lib-with-panel .gk-gui-stuff-sg-canvas { min-inline-size: 0; }
+.gk-gui-stuff-sg-lib .gk-gui-stuff-lib-with-panel .gk-gui-stuff-sg-use { grid-template-columns: minmax(0, 1fr); }
+/* the page's heading first and the switch between the two forms after it: one row, the switch at the end, and the
+   switch under the heading where the row runs out (a phone); core's place for the page's actions takes no room while
+   it is empty. The row is a box of its own (flex) beside core's floating div.contextual, where GK GUI Stuff's three-dot
+   menu stands: a box of its own is laid beside a float even with no room left, and on a phone core makes the
+   div.contextual the whole width, so the row got no width and the heading lay under the menu. With a least width
+   (20em, never more than the page's width) the row never lies under the menu, and it stays beside it on a computer.
+   Under 899 px the page's own div.contextual (gk-gui-stuff-sg-actions, this page's, never core's on other
+   pages) is only as wide as the menu, so that the menu stands at the end of the row with the heading and the choice
+   of form instead of on a row of its own before the heading; the row's least width there is 12em, so that it still
+   goes under the menu where even that has no room. The menu's list opens from the menu's end inwards, inside the
+   window */
+.gk-gui-stuff-sg-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; min-inline-size: min(100%, 20em); }
+@media (max-width: 899px) { #content > .contextual.gk-gui-stuff-sg-actions { inline-size: auto; margin-inline-start: 8px; } .gk-gui-stuff-sg-head { min-inline-size: min(100%, 12em); } #content > .contextual.gk-gui-stuff-sg-actions .drdn-content { inset-inline-start: auto; inset-inline-end: 0; } }
+.gk-gui-stuff-sg-head > h2 { min-inline-size: 0; }
+.gk-gui-stuff-sg-form { display: flex; align-items: center; }
+.gk-gui-stuff-sg-actions:empty { display: none; }
+
+/* the side menu: follows on scroll, never taller than the window; the search as the icon library's; the group pills;
+   the element in view marked. CSS sticky does not hold inside core's #wrapper and #content (overflow), so the page's
+   script fixes the menu (-fixed) at its column's place while the column ([data-gk-gui-sg-side]) keeps the grid */
+.gk-gui-stuff-sg-side { min-inline-size: 0; }
+.gk-gui-stuff-sg-menu { inset-block-start: var(--gk-gui-sg-top); max-block-size: calc(100vh - var(--gk-gui-sg-top) - 8px); overflow: auto; box-sizing: border-box;
+  margin: 0; padding: 8px; border: 1px solid var(--gk-gui-sg-divider); border-radius: 4px; background: var(--gk-gui-sg-quiet); font-size: 0.95em; }
+.gk-gui-stuff-sg-menu.gk-gui-stuff-sg-menu-fixed { position: fixed; z-index: 1; }
+.gk-gui-stuff-sg-menu-fold > summary { display: none; }
+.gk-gui-stuff-sg-menu input[type="search"] { inline-size: 100%; box-sizing: border-box; margin-block-end: 6px; }
+.gk-gui-stuff-sg-menu-all, .gk-gui-stuff-sg-menu-head { margin-block: 8px 2px; }
+.gk-gui-stuff-sg-menu ul { list-style: none; margin: 0; padding: 0; }
+.gk-gui-stuff-sg-menu li a { display: block; padding-block: 1px; padding-inline: 8px; border-radius: 3px; }
+.gk-gui-stuff-sg-menu li a[aria-current="true"] { background: color-mix(in srgb, var(--gk-gui-sg-on) 14%, var(--gk-gui-sg-ground)); font-weight: bold; }
+
+/* the page's bar at the top of the elements: light or dark and computer or phone for every element, beside
+   Visa all kod. It follows on scroll: as the menu, CSS sticky cannot hold inside core's #wrapper and #content, so the
+   page's script fixes the bar (-fixed) at its place's width while its place ([data-gk-gui-sg-bar-place]) keeps its
+   height in the flow; on a phone it stands under core's fixed header */
+.gk-gui-stuff-sg-bar-place { margin-block: 0 8px; }
+.gk-gui-stuff-sg-tools { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 8px; margin: 0; padding-block: 4px; box-sizing: border-box; }
+.gk-gui-stuff-sg-tools.gk-gui-stuff-sg-tools-fixed { position: fixed; z-index: 2; inset-block-start: var(--gk-gui-sg-top); padding-inline: 8px; border: 1px solid var(--gk-gui-sg-divider); border-radius: 4px;
+  background: var(--gk-role-ui-surface, var(--gk-gui-sg-ground)); box-shadow: 0 2px 6px color-mix(in srgb, var(--gk-role-ui-shadow, #000) 10%, transparent); }
+
+/* an element: core's box; the heading with the name, the plugin and the states, and the choices at the end; Används
+   för and Inte för side by side; the GK counterpart of a Redmine form. A jump (an anchor, the menu, Enter in the
+   search) leaves the heading under the header and the bar; in the library form the library's own scroll-margin does,
+   with the bar added (--gk-gui-lib-jump-more) */
+.gk-gui-stuff-sg-element { margin-block: 0 16px; }
+.gk-gui-stuff-sg-page :is(.gk-gui-stuff-sg-element, .gk-gui-stuff-sg-name) { scroll-margin-block-start: var(--gk-gui-sg-jump); }
+/* a tile with an anchor of its own (sg-tile-…): a jump to it leaves its head under the header and the bar */
+.gk-gui-stuff-sg-page .gk-gui-stuff-sg-tile[id] { scroll-margin-block-start: calc(var(--gk-gui-sg-jump) + 14px); }
+.gk-gui-stuff-sg-name:focus { outline: none; }
+.gk-gui-stuff-sg-name:focus-visible { outline: 2px solid var(--gk-role-ui-choice, var(--gk-gui-sg-on)); outline-offset: 2px; }
+/* the element's own choices only while the pointer or the focus is on its heading: hidden, but still in the
+   Tab order, so that a tab into them shows them; a tap on the name focuses it; an element
+   whose choice differs from the page's (-own) shows it. In the library form the panel's head always shows them */
+.gk-gui-stuff-sg-element-tools { opacity: 0; pointer-events: none; transition: opacity 0.12s; }
+.gk-gui-stuff-sg-element-head:is(:hover, :focus-within) .gk-gui-stuff-sg-element-tools, .gk-gui-stuff-sg-element-tools.gk-gui-stuff-sg-own { opacity: 1; pointer-events: auto; }
+@media (prefers-reduced-motion: reduce) { .gk-gui-stuff-sg-element-tools { transition: none; } }
+/* where nothing can hover (a touch screen wider than a phone) the choices always show: a tap on a choice would
+   otherwise take the focus off the heading first and hide them in the middle of the tap. Under 899 px they are not
+   drawn at all (at the end of the sheet): only the page's own choices in the bar */
+@media (hover: none) { .gk-gui-stuff-sg-element-tools { opacity: 1; pointer-events: auto; } }
+.gk-gui-stuff-sg-element-head { --gk-gui-flag-shift: 1px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+/* after the name, on the same line, its short legend in the text (the plugin, the number of states, the tiles' modes
+   counted); where the line runs out the legend stands on the next line, under the name */
+.gk-gui-stuff-sg-element-head h3.gk-gui-stuff-sg-name { margin: 0; padding: 0; border: 0; font-size: 1.15em; }
+.gk-gui-stuff-sg-element-head > .gk-gui-stuff-sg-modes { min-inline-size: 0; }
+.gk-gui-stuff-sg-element-tools { display: inline-flex; flex-wrap: wrap; gap: 8px; margin-inline-start: auto; }
+.gk-gui-stuff-sg-use { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-block: 8px 12px; }
+.gk-gui-stuff-sg-use p { margin: 0; padding-block: 6px; padding-inline: 10px; border-radius: 4px; background: var(--gk-gui-sg-quiet); }
+.gk-gui-stuff-sg-use b { display: block; font-size: 0.85em; }
+.gk-gui-stuff-sg-counterpart { margin-block: 0 10px; font-size: 0.9em; color: var(--gk-gui-sg-muted); }
+
+/* the tiles: as many as the width holds, never narrower than 300 px (the canvas then has at least 250 px inside its
+   22 px of air); a wide one takes the whole row. Each tile is as tall as its own content: a tall neighbour
+   never stretches a small example's canvas, so a small button never stands in the middle of a big empty canvas */
+.gk-gui-stuff-sg-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); align-items: start; gap: 12px; margin-block-end: 6px; }
+.gk-gui-stuff-sg-tile { display: flex; flex-direction: column; min-inline-size: 0; border: 1px solid var(--gk-gui-sg-divider); border-radius: 4px; background: var(--gk-gui-sg-ground); }
+.gk-gui-stuff-sg-tile-wide { grid-column: 1 / -1; }
+/* what the example does stands after the state's name in the text, as the flag's own element with its words; where the
+   row runs out it stands on the next row, under the name. What it means for a screen reader is hidden after the word */
+.gk-gui-stuff-sg-tile-head { --gk-gui-flag-shift: 1px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; padding-block: 6px; padding-inline: 10px; border-block-end: 1px solid var(--gk-gui-sg-divider); }
+.gk-gui-stuff-sg-state { font-weight: bold; }
+/* the canvas: the example in its real size on the chequered ground in its frame, as the library's large picture (the
+   icon library's), 22 px of air round it and the concept's least height (96 px with the air and the frame: core
+   sets no border-box for the page, so the canvas sets its own; 296 px wide is 250 px inside its air), and otherwise
+   as tall as the example; it scrolls sideways rather than cut anything. The example's own box is centred, and
+   inside it the example stands at the start as on a real page */
+.gk-gui-stuff-sg-canvas { flex: none; display: flex; align-items: center; justify-content: center; box-sizing: border-box; min-block-size: 96px; min-inline-size: 296px; margin: 8px; padding: 22px; overflow-x: auto;
+  border: 1px solid var(--gk-gui-sg-divider); border-radius: 3px; background-color: var(--gk-gui-sg-ground);
+  background-image: conic-gradient(var(--gk-gui-sg-square) 25%, transparent 0 50%, var(--gk-gui-sg-square) 0 75%, transparent 0); background-size: 16px 16px; }
+/* what folds out of an example lies over the page, as on a real page: while a fly, a mount's box or Redmine's dropdown
+   is open the canvas clips nothing, so it gets no scrollbars, the button stays where it is and the tile keeps its
+   size. A still copy stands in the page's flow and has no part in it */
+.gk-gui-stuff-sg-canvas:has(:is(details.gk-gui-stuff-fly[open], :is(.gk-gui-stuff-mount, .gk-gui-stuff-inline-edit) > .gk-gui-stuff-mount-box:not([hidden]), .drdn.expanded):not(.gk-gui-stuff-sg-still *)) { overflow: visible; }
+.gk-gui-stuff-sg-shown { max-inline-size: 100%; min-inline-size: 0; text-align: start; }
+/* a save bar's row in a tile hugs its controls, so it has no empty end for the word to lie over: the word stands under
+   the row's end, in the canvas' padding, still taking no room */
+.gk-gui-stuff-sg-shown > .gk-gui-stuff-rail > .gk-gui-stuff-save-status { inset-block: 100% auto; }
+.gk-gui-stuff-sg-tile-wide .gk-gui-stuff-sg-canvas { display: block; }
+.gk-gui-stuff-sg-tile-wide .gk-gui-stuff-sg-shown { max-inline-size: none; }
+/* the top band short of room: an example narrower than its four parts as icons with their counts, so that +N shows on
+   a computer as on a phone: the instance's role and two parts as icons beside +N fit, the other two are in +N */
+.gk-gui-stuff-sg-shown > .gk-gui-stuff-band.gk-gui-stuff-sg-band-narrow { max-inline-size: 22em; }
+/* Prova under a still picture */
+.gk-gui-stuff-sg-try { margin-block: 10px 0; text-align: center; }
+/* the code folded under the canvas, with the copy button beside it */
+.gk-gui-stuff-sg-code { border-block-start: 1px solid var(--gk-gui-sg-divider); }
+.gk-gui-stuff-sg-code > summary { padding-block: 4px; padding-inline: 10px; cursor: pointer; color: var(--gk-gui-sg-muted); font-size: 0.85em; }
+.gk-gui-stuff-sg-code-body { display: flex; align-items: flex-start; gap: 6px; padding-block: 0 8px; padding-inline: 10px; }
+.gk-gui-stuff-sg-code-body > code { flex: 1; min-inline-size: 0; padding-block: 5px; padding-inline: 7px; border: 1px solid var(--gk-role-ui-code, var(--gk-gui-sg-frame)); border-radius: 3px;
+  background: var(--gk-role-ui-code-soft, var(--gk-gui-sg-quiet)); font-size: 0.85em; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Telefon: the element's frame page in a frame 375 px wide, on the same ground */
+.gk-gui-stuff-sg-phone { display: flex; justify-content: center; box-sizing: border-box; padding: 22px; border: 1px solid var(--gk-gui-sg-divider); border-radius: 3px; overflow-x: auto;
+  background-color: var(--gk-gui-sg-ground);
+  background-image: conic-gradient(var(--gk-gui-sg-square) 25%, transparent 0 50%, var(--gk-gui-sg-square) 0 75%, transparent 0); background-size: 16px 16px; }
+.gk-gui-stuff-sg-phone > iframe { flex: none; inline-size: 375px; block-size: 400px; border: 1px solid var(--gk-gui-sg-frame); border-radius: 12px; background: var(--gk-gui-sg-ground); }
+/* the frame page itself: Redmine's page frame without its own parts (core's body classes for this controller and
+   action, core's ids for its parts), only the element's tiles */
+body.controller-gk_gui_stuff_styleguide.action-frame :is(#top-menu, #header, #footer, #sidebar, .flyout-menu) { display: none; }
+body.controller-gk_gui_stuff_styleguide.action-frame > :is(.gk-gui-stuff-instance, .gk-gui-stuff-band) { display: none; }
+body.controller-gk_gui_stuff_styleguide.action-frame .gk-gui-stuff-ribbon-frame { display: none; }
+/* without the header and the band no room is kept for them (core's 64 px for its fixed header on a phone, the band's
+   height); the guide's script takes away the frame's scrollbar room (core's html overflow-y: scroll), so the page is
+   the full 375 px */
+body.controller-gk_gui_stuff_styleguide.action-frame { --gk-gui-stuff-band-h: 0px; --gk-gui-stuff-lw-h: 0px; }
+body.controller-gk_gui_stuff_styleguide.action-frame #main { padding-block-start: 0; }
+.gk-gui-stuff-sg-in-frame { display: block; }
+.gk-gui-stuff-sg-in-frame .gk-gui-stuff-sg-element { margin: 0; }
+
+/* Visa all kod in the page's bar: the button with its words on a computer, the icon button (core's toggle-plus, and
+   toggle-minus while all the code is open, as core's own expand and collapse; its words as the tooltip and for a
+   screen reader) under 899 px, so that the bar is one row there. The one not shown is not drawn, so it is
+   out of the Tab order */
+@media (min-width: 900px) { .gk-gui-stuff-sg-tools .gk-gui-stuff-sg-all-code-icon { display: none; } }
+
+/* under 899 px the menu stands folded at the top, not following; Används för and Inte för one under the other. Only
+   the page's choices show: the element's own (light or dark, computer or phone) are not drawn in its heading nor in
+   the library form's panel, and the page's bar is one row, its choices and Visa all kod as an icon button */
+@media (max-width: 899px) {
+  .gk-gui-stuff-sg-page { grid-template-columns: minmax(0, 1fr); }
+  .gk-gui-stuff-sg-menu { position: static; max-block-size: none; }
+  .gk-gui-stuff-sg-menu-fold > summary { display: list-item; cursor: pointer; font-weight: bold; }
+  .gk-gui-stuff-sg-use { grid-template-columns: minmax(0, 1fr); }
+  .gk-gui-stuff-sg-element-tools, .gk-gui-stuff-sg-lib-tools { display: none; }
+  .gk-gui-stuff-sg-tools { flex-wrap: nowrap; gap: 6px; }
+  .gk-gui-stuff-sg-tools .gk-gui-stuff-sg-all-code { display: none; }
+}
+@media print { .gk-gui-stuff-sg-menu, .gk-gui-stuff-sg-bar-place, .gk-gui-stuff-sg-element-tools, .gk-gui-stuff-sg-try { display: none; } .gk-gui-stuff-sg-page { display: block; } }
+
+/* A narrow place shows how a long pill name is cut short. */
+.gk-gui-stuff-sg-narrow { max-inline-size: 200px; border: 1px dashed var(--gk-gui-sg-frame, var(--oc-gray-4, #ced4da)); padding: 4px; }
+/* What opens, shown open and still: in an inert container, laid in the page instead of over it; the live one opens by
+   Prova. Also used by the previews under Administration, Utseende */
+.gk-gui-stuff-sg-still { margin-block: 4px; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-layer, .gk-gui-stuff-sg-still.ui-dialog { position: relative; z-index: auto; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-toc { position: static; }
+/* core's card of a tip, shown still: the look core gives it on hover (div.tooltip:hover span.tip), laid under its word */
+.gk-gui-stuff-sg-still .tooltip span.tip { display: block; position: static; box-sizing: border-box; inline-size: 250px; margin-block-start: 2px; padding: 4px;
+  border: 1px solid var(--oc-gray-7, #555); border-radius: 3px; background-color: var(--oc-white, #fff); color: var(--oc-gray-7, #505050);
+  font-size: 0.75rem; box-shadow: 0 1px 2px rgba(var(--oc-gray-9-rgb, 0, 0, 0), 0.05); }
+/* a fly drawn open: its box under the button in the page, also on a phone (no sheet, no dimmed page) */
+.gk-gui-stuff-sg-still details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box { position: static; inset: auto; z-index: auto; max-block-size: none; }
+.gk-gui-stuff-sg-still details.gk-gui-stuff-fly[open]::before, .gk-gui-stuff-sg-still details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box::before { content: none; }
+/* Visa: Av and På side by side while there is room (gk_gui_stuff_sg_compare), in a fly wide enough for both. The two
+   pictures start at the same height, whatever stands first in them, and mid_line's dashed line goes through the middle of
+   each row from frame to frame: a row keeps its own margins out of the middle. Only colours follow light and dark. */
+details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box:has(.gk-gui-stuff-compare) { inline-size: min(48em, 92vw); max-inline-size: min(48em, 92vw); }
+.gk-gui-stuff-compare-head { margin-block: 0 0.5em; }
+.gk-gui-stuff-compare-sides { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(18em, 100%), 1fr)); gap: 0.6em; }
+.gk-gui-stuff-compare-stack .gk-gui-stuff-compare-sides { grid-template-columns: minmax(0, 1fr); }
+.gk-gui-stuff-compare-side { min-inline-size: 0; margin: 0; padding: 0.4em 0.8em 0.8em; border: 1px solid var(--gk-role-ui-divider); border-radius: 3px; background: var(--gk-role-ui-surface); }
+.gk-gui-stuff-compare-side > figcaption { margin-block-end: 0.4em; font-size: 0.85em; font-weight: bold; color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-compare-side > .gk-gui-stuff-sg-try { margin-block: 0.5em 0; text-align: start; }
+.gk-gui-stuff-compare-picture { user-select: none; }
+.gk-gui-stuff-compare-side .gk-gui-stuff-compare-picture, .gk-gui-stuff-compare-picture .gk-gui-stuff-sg-still { margin-block: 0; }
+.gk-gui-stuff-compare-row { position: relative; display: flow-root; }
+.gk-gui-stuff-compare-row + .gk-gui-stuff-compare-row { margin-block-start: 0.4em; }
+.gk-gui-stuff-compare .gk-gui-stuff-compare-mid :is(h2, table, p, div.flash) { margin-block: 0; }
+.gk-gui-stuff-compare-mid > .badge { vertical-align: middle; }
+/* the count is taller than a line in a small font: it must not make its row taller than the side without it */
+.gk-gui-stuff-compare-mid .gk-gui-stuff-count { margin-block: -0.5em; }
+.gk-gui-stuff-compare-mid::after { content: ""; position: absolute; inset-inline: -0.8em; inset-block-start: 50%; border-block-start: 1px dashed var(--gk-role-ui-effect); pointer-events: none; }
+/* the style guide's example of a lift: the same marks a little lower than Redmine's own */
+.gk-gui-stuff-sg-compare-lower .badge { inset-block-end: 1px; }
+/* the still pictures of what a script opens (gk_gui_stuff_sg_still): each laid in the page at a size that shows it,
+   never fixed to the window, nothing moving */
+.gk-gui-stuff-sg-still .gk-gui-stuff-note { max-inline-size: 380px; box-sizing: border-box; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-banner { margin-block-end: 0; }
+.gk-gui-stuff-sg-still-back { display: flex; justify-content: center; padding: 16px; border-radius: 4px; background: rgba(var(--oc-gray-9-rgb, 33, 37, 41), 0.62); }
+.gk-gui-stuff-sg-still-palette .gk-gui-stuff-sg-still-back { background: rgba(var(--oc-gray-9-rgb, 33, 37, 41), 0.25); }
+.gk-gui-stuff-sg-still-back .gk-gui-stuff-surface { inline-size: min(320px, 100%); max-block-size: none; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-wave { position: relative; inset: auto; z-index: auto; inline-size: 260px; max-inline-size: 100%; block-size: 120px; border-radius: 4px; overflow: hidden; transition: none; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-wave-word { font-size: 36px; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-wave-line { inset-inline: 0; }
+.gk-gui-stuff-sg-still-page { position: relative; inline-size: 300px; max-inline-size: 100%; block-size: 170px; border: 1px dashed var(--gk-gui-sg-frame, var(--oc-gray-4, #ced4da)); background: var(--gk-gui-sg-ground, var(--oc-white, #fff)); }
+/* the fold's own box takes the picture's width, so that its card stays inside the picture at any width */
+.gk-gui-stuff-sg-still .gk-gui-stuff-corner { z-index: auto; inset-inline-end: 0; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-corner-fold.gk-gui-stuff-corner-new { animation: none; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-corner-card { inline-size: auto; inset-inline-end: 8px; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-corner-card::before { content: none; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-drawer { position: static; inline-size: 300px; max-inline-size: 100%; block-size: auto; z-index: auto; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-notice { position: static; transform: none; opacity: 1; margin: 0; transition: none; }
+/* a row of actions as div.contextual stands at the start of its canvas */
+.gk-gui-stuff-sg-contextual { float: none; }
+/* the note at the top: GK GUI Stuff's group in the role info, folded, its heading the four flags' marks and
+   one line; open, the text, the four flags' marks each with what it means, and that hover and focus are not shown */
+.gk-gui-stuff-sg-dummy { margin-block: 8px 12px; }
+/* the arrow stays beside the line on a phone: the title wraps inside itself, the arrow at its first line */
+.gk-gui-stuff-sg-dummy .gk-gui-stuff-group-toggle { flex-wrap: nowrap; align-items: flex-start; text-align: start; }
+.gk-gui-stuff-sg-dummy .gk-gui-stuff-group-toggle > svg { flex: none; margin-block-start: max(0px, calc((1lh - 14px) / 2)); }
+.gk-gui-stuff-sg-dummy .gk-gui-stuff-group-title { min-inline-size: 0; }
+.gk-gui-stuff-sg-dummy-marks { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin-inline-end: 8px; }
+.gk-gui-stuff-sg-dummy-line { font-weight: normal; color: var(--oc-gray-9, #212529); }
+.gk-gui-stuff-sg-dummy p { margin-block: 0 6px; }
+.gk-gui-stuff-sg-legend { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 0.9em; }
+.gk-gui-stuff-sg-legend li { display: flex; align-items: center; gap: 8px; }
+.gk-gui-stuff-sg-legend .gk-gui-stuff-sg-mode { flex: none; }
+/* the flag's examples: targets with room for the words after their pennants, also after the last one (the canvas
+   clips at its frame, so without that room the last word would go before its pennant, over its target); the box
+   that clips, with its target at its end, so that the word goes before the pennant; what is gone, quiet and struck
+   through */
+.gk-gui-stuff-sg-flag-row { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 22px 84px; padding-block-start: 12px; padding-inline-end: 84px; }
+.gk-gui-stuff-sg-flag-clip { box-sizing: border-box; inline-size: 220px; max-inline-size: 100%; overflow: hidden; padding-block: 18px 8px; padding-inline: 8px; text-align: end;
+  border: 1px dashed var(--gk-gui-sg-divider); border-radius: 3px; }
+.gk-gui-stuff-sg-flag-gone { color: var(--gk-gui-sg-muted); text-decoration: line-through; }
+/* the flag's own element: a sentence of made-up words with flags in it, a legend over the targets whose flags its
+   rows frame, and core's table with a state in its column, as wide as its words */
+.gk-gui-stuff-sg-flag-text { margin: 0; max-inline-size: 36em; }
+.gk-gui-stuff-sg-flag-legend-area { display: grid; gap: 6px; justify-items: start; }
+.gk-gui-stuff-sg-flag-table { inline-size: auto; }
+/* the heading's short legend: a made-up heading with its legend after it, on the next line where the line runs out */
+.gk-gui-stuff-sg-flag-heading { --gk-gui-flag-shift: 1px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.gk-gui-stuff-sg-flag-heading > h4 { margin: 0; padding: 0; border: 0; }
+/* the marker's examples: a made-up list of rows with room above them for the flag on the current place; the column
+   that went away keeps its room unseen, so that Visa var den stod has a place to show */
+.gk-gui-stuff-sg-marker-list { display: grid; gap: 10px; padding-block-start: 18px; }
+.gk-gui-stuff-sg-marker-line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 18px; }
+/* the rows stand in columns, and after the marked place comes room for the flag's words (a pennant on top,
+   its words after it in the flag's 10 px), so that the label on the current place never lies over the next column;
+   where the rows' room runs out they take fewer columns (the container rules below), so that the example is never
+   clipped and never scrolls sideways */
+.gk-gui-stuff-sg-marker-cols { grid-template-columns: minmax(0, max-content) repeat(3, max-content); justify-content: start; justify-items: start; align-items: center; column-gap: 18px; }
+.gk-gui-stuff-sg-marker-cols > .gk-gui-stuff-sg-marker-line { display: contents; }
+.gk-gui-stuff-sg-marker-cols > .gk-gui-stuff-sg-marker-line > :first-child { grid-column-start: 1; }
+.gk-gui-stuff-sg-marker-cols .gk-gui-stuff-sg-marker-room { margin-inline-end: var(--gk-gui-sg-marker-room, 230px); }
+/* where the rows are given less room than a row needs, the marked place would stand at the canvas's seen edge, where
+   the flag's word goes before its pennant and lies over the row's first cell. So the row's first cell takes a
+   line of its own and the marked place begins the next, with its words after it inside what is seen. The room is the
+   width the rows are given, never the window's: a phone, a tablet, a narrow window, but also the library form's panel
+   at any window width. The rows' own box (-fit, a block as wide as the canvas inside its air, whatever the rows need)
+   is the container measured; the canvas itself is not, so that no other example is held to its width or made the
+   containing block of what it opens. No width ever scrolls sideways or clips, measured at 14 px:
+   in four columns the first cell's column may narrow (minmax(0, max-content)), so that a long first cell wraps
+   rather than push the row wider, and four columns need about 49em with the first cell whole (the Swedish words;
+   English about 3em more), so they start at 52em; three columns (the marked place with its room, the column that
+   went away, the date) need about 32em, so they start at 34em; under that every cell takes a line of its own, the
+   marked place with its words beside it and the date under it */
+.gk-gui-stuff-sg-marker-fit { container: gk-gui-sg-marker / inline-size; }
+@container gk-gui-sg-marker (width < 52em) {
+  .gk-gui-stuff-sg-marker-cols { grid-template-columns: repeat(3, max-content); }
+  .gk-gui-stuff-sg-marker-cols > .gk-gui-stuff-sg-marker-line > :first-child { grid-column: 1 / -1; }
+}
+@container gk-gui-sg-marker (width < 34em) {
+  .gk-gui-stuff-sg-marker-cols { grid-template-columns: minmax(0, 1fr); }
+  .gk-gui-stuff-sg-marker-cols .gk-gui-stuff-sg-marker-room { margin-inline-end: 0; }
+}
+.gk-gui-stuff-sg-marker-was { visibility: hidden; }
+.gk-gui-stuff-sg-marker-menu { display: inline-block; padding-block-start: 18px; }
+/* the still example Nytt: the canvas centres it, so room after the place for the flag's words (10 px bold, "Nytt:
+   Tidtagning · 1 av 1" about 130 px with the pennant) keeps the words beside the place inside what is seen; without
+   it a phone's canvas turned the words inwards over the place's own text (the current place has its solid
+   outline and its label, and the label never covers it) */
+.gk-gui-stuff-sg-marker-menu-room { margin-inline-end: var(--gk-gui-sg-marker-room-new, 150px); }
+/* what leads nowhere: the pointer says that it does nothing (the guide's script says it in words on a click; its
+   CONTROL is the same list as here) */
+.gk-gui-stuff-sg-tile[data-gk-gui-sg-mode="still"] .gk-gui-stuff-sg-shown :is(a[href], button, input, select, textarea, summary, label, [role="button"]),
+.gk-gui-stuff-sg-shown [data-gk-gui-sg-noop], .gk-gui-stuff-sg-shown [data-gk-gui-sg-example-links] a[href]:not([href^="#"]):not([href^="javascript:"]) { cursor: not-allowed; }
+/* Visa var's example: a box of its own that scrolls, the one example that does, with made-up targets above and below what
+   is seen and made-up rows between them, so that it is never an empty surface; the room around the targets for the ring;
+   the still picture of its parts in the page, nothing fixed to the window, nothing moving */
+.gk-gui-stuff-sg-where-box { block-size: 7em; overflow-y: auto; padding: 1.2em; border: 1px dashed var(--gk-gui-sg-frame, var(--oc-gray-4, #ced4da)); border-radius: 4px; }
+.gk-gui-stuff-sg-where-box > .gk-gui-stuff-sg-where-gap { margin-block: 0 1.2em; }
+.gk-gui-stuff-sg-where-row { margin-block: 0 0.4em; color: var(--gk-role-ui-muted); }
+/* the real arrows lie over the page while they are up: the still picture of the same arrows gives way meanwhile, keeping
+   its place, so that a real arrow never stands on a drawn one */
+body:has(> .gk-gui-stuff-where-edge) .gk-gui-stuff-sg-where-still { visibility: hidden; }
+.gk-gui-stuff-sg-where-goal { display: inline-block; margin: 0 0 1.2em; padding: 0.3em 0.6em; border: 1px solid var(--gk-role-ui-frame); border-radius: 3px; background: var(--gk-role-ui-effect-soft); }
+.gk-gui-stuff-sg-where-box > .gk-gui-stuff-sg-where-goal { display: table; }
+.gk-gui-stuff-sg-where-still { display: flex; flex-wrap: wrap; align-items: center; gap: 1em; padding: 0.5em; }
+.gk-gui-stuff-sg-where-still .gk-gui-stuff-sg-where-goal { margin: 0.5em; }
+.gk-gui-stuff-sg-still .gk-gui-stuff-where-ring { animation: none; }

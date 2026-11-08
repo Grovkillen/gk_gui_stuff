@@ -34,8 +34,8 @@
     }
     function count(word) { var n = parseInt(G.get('wave.n.' + word) || '0', 10) + 1; G.set('wave.n.' + word, String(n)); return n; }
     function doneMs(word) { return Math.max(count(word) <= 10 ? (o.first_ms || 1600) : (o.ms || 600), o.min_ms || 0); }
-    function flash() { return document.querySelector('#content > .flash.notice, #flash_notice'); }
-    function failure() { return document.querySelector('#content > .flash.error, #flash_error'); }
+    function flash() { return document.querySelector('#flash_notice:not(.gk-gui-stuff-sg-still *, [inert] *)'); }
+    function failure() { return document.querySelector('#flash_error:not(.gk-gui-stuff-sg-still *, [inert] *)'); }
     // the message's own words, without what other modules put in the box (the countdown, the cross)
     function said(f) { var c = f.cloneNode(true); c.querySelectorAll('.gk-gui-stuff-flash-tools').forEach(function (x) { x.remove(); }); return c.textContent.trim().slice(0, 80); }
     // The outcome for a reload: kept in localStorage with this tab's id and the request's, short, read once
@@ -71,7 +71,9 @@
         remember(word, level, text);
         return;
       }
-      if (carried) { G.wave.hide(); return; } // no outcome on this page: the wave fades
+      // no outcome on this page (core says nothing after a save that changed nothing): the wave the first script drew
+      // fades at once; G.wave.hide knows only a wave this page showed itself, so the element is taken down here
+      if (carried) { var born = document.getElementById('gk-gui-stuff-wave'); if (born) born.classList.remove('gk-gui-stuff-wave-on'); return; }
       carryOff();
       // a reload of the page that showed an outcome shows it once more, as a notice
       var r = !box && recalled();
@@ -106,7 +108,11 @@
       var failed = b.gkGuiStuffWaveFailed || d.gkGuiStuffWaveFailed || o.failed;
       ss('wave', JSON.stringify({ word: word, done: done, failed: failed, level: lvl, text: text, at: Date.now(), req: Math.random().toString(36).slice(2) }));
       // the start delay: a save that answers at once never shows the waiting word, only the outcome
-      setTimeout(function () { G.wave.show({ word: word, text: text, level: lvl, waiting: true, duration: 0 }); }, o.start_delay || 0);
+      // a listener after this one may still stop the send and the page stays: then no word, and nothing handed over
+      setTimeout(function () {
+        if (e.defaultPrevented) { ss('wave', null); return; }
+        G.wave.show({ word: word, text: text, level: lvl, waiting: true, duration: 0 });
+      }, o.start_delay || 0);
     }, false);
     // loading: only when the page really leaves and the next one is slow. The browser says when it leaves
     // (beforeunload); a click says nothing, for many links never leave the page (core's row menu, a tab, a
@@ -131,10 +137,10 @@
   }
 
   // ------------------------------------------------------------------ the outcome as a notice
-  // With the wave off for the person, a form that was sent says its outcome in the corner: the done word (SPARAT,
-  // KLART) briefly, FEL (alarm) until it is closed. The words come from the form (data-gk-gui-stuff-wave-done, -failed)
-  // as for the wave.
-  if (!G.on('wave') && G.notice && G.notice.show) {
+  // With its own setting on and the wave off for the person, a form that was sent says its outcome in the corner: the
+  // done word (SPARAT, KLART) briefly, FEL (alarm) until it is closed. The words come from the form
+  // (data-gk-gui-stuff-wave-done, -failed) as for the wave. Redmine's own message stands either way.
+  if (G.on('outcome_notice') && !G.on('wave') && G.notice && G.notice.show) {
     document.addEventListener('submit', function (e) {
       var f = e.target;
       if (!f || f.id === 'sudo-form' || (f.method || '').toLowerCase() !== 'post' || f.dataset.remote === 'true' || e.defaultPrevented) return;
@@ -149,17 +155,24 @@
       try { h = JSON.parse(ss('outcome') || 'null'); } catch (e) { h = null; }
       ss('outcome', null);
       if (!h || Date.now() - h.at > 30000) return;
-      var bad = document.querySelector('#content > .flash.error, #flash_error'), good = document.querySelector('#content > .flash.notice, #flash_notice');
+      var bad = document.querySelector('#flash_error:not(.gk-gui-stuff-sg-still *, [inert] *)'), good = document.querySelector('#flash_notice:not(.gk-gui-stuff-sg-still *, [inert] *)');
       // the message's own words, without what flash_timeout put in it (the countdown and the cross)
       var words = function (el) { var c = el.cloneNode(true); c.querySelectorAll('.gk-gui-stuff-flash-tools').forEach(function (x) { x.remove(); }); return c.textContent.trim().slice(0, 160); };
-      if (bad) G.notice.show({ level: 'alarm', text: String(h.failed).toUpperCase() + ': ' + words(bad), life: 'sticky' });
-      else if (good) G.notice.show({ level: 'notice', text: String(h.done).toUpperCase() + ': ' + words(good) });
+      if (bad) G.notice.show({ level: 'alarm', text: String(h.failed).toUpperCase() + ': ' + words(bad), life: 'sticky', effect: 'outcome_notice' });
+      else if (good) G.notice.show({ level: 'notice', text: String(h.done).toUpperCase() + ': ' + words(good), effect: 'outcome_notice' });
     };
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', told); else told();
   }
 
   // ------------------------------------------------------------------ heartbeat and corner
   if (G.on('corner') && page.kind === 'issue' && (G.opt('beat').seconds || 0) > 0) {
+    // the fold's room over the heading from the start, so that nothing moves when the fold comes; this script stands in the
+    // page's head, where #content is not there yet
+    function foldRoomOn() {
+      var foldRoom = document.getElementById('content');
+      if (foldRoom) foldRoom.classList.add('gk-gui-stuff-corner-room');
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', foldRoomOn); else foldRoomOn();
     var seen = [], since = page.at, gone = false;
     function took(d) {
       if (!d) return;
@@ -176,6 +189,7 @@
           location.reload();
         }
       });
+      if (G.effect) G.effect(document.querySelector('.gk-gui-stuff-corner'), 'corner');
     }
     function beat() {
       if (document.hidden) return; // a page nobody looks at asks nothing
@@ -198,24 +212,30 @@
   // ------------------------------------------------------------------ history_navigator (Snabbhopp)
   var actions = G.actions; // shared: plugins add theirs (GkGui.actions.<name> = function (link) {})
   if (G.on('history_navigator') && page.kind === 'issue') {
+    // only the journals that are drawn: core's history tabs hide some (Properties hides the notes without changes,
+    // another tab the whole history), and a hidden one can be neither stepped to nor scrolled to
+    function shown(el) { return el.getClientRects().length > 0; }
     function notes() {
-      return Array.prototype.map.call(document.querySelectorAll('#history .journal'), function (j) {
-        // core's header without the avatar and the note's own menu; the number from the note's anchor
-        var info = j.querySelector('.journal-info') || j.querySelector('h4');
+      return Array.prototype.filter.call(document.querySelectorAll('#history .journal'), shown).map(function (j) {
+        // core's header (its class journal-info) without the avatar and the note's own menu; the number from the
+        // note's anchor. The texts are only shown in the list and searched by what one types: no note is found by them
+        var info = j.querySelector('.journal-info');
         var who = '';
-        if (info) { var c = info.cloneNode(true); c.querySelectorAll('.avatar, .journal-actions, .drdn, img').forEach(function (x) { x.remove(); }); who = c.textContent.replace(/\s+/g, ' ').trim(); }
+        if (info) { var c = info.cloneNode(true); c.querySelectorAll('.avatar, .journal-actions, .drdn, img').forEach(function (x) { x.remove(); }); who = c.textContent.replace(/\s+/g, ' ').trim(); } // gk-r17 P4r: the header is read to be shown in the jump list, the note is already found by its class
         var noteEl = j.querySelector('[id^="note-"]');
         var num = noteEl ? '#' + noteEl.id.slice(5) : '';
         var wiki = j.querySelector('.wiki');
-        var text = wiki ? wiki.textContent.trim().replace(/\s+/g, ' ') : '';
-        var details = Array.prototype.map.call(j.querySelectorAll('ul.journal-details li, ul.details li'), function (li) { return li.textContent.replace(/\s+/g, ' ').trim(); });
+        var text = wiki ? wiki.textContent.trim().replace(/\s+/g, ' ') : ''; // gk-r17 P4r: the note's text is shown and searched as typed, nothing is found by it
+        var details = Array.prototype.map.call(j.querySelectorAll('ul.journal-details li, ul.details li'), function (li) { return li.textContent.replace(/\s+/g, ' ').trim(); }); // gk-r17 P4r: the change lines are shown and searched as typed, nothing is found by them
         return { el: j, label: (num + ' ' + who).trim().slice(0, 90),
                  hint: text ? text.slice(0, 110) : (details[0] || '').slice(0, 110) + (details.length > 1 ? ' ' + G.t('and_more', { count: details.length - 1 }) : ''),
                  search: text + ' ' + details.join(' '), anchor: noteEl ? '#' + noteEl.id : null, note: !!text };
       });
     }
+    var at = null; // the note the last jump landed on: j/k step from it while it is still on screen
     function go(item) {
       if (!item) return;
+      at = item.el;
       // a jump unfolds the note one lands in
       var folded = item.el.querySelector('.gk-gui-stuff-fold'), btn = item.el.querySelector('.gk-gui-stuff-fold-btn');
       if (folded && btn) btn.click();
@@ -226,7 +246,7 @@
     }
     function current(list) {
       var best = -1;
-      list.forEach(function (n, i) { if (n.el.getBoundingClientRect().top < 120) best = i; });
+      list.forEach(function (n, i) { if (shown(n.el) && n.el.getBoundingClientRect().top < 120) best = i; });
       return best;
     }
     actions.history = function () {
@@ -238,15 +258,22 @@
       if (typing(e) || e.ctrlKey || e.metaKey || e.altKey || G.surface.count()) return;
       var list;
       if (e.key === 'g') { e.preventDefault(); actions.history(); }
-      else if (e.key === 'j' || e.key === 'n') { list = notes().filter(function (n) { return n.note; }); var c = list.filter(function (n) { return n.el.getBoundingClientRect().top > 130; })[0]; if (c) { e.preventDefault(); go(c); } }
-      else if (e.key === 'k' || e.key === 'p') { list = notes().filter(function (n) { return n.note; }); var b = list.filter(function (n) { return n.el.getBoundingClientRect().top < -10; }).pop(); if (b) { e.preventDefault(); go(b); } }
+      else if (e.key === 'j' || e.key === 'n' || e.key === 'k' || e.key === 'p') {
+        // step from the note the last jump landed on; scrolled away from it (or no jump yet), start from where the page is
+        list = notes().filter(function (n) { return n.note; });
+        var i = -1, r = at && at.getBoundingClientRect();
+        if (r && r.bottom > 0 && r.top < window.innerHeight) list.forEach(function (n, x) { if (n.el === at) i = x; });
+        if (i < 0) i = current(list);
+        var to = (e.key === 'j' || e.key === 'n') ? list[i + 1] : (i > 0 ? list[i - 1] : null);
+        if (to) { e.preventDefault(); go(to); }
+      }
     });
   }
 
   // ------------------------------------------------------------------ fullscreen (view_state)
   if (G.on('fullscreen')) {
     var view = G.cfg.view || {};
-    function apply(v) { document.documentElement.classList.toggle('gk-gui-stuff-fullscreen', v === 'on'); }
+    function apply(v) { document.documentElement.classList.toggle('gk-gui-stuff-fullscreen', v === 'on'); if (v === 'on') G.effect(document.documentElement, 'fullscreen'); else if (G.uneffect) G.uneffect(document.documentElement, 'fullscreen'); }
     apply(view.fullscreen);
     actions.fullscreen = function () {
       var next = document.documentElement.classList.contains('gk-gui-stuff-fullscreen') ? 'off' : 'on';
@@ -259,7 +286,12 @@
   }
 
   // ------------------------------------------------------------------ layout: the sidebar's place, the header's height
-  (G.cfg.layout || []).forEach(function (k) { document.documentElement.classList.add(k); });
+  // each class is gk-gui-stuff-<sidebar|header>-<value>, so the effect mark names layout_sidebar or layout_header
+  (G.cfg.layout || []).forEach(function (k) {
+    document.documentElement.classList.add(k);
+    var part = /^gk-gui-stuff-(sidebar|header)-/.exec(k);
+    if (part && G.effect) G.effect(document.documentElement, 'layout_' + part[1]);
+  });
 
   // ------------------------------------------------------------------ the project menu as icons
   // A tab with an icon shows the icon only; its name stays for screen readers (aria-label) and as tooltip. Core draws
@@ -280,6 +312,7 @@
           a.textContent = '';
           a.appendChild(ico);
           a.appendChild(N('span', 'icon-label', bare));
+          G.effect(a, 'icons_tabs');
         }
       }
       var span = a.querySelector('.icon-label'), text = (span || a).textContent.trim();
@@ -296,7 +329,7 @@
   // goes; a row moved out can be moved back under My account.
   function menuRows(items) {
     return Array.prototype.filter.call(items.children, function (c) {
-      return c.tagName !== 'HR' && !c.classList.contains('gk-gui-stuff-menu-line') && window.getComputedStyle(c).display !== 'none';
+      return c.tagName !== 'HR' && !c.classList.contains('gk-gui-stuff-menu-line') && !(G.cfg.hidden_rows && c.matches(G.cfg.hidden_rows));
     }).length;
   }
   function menuFit(drdn) {
@@ -325,7 +358,7 @@
     a.dataset.gkGuiStuffIconOnly = '1';
     a.classList.add('icon-only');
     span.hidden = true;
-    a.setAttribute('aria-label', text);
+    if (!a.hasAttribute('aria-label')) a.setAttribute('aria-label', text); // a name the link has already is kept
     if (!a.title) a.title = text;
   }
   function coreIcons() {
@@ -434,7 +467,7 @@
     function show(btn, ident) {
       closeCard();
       btn.setAttribute('aria-expanded', 'true');
-      card = N('div', 'gk-gui-stuff-preview gk-gui-stuff-branch');
+      card = G.effect(N('div', 'gk-gui-stuff-preview gk-gui-stuff-branch'), 'branch_jump');
       var mine = card, ul = N('ul');
       ul.appendChild(N('li', 'gk-gui-stuff-branch-wait', G.t('loading')));
       card.appendChild(ul);
@@ -464,20 +497,30 @@
     }
     G.onContent(function () {
       // every level of the breadcrumb, and the current project itself (so that a project at the top can reach its siblings)
-      var h1 = document.querySelector('#header h1');
+      // the header's title is the one GK Core Stuff's anchor_marks marks site-title; without it there is no branch jump
+      var h1 = document.querySelector('#header .site-title');
       if (!h1 || h1.dataset.gkGuiStuffBranch) return;
+      // the projects of the path: the links GK Core Stuff's breadcrumb_marks gives the project's identifier
+      // (data-project); a path without them gets no buttons
+      var links = Array.prototype.slice.call(h1.querySelectorAll('.breadcrumbs a[data-project]'));
+      if (h1.querySelector('.breadcrumbs') && !links.length) return;
       h1.dataset.gkGuiStuffBranch = '1';
-      var links = h1.querySelectorAll('.breadcrumbs a.ancestor, .breadcrumbs a');
+      function identOf(a) { return a ? a.getAttribute('data-project') : null; }
+      // the project a separator leads to: the first of the marked project links after it in the path (core may leave
+      // out levels in the middle and write an ellipsis there, so it is never counted by place), else the current project
+      function after(sep) {
+        return links.filter(function (a) { return sep.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING; })[0] || null;
+      }
       function add(after, ident) {
-        var b = G.put(N('button', 'gk-gui-stuff-branch-btn'), 'chevrons-right', '\u00BB', 16); b.type = 'button';
+        var b = G.put(N('button', 'gk-gui-stuff-branch-btn'), 'chevrons-right', '\u00BB', 16); b.type = 'button'; G.effect(b, 'branch_jump');
         b.setAttribute('aria-label', G.t('branch')); b.title = G.t('branch'); b.setAttribute('aria-expanded', 'false');
         b.addEventListener('click', function (e) { e.stopPropagation(); if (b.getAttribute('aria-expanded') === 'true') closeCard(); else show(b, ident); });
         // nothing is fetched ahead: the current project's branch is in the page, another level is asked for at the click
         after(b);
       }
-      h1.querySelectorAll('.breadcrumbs .separator').forEach(function (sep, i) {
-        // the separator after ancestor i leads to the level below it: the branch of the next project in the path
-        var next = links[i + 1], ident = next ? (/\/projects\/([^/?#]+)/.exec(next.getAttribute('href')) || [])[1] : page.project;
+      h1.querySelectorAll('.breadcrumbs .separator').forEach(function (sep) {
+        // a separator leads to the level below it: the branch of the next project in the path
+        var next = after(sep), ident = next ? identOf(next) : page.project;
         sep.textContent = '';
         add(function (b) { sep.appendChild(b); }, ident || page.project);
       });

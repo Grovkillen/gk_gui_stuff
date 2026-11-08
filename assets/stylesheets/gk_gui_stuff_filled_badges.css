@@ -1,7 +1,10 @@
 /* gk_gui_stuff filled_badges: core's status badges filled with their own colour and the text white, on every page,
    core's and the GK plugins'. Core draws them outlined (.badge-status-open, -locked, -closed); .badge-private is
    filled in core already. Written for the newest core: its colour variables, which GK Compat supplies where core
-   lacks them; the fallback is the newest core's own value. Off: core's outlined badges. */
-.badge.badge-status-open { color: var(--oc-white, #ffffff); background: var(--oc-blue-9, #1864ab); border-color: var(--oc-blue-9, #1864ab); }
-.badge.badge-status-locked { color: var(--oc-white, #ffffff); background: var(--oc-gray-7, #495057); border-color: var(--oc-gray-7, #495057); }
-.badge.badge-status-closed { color: var(--oc-white, #ffffff); background: var(--oc-green-9, #2b8a3e); border-color: var(--oc-green-9, #2b8a3e); }
+   lacks them; the fallback is the newest core's own value. Off: core's outlined badges, also in a still sample
+   (.gk-gui-stuff-sg-still: the style guide, Visa under Administration, Appearance), and in another setting's picture
+   under Visa (.gk-gui-stuff-preview-on), which shows that setting alone. Each fill holds at least 4.5:1 against its text
+   (test/role_contrast_test.rb): core's green-9 is under that, so closed takes the role notice. */
+.badge.badge-status-open:not(.gk-gui-stuff-sg-still *, .gk-gui-stuff-preview-on *) { color: var(--oc-white, #ffffff); background: var(--oc-blue-9, #1864ab); border-color: var(--oc-blue-9, #1864ab); }
+.badge.badge-status-locked:not(.gk-gui-stuff-sg-still *, .gk-gui-stuff-preview-on *) { color: var(--oc-white, #ffffff); background: var(--oc-gray-7, #495057); border-color: var(--oc-gray-7, #495057); }
+.badge.badge-status-closed:not(.gk-gui-stuff-sg-still *, .gk-gui-stuff-preview-on *) { color: var(--oc-white, #ffffff); background: var(--gk-role-alert-notice); border-color: var(--gk-role-alert-notice); }

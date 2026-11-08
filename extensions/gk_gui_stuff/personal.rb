@@ -35,7 +35,7 @@ module GkGuiStuff
     def all = (@all ||= {})
 
     # The keyword is if: as the menus have it
-    # css: a class the owner's script looks for on the link (people opens Kliv upp in a surface)
+    # css: a class the owner's script looks for on the link (people opens Stega upp in a surface)
     def register(key, plugin:, label:, url:, icon: nil, order: 50, count: nil, waits: false, css: nil, **opts)
       k = key.to_s
       all[k] = Page.new(key: k, plugin: plugin.to_s, label_key: label, url: url, icon: icon, order: order.to_i,
@@ -104,15 +104,21 @@ module GkGuiStuff
     def forget!(user = nil) = (user.nil? || user.logged?) && Rails.cache.write(GENERATION, Time.current.to_f)
     GENERATION = 'gk_gui_stuff_personal_gen'
 
-    def split?(user) = GkGuiStuffUserSetting.for(user).data['count_split'].to_s == '1'
-
-    # The person's own choice: waiting (the default: a count shows when it is more than 0), zero (also 0) or none (no
-    # counters at all)
+    # The counters are the appearance setting personal_count, off in a new installation: off gives no counters at all
+    # (none). Its value shown_as is waiting (a count shows when it is more than 0), split (what waits only on the person
+    # and what others can take too, apart) or zero (also 0); with the setting optional each person chooses their own.
     COUNT_MODES = %w[waiting zero none].freeze
 
+    def shown_as(user) = Appearance.on_for?('personal_count', user) ? GkGuiStuff.appearance_settings.person_value('gui_stuff.personal_count', 'shown_as', user).to_s : nil
+
+    def split?(user) = shown_as(user) == 'split'
+
     def count_mode(user)
-      m = GkGuiStuffUserSetting.for(user).data['count_mode'].to_s
-      COUNT_MODES.include?(m) ? m : 'waiting'
+      case shown_as(user)
+      when nil then 'none'
+      when 'zero' then 'zero'
+      else 'waiting'
+      end
     end
 
     # What the page and the pulse carry: the rows (label, address, count) and the sum of what waits

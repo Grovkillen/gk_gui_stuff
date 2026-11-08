@@ -1,0 +1,12 @@
+<%# core's messages: render_flash_messages with the three kinds (shown still, apart from the page's own message and
+    from flash_timeout and the wave), core's error box, the warning and the empty list %>
+<% ex = ->(k) { l(:"text_gk_gui_stuff_sg_example_#{k}") } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_flash), "render_flash_messages") do %>
+    <div class="gk-gui-stuff-sg-still" inert><%= gk_gui_stuff_sg_flash(notice: ex.call(:flash_notice), warning: ex.call(:flash_warning), error: ex.call(:flash_error)) %></div>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_errors), "error_messages_for(obj)") do %><div class="gk-gui-stuff-sg-still" inert><%= error_messages_for demo[:form] %></div><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_warning), "p.warning, p.nodata") do %>
+    <p class="warning"><%= ex.call(:flash_warning) %></p><p class="nodata"><%= l(:label_no_data) %></p>
+  <% end %>
+</div>

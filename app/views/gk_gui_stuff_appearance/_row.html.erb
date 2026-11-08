@@ -1,0 +1,79 @@
+<%# One appearance setting on Administration > Utseende. The name cell: the name, the plugin and the key quiet, Visa, "var: …"
+    while the level is changed, the description, what it goes with, what it affects (Påverkar, from its footprint, no
+    line when nothing is described), what it needs, its values (hidden while off) and
+    its latest change. Then the level as a radio button under Av, Valfritt and Tvingat; a setting for all or none has
+    the quiet "gäller alla" under Valfritt, and one each person chooses the quiet "Bara per person" under Tvingat. A
+    row with a warning shows it under the description, the sharper one while its value is sharp; the script swaps the
+    text as the field changes. A setting the running Redmine has built in has the flag "Ingår i Redmine <version>" as
+    an element of its own after its name, and core's quiet help text over the three columns with the link to Redmine's own setting where there is one; without that link
+    the row is dimmed and cannot be chosen. One whose plugin is missing is dimmed with its buttons inactive. A shared
+    value has no level: its name cell spans every column, with its fields under the description. %>
+<% reg = @register %>
+<% mode = shared ? nil : reg.mode(row.key) %>
+<% in_core = !shared && reg.in_core?(row) %>
+<% core_link = in_core && row.core_link ? (row.core_link.call rescue nil) : nil %>
+<% present = shared || reg.present?(row) %>
+<% last = @last[row.key] %>
+<% values = row.values.values.map { |v| gk_gui_stuff_value_field(row, v, reg.value(row.key, v.name), disabled: !present || in_core) } %>
+<% warning = gk_gui_stuff_row_warning(row) %>
+<% sharp_when = row.respond_to?(:sharp_when) ? row.sharp_when : nil %>
+<% person_only = row.respond_to?(:person_only?) && row.person_only? %>
+<%= content_tag(:tr, id: gk_gui_stuff_form_page_anchor(row.key),
+                     class: ['gk-gui-stuff-form-page-row', present && (core_link || !in_core) ? nil : 'gk-gui-stuff-form-page-dimmed'].compact.join(' '),
+                     data: { gk_gui_row: row.key, gk_gui_requires: row.requires.join(' ').presence,
+                             gk_gui_search: gk_gui_stuff_form_page_search_text(row.label, row.help, row.plugin_name, key: row.key, label_key: row.label_key),
+                             gk_gui_warning: warning.presence, gk_gui_warning_sharp: gk_gui_stuff_row_warning(row, true).presence,
+                             gk_gui_sharp_field: (sharp_when && "values[#{row.key}][#{sharp_when['value']}]"),
+                             gk_gui_sharp_includes: sharp_when&.dig('includes'),
+                             gk_gui_reason_sharp: (row.respond_to?(:reason_when_sharp) && row.reason_when_sharp ? '1' : nil) }) do %>
+  <%= content_tag(:td, class: 'name', colspan: shared ? 4 : nil) do %>
+    <span class="gk-gui-stuff-form-page-name"><%= row.label %></span>
+    <% if in_core %><%= gk_gui_stuff_in_core_flag %><% end %>
+    <span class="gk-gui-stuff-form-page-quiet"><%= in_core ? 'Redmine' : row.plugin_name %></span>
+    <%= gk_gui_stuff_form_page_key(row.key) %>
+    <% unless shared %><%= gk_gui_stuff_fly(l(:button_show), plain: true, ellipsis: false) { gk_gui_stuff_appearance_show(row) } %><% end %>
+    <span class="gk-gui-stuff-form-page-was" hidden></span>
+    <% if row.help.present? %><span class="gk-gui-stuff-form-page-help"><%= row.help %></span><% end %>
+    <% if warning.present? %>
+      <%= render 'gk_gui_stuff_appearance/warning', row: row, sharp: gk_gui_stuff_row_sharp?(row) %>
+    <% end %>
+    <% related = row.related.select { |k| names.key?(k) } %>
+    <% if related.any? %>
+      <span class="gk-gui-stuff-form-page-related"><%= l(:label_gk_gui_stuff_related) %>
+        <%= safe_join(related.map { |k| link_to(names[k], "##{gk_gui_stuff_form_page_anchor(k)}") }, ', ') %></span>
+    <% end %>
+    <%= gk_gui_stuff_affects(reg, row.key) %>
+    <% if shared && row.used_by.any? %>
+      <% users = row.used_by.select { |k| names.key?(k) } %>
+      <span class="gk-gui-stuff-form-page-related"><%= l(:text_gk_gui_stuff_used_by, names: users.map { |k| names[k] }.join(', '),
+                                                          on: users.count { |k| reg.mode(k) != 'off' }, count: users.size) %></span>
+    <% end %>
+    <% unless present %>
+      <span class="gk-gui-stuff-form-page-needs"><%= l(:text_gk_gui_stuff_needs_plugin, plugin: GkGuiStuff::Appearance.plugin_name(row.needs_plugin || row.plugin)) %></span>
+    <% end %>
+    <% if values.any? %>
+      <%= content_tag(:div, safe_join(values), class: 'gk-gui-stuff-form-page-values', hidden: !shared && mode == 'off') %>
+    <% end %>
+    <% if last %>
+      <%# an event that changed only values has no level: it says so instead of a level %>
+      <%= gk_gui_stuff_form_page_last(last[:mode] ? gk_gui_stuff_mode_word(last[:mode]) : l(:text_gk_gui_stuff_values_changed), last,
+                                      gk_gui_stuff_form_page_history(GkRecords::AppearanceSettings::TARGET, last[:event]&.target_id)) %>
+    <% elsif row.moved_from == 'features' %>
+      <span class="gk-gui-stuff-form-page-last"><%= l(:text_gk_gui_stuff_moved_from_features) %></span>
+    <% end %>
+  <% end %>
+  <% if in_core %>
+    <td colspan="3" class="gk-gui-stuff-form-page-in-core"><%= gk_gui_stuff_in_core(core_link) %></td>
+  <% elsif !shared %>
+    <% %w[off optional forced].each do |m| %>
+      <% if row.modes.include?(m) %>
+        <%= gk_gui_stuff_form_page_radio("modes[#{row.key}]", m, mode == m, label: "#{row.label}: #{gk_gui_stuff_mode_word(m)}", word: gk_gui_stuff_mode_word(m),
+                                         disabled: !present) %>
+      <% elsif person_only %>
+        <td class="gk-gui-stuff-choice-col gk-gui-stuff-form-page-for-all"><span class="gk-gui-stuff-form-page-quiet" title="<%= l(:text_gk_gui_stuff_person_only_tip) %>"><%= l(:text_gk_gui_stuff_person_only) %></span></td>
+      <% else %>
+        <td class="gk-gui-stuff-choice-col gk-gui-stuff-form-page-for-all"><span class="gk-gui-stuff-form-page-quiet" title="<%= l(:text_gk_gui_stuff_for_everyone_tip) %>"><%= l(:text_gk_gui_stuff_for_everyone) %></span></td>
+      <% end %>
+    <% end %>
+  <% end %>
+<% end %>

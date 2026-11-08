@@ -1,0 +1,30 @@
+<%# core's labelled form on an object in memory (GkGuiStuff::Styleguide::Demo): a text field with its error, a
+    list, a check box, radio buttons, a date with core's calendar, a text with core's toolbar, a disabled field, a list
+    of several; it posts to the guide's address, which stores nothing %>
+<% ex = ->(k) { l(:"label_gk_gui_stuff_sg_example_#{k}") } %>
+<% f_obj = demo[:form] %>
+<% @gk_gui_stuff_sg_mode = :server %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_forms), "labelled_form_for(obj, url:) { |f| f.text_field … }; error_messages_for(obj)") do %>
+    <div class="gk-gui-stuff-sg-still" inert><%= error_messages_for f_obj %></div>
+    <%= labelled_form_for f_obj, url: save, html: { id: 'gk-gui-stuff-sg-core-form' } do |f| %>
+      <div class="box tabular">
+        <p><%= f.text_field :subject, label: ex.call(:subject), required: true, size: 40 %></p>
+        <p><%= f.select :kind, [[ex.call(:kind_a), 'a'], [ex.call(:kind_b), 'b']], label: ex.call(:kind) %></p>
+        <p><%= f.check_box :done, label: ex.call(:done) %></p>
+        <p><label><%= ex.call(:level) %></label>
+          <% [[l(:label_gk_gui_stuff_sg_off), 'off'], [l(:label_gk_gui_stuff_sg_optional), 'optional'], [l(:label_gk_gui_stuff_sg_required), 'required']].each do |text, v| %>
+            <label class="inline"><%= radio_button_tag 'sg_demo[level]', v, f_obj.level == v, id: nil %> <%= text %></label>
+          <% end %></p>
+        <p><%= f.date_field :start_date, label: ex.call(:start_date), size: 10 %><%= calendar_for('sg_demo_start_date') %></p>
+        <p><%= f.text_area :description, label: l(:field_description), cols: 60, rows: 4, class: 'wiki-edit' %></p>
+        <%= wikitoolbar_for 'sg_demo_description' %>
+        <p><label for="gk-gui-stuff-sg-disabled"><%= ex.call(:disabled) %></label><%= text_field_tag 'sg_disabled', ex.call(:value_open), id: 'gk-gui-stuff-sg-disabled', disabled: true %></p>
+        <p><label for="gk-gui-stuff-sg-several"><%= ex.call(:several) %></label>
+          <%= select_tag 'sg_several_core[]', options_for_select(demo[:users].map { |u| [u.name, u.id] }, [demo[:users].first.id]), multiple: true, size: 3, id: 'gk-gui-stuff-sg-several' %></p>
+      </div>
+      <%# Spara asks the guide's address; Avbryt would leave the page, so here it says that it leads nowhere %>
+      <p><%= submit_tag l(:button_save), name: nil %> <span data-gk-gui-sg-example-links><%= link_to l(:button_cancel), gk_gui_stuff_styleguide_path %></span></p>
+    <% end %>
+  <% end %>
+</div>

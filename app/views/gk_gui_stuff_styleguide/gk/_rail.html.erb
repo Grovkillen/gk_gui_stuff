@@ -1,0 +1,67 @@
+<%= gk_gui_stuff_direct_note %>
+<% @gk_gui_stuff_sg_mode = :server %>
+<div class="gk-gui-stuff-sg-tiles">
+  <% %w[direct changed saved failed].each do |st| %>
+    <%= gk_gui_stuff_sg_row(l(:"label_gk_gui_stuff_sg_rail_#{st}"), "data-gk-gui-save=\"#{st}\"", mode: :still) do %>
+      <div class="gk-gui-stuff-rail" data-gk-gui-save="<%= st %>"><%= l(:label_gk_gui_stuff_sg_example_events) %> <%= gk_gui_stuff_switch("sg_static_#{st}", st != 'failed', label: l(:label_gk_gui_stuff_sg_example_events)) %><span class="gk-gui-stuff-rail-bar"></span><span class="gk-gui-stuff-save-status<%= ' gk-gui-stuff-save-status-on' unless st == 'direct' %>"><%= { 'changed' => l(:text_gk_gui_stuff_saving), 'saved' => l(:text_gk_gui_stuff_saved), 'failed' => l(:text_gk_gui_stuff_not_saved) }[st] %></span></div>
+    <% end %>
+  <% end %>
+  <%# the sweep beside the bar's states: a picture of a row and Prova with a made-up answer; nothing goes to the server %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_rail_sweep), "Administration > Appearance: gui_stuff.save_sweep; GkGui.save.rehearse(rail, { answer:, delay:, control:, sweep:, flip: })", wide: true, mode: :nosave, id: 'sg-tile-rail-sweep') do %>
+    <%= gk_gui_stuff_sg_sweep %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_segment), "gk_gui_stuff_segment(name, choices, selected)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= gk_gui_stuff_segment('view', [[l(:label_list), 'list'], [l(:label_gk_gui_stuff_sg_grid), 'grid'], [l(:label_gk_gui_stuff_sg_cards), 'cards']], 'list') %><% end %>
+  <% end %>
+  <%# beside the segment that saves: the view segment, which only changes the view, has no rail and never saves; the
+      browser remembers the choice, so the example reacts in the page only %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_view_segment), "gk_gui_stuff_view_segment(name, choices, selected, label:)", mode: :nosave) do %>
+    <%= l(:label_gk_gui_stuff_lib_view) %> <%= gk_gui_stuff_view_segment('sg_example_view', [[l(:label_gk_gui_stuff_lib_grid), 'grid'], [l(:label_gk_gui_stuff_lib_list), 'list']], 'grid',
+                                                                         label: l(:label_gk_gui_stuff_lib_view)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_view_segment_three), "gk_gui_stuff_view_segment(name, choices, selected, label:, remember: false)", mode: :nosave) do %>
+    <%= gk_gui_stuff_view_segment('sg_example_view_three', [[l(:label_list), 'list'], [l(:label_gk_gui_stuff_sg_grid), 'grid'], [l(:label_gk_gui_stuff_sg_cards), 'cards']], 'list',
+                                 label: l(:label_gk_gui_stuff_lib_view), remember: false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_toggle), "gk_gui_stuff_icon_toggle(name, pressed, icon:, label:)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= gk_gui_stuff_icon_toggle('watch', true, icon: 'fav', label: l(:button_watch)) %> <%= l(:button_watch) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_inline_edit), "gk_gui_stuff_inline_edit(name, value, label:)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= l(:label_gk_gui_stuff_sg_phone) %>: <%= gk_gui_stuff_inline_edit('phone', l(:label_gk_gui_stuff_sg_example_phone), label: l(:label_gk_gui_stuff_sg_phone)) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_inline_empty), "gk_gui_stuff_inline_edit(name, '', label:)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= l(:label_gk_gui_stuff_sg_phone) %>: <%= gk_gui_stuff_inline_edit('phone2', '', label: l(:label_gk_gui_stuff_sg_phone)) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_row_save), "gk_gui_stuff_rail(url:, row: true) { … gk_gui_stuff_row_save_button }") do %>
+    <%= gk_gui_stuff_rail(url: save, row: true) do %>
+      <%= select_tag 'level', options_for_select([[l(:label_gk_gui_stuff_sg_off), 'off'], [l(:label_gk_gui_stuff_sg_optional), 'optional'], [l(:label_gk_gui_stuff_sg_required), 'required']], 'optional'), id: nil, 'aria-label': l(:label_gk_gui_stuff_reason) %>
+      <%= number_field_tag 'min', 10, id: nil, min: 0, 'aria-label': l(:label_gk_gui_stuff_sg_min_length) %>
+      <%= gk_gui_stuff_row_save_button %>
+    <% end %>
+  <% end %>
+  <%# the handle saves as what surrounds it; at once in a rail, else at Spara or Verkställ with the rail changed
+      on what moved and the note under the list %>
+  <% order_items = [[1, l(:label_gk_gui_stuff_sg_bug)], [2, l(:label_gk_gui_stuff_sg_feature)], [3, l(:label_gk_gui_stuff_sg_deviation)]] %>
+  <% order_list = lambda do |**how|
+       gk_gui_stuff_order('order', **how) do
+         safe_join(order_items.map { |id, name| gk_gui_stuff_order_item(id, label: name) { safe_join([gk_gui_stuff_handle, name], ' ') } })
+       end
+     end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_order_direct), "gk_gui_stuff_order(name, url:) { gk_gui_stuff_order_item(id, label:) { gk_gui_stuff_handle … } }") do %>
+    <%= order_list.call(url: save) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_order_wait_save), "form_tag(url, data: gk_gui_stuff_form_changes) { gk_gui_stuff_order(name, applies: :save) { … } }") do %>
+    <%= form_tag(save, data: gk_gui_stuff_form_changes, id: 'gk-gui-stuff-sg-order-form') do %>
+      <%= order_list.call(applies: :save) %>
+      <p><%= submit_tag l(:button_save), name: nil %></p>
+    <% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_order_wait_apply), "gk_gui_stuff_layer_button(label) { form_tag(url) { gk_gui_stuff_order(name, applies: :apply) { … } } }") do %>
+    <%= gk_gui_stuff_layer_button(l(:label_gk_gui_stuff_sg_open_layer), title: l(:label_gk_gui_stuff_sg_order_wait_apply)) do %>
+      <%= form_tag(save) do %>
+        <%= order_list.call(applies: :apply) %>
+        <p><%= submit_tag l(:button_apply), name: nil %></p>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

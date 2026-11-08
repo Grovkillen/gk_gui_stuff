@@ -10,6 +10,71 @@
   opacity: .9; cursor: copy; border-radius: 3px; }
 .gk-gui-stuff-instance-copy:hover, .gk-gui-stuff-instance-copy:focus-visible { background: rgba(255,255,255,.2); opacity: 1; }
 .gk-gui-stuff-instance small { font-weight: normal; letter-spacing: 0; text-transform: none; margin-inline-start: 8px; opacity: .9; }
+/* The top band: the instance's role first, in its role and colour, then each plugin's part; one line, one height. A
+   phone shows only the role's word. */
+.gk-gui-stuff-band { display: flex; align-items: stretch; min-block-size: 26px; color: #fff; font-size: 12.5px; line-height: 18px; font-weight: bold; }
+.gk-gui-stuff-band > .gk-gui-stuff-band-instance { display: flex; align-items: center; flex: none; padding-inline: 10px; }
+/* an example in a table cell (the style guide) has a width of its own and shortens its words as the real band does */
+td > .gk-gui-stuff-band { inline-size: min(34em, 55vw); }
+@media screen and (max-width: 899px) {
+  .gk-gui-stuff-band-instance :is(small, .gk-gui-stuff-instance-copy) { display: none; }
+}
+/* The top band as a row of parts (gk_gui_stuff_top_band): always one row. A part is its icon, its full or short
+   words or neither (the length is a class gk_gui_stuff_top_band.js sets by the room), at most one count and ▾ when it
+   opens; its colour is its role's (admin, info, or the quiet fill). One part alone covers the band; with more, the
+   band's own dark ground shows after them. An openable part is a fly: its panel lies under it in its role, with a
+   heading, and is a sheet below 899 px. What does not fit stands in +N's panel with its full words. */
+.gk-gui-stuff-band-parts { flex-wrap: nowrap; white-space: nowrap; font-weight: bold;
+  background: color-mix(in srgb, var(--gk-role-ui-muted, #868e96), #000 55%); }
+.gk-gui-stuff-band-parts > .gk-gui-stuff-band-instance { border-inline-end: 1px solid rgba(255,255,255,.35); }
+/* a part's tone and its ink: the tone is its role (admin, info), the ink the surface's role, so that both
+   follow the dark mode, where the role is light and the surface dark: white on violet and blue in the light, the dark
+   surface on the light violet and blue in the dark. The quiet part's tone is the muted fill, dark in both, with white
+   ink; +N stands on the band's own dark ground with white ink. The count is the pair turned round (ink as its ground,
+   tone as its words), so that it has the same contrast as the part: at least 4.5:1 in both modes */
+.gk-gui-stuff-band-parts .gk-gui-stuff-band-part[data-gk-gui-band-part], .gk-gui-stuff-band-parts > .gk-gui-stuff-band-more {
+  --gk-gui-band-tone: var(--gk-gui-fg, #495057); --gk-gui-band-ink: var(--gk-role-ui-surface, #fff);
+  flex: none; display: block; position: relative; color: var(--gk-gui-band-ink); background: var(--gk-gui-band-tone);
+  border-inline-end: 1px solid color-mix(in srgb, currentColor 35%, transparent); }
+.gk-gui-stuff-band-parts .gk-gui-stuff-band-part.gk-gui-stuff-band-role-quiet {
+  --gk-gui-band-tone: var(--gk-role-ui-muted-fill, color-mix(in srgb, var(--gk-role-ui-muted, #868e96), #000 40%)); --gk-gui-band-ink: #fff; }
+.gk-gui-stuff-band-parts > .gk-gui-stuff-band-more { --gk-gui-band-ink: #fff; background: transparent; }
+.gk-gui-stuff-band-parts > .gk-gui-stuff-band-more[hidden] { display: none; }
+/* a part put away (the marks when they are over) and a band left with nothing in it are gone, as hidden says */
+.gk-gui-stuff-band-parts .gk-gui-stuff-band-part[data-gk-gui-band-part][hidden], .gk-gui-stuff-band[hidden] { display: none; }
+.gk-gui-stuff-band-parts span.gk-gui-stuff-band-part[data-gk-gui-band-part], .gk-gui-stuff-band-parts .gk-gui-stuff-band-part > summary.gk-gui-stuff-band-button {
+  display: flex; align-items: center; gap: 6px; box-sizing: border-box; block-size: 100%; min-block-size: 26px; padding-inline: 10px; color: inherit; }
+.gk-gui-stuff-band-parts .gk-gui-stuff-band-part > summary.gk-gui-stuff-band-button:focus-visible { outline: 2px solid currentColor; outline-offset: -3px; }
+/* hover: a thin line in the ink under the part; the tone stays, so that the words keep their contrast */
+.gk-gui-stuff-band-parts .gk-gui-stuff-band-part > summary.gk-gui-stuff-band-button:hover { box-shadow: inset 0 -2px 0 color-mix(in srgb, currentColor 55%, transparent); }
+/* open: the part keeps its colour and gets a line in its ink under it; the fly's own open look is not for the band */
+.gk-gui-stuff-band details.gk-gui-stuff-band-part[open] > summary.gk-gui-stuff-band-button { background: transparent; color: inherit; box-shadow: inset 0 -3px 0 currentColor; }
+.gk-gui-stuff-band .gk-gui-stuff-band-part svg { stroke: currentColor; flex: none; }
+.gk-gui-stuff-band-one > .gk-gui-stuff-band-part[data-gk-gui-band-part] { flex: 1 1 auto; }
+.gk-gui-stuff-band-one.gk-gui-stuff-band-measuring > .gk-gui-stuff-band-part[data-gk-gui-band-part] { flex: none; }
+.gk-gui-stuff-band-part :is(.gk-gui-stuff-band-full, .gk-gui-stuff-band-short) { display: none; }
+.gk-gui-stuff-band-len-full .gk-gui-stuff-band-full, .gk-gui-stuff-band-len-short .gk-gui-stuff-band-short { display: inline; }
+.gk-gui-stuff-band-count { padding-inline: 6px; border-radius: 9px; background: var(--gk-gui-band-ink, #fff); color: var(--gk-gui-band-tone, #212529); font-size: 11px; line-height: 16px; font-weight: bold; }
+.gk-gui-stuff-band-caret { display: inline-flex; opacity: .85; }
+.gk-gui-stuff-band-tight .gk-gui-stuff-band-instance :is(small, .gk-gui-stuff-instance-copy) { display: none; }
+/* the panel: the fly's box in the part's role, its edge on top thicker, the page's own text in it */
+.gk-gui-stuff-band .gk-gui-stuff-band-panel { min-inline-size: 16em; border-block-start-width: 3px; color: var(--oc-gray-9, #212529); font-size: 13px;
+  line-height: 1.5; font-weight: normal; white-space: normal; cursor: auto; }
+.gk-gui-stuff-band-panel-title { margin-block: 0 0.4em; }
+.gk-gui-stuff-band-panel-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-block: 0 0.4em; }
+/* +N's panel: the parts that did not fit, each with its full words in its own colour; one that opens opens in place */
+.gk-gui-stuff-band-more-list { display: flex; flex-direction: column; gap: 4px; }
+.gk-gui-stuff-band-more-list > .gk-gui-stuff-band-part[data-gk-gui-band-part] { border-inline-end: 0; border-radius: 3px; font-weight: bold; }
+.gk-gui-stuff-band-more-list .gk-gui-stuff-band-full { display: inline; }
+.gk-gui-stuff-band-more-list .gk-gui-stuff-band-short { display: none; }
+@media screen and (max-width: 899px) {
+  .gk-gui-stuff-band-parts .gk-gui-stuff-band-part :is(.gk-gui-stuff-band-full, .gk-gui-stuff-band-short) { display: none; }
+  .gk-gui-stuff-band-parts .gk-gui-stuff-band-more-list .gk-gui-stuff-band-full { display: inline; }
+  .gk-gui-stuff-band-parts span.gk-gui-stuff-band-part[data-gk-gui-band-part], .gk-gui-stuff-band-parts .gk-gui-stuff-band-part > summary.gk-gui-stuff-band-button { padding-inline: 7px; }
+}
+@media screen and (min-width: 900px) {
+  .gk-gui-stuff-band-more-list details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box { position: static; margin-block-start: 2px; box-shadow: none; }
+}
 /* Phone layout: core's header is fixed with no place of its own, so it stays where the band left it, and the band in
    the flow scrolls away and leaves the page showing above the header. Where the band is, it stands fixed at the top
    on one line, and what core places below its fixed header moves down by the band's height (--gk-gui-stuff-band-h,
@@ -17,19 +82,36 @@
    scroll while it is open) stands fixed under the band, as high as the window, and scrolls by itself. */
 @media screen and (max-width: 899px) {
   body:has(> .gk-gui-stuff-instance) { --gk-gui-stuff-band-h: 18px; }
+  body:has(> .gk-gui-stuff-band) { --gk-gui-stuff-band-h: 26px; }
   body > .gk-gui-stuff-instance { position: fixed; inset-block-start: 0; inset-inline: 0; z-index: 10001; block-size: 18px;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  body:has(> .gk-gui-stuff-instance) #header { inset-block-start: calc(var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
-  body:has(> .gk-gui-stuff-instance) #main { padding-block-start: calc(64px + var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
-  body:has(> .gk-gui-stuff-instance) div#sticky-issue-header { inset-block-start: calc(64px + var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
-  html.flyout-is-active body:has(> .gk-gui-stuff-instance) .flyout-menu { position: fixed; inset-block: var(--gk-gui-stuff-band-h) 0;
+  body > .gk-gui-stuff-band { position: fixed; inset-block-start: 0; inset-inline: 0; z-index: 10001; block-size: 26px; overflow: hidden; }
+  body:has(> :is(.gk-gui-stuff-instance, .gk-gui-stuff-band)) #header { inset-block-start: calc(var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
+  body:has(> :is(.gk-gui-stuff-instance, .gk-gui-stuff-band)) #main { padding-block-start: calc(64px + var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
+  body:has(> :is(.gk-gui-stuff-instance, .gk-gui-stuff-band)) div#sticky-issue-header { inset-block-start: calc(64px + var(--gk-gui-stuff-band-h) + var(--gk-gui-stuff-lw-h, 0px)); }
+  html.flyout-is-active body:has(> :is(.gk-gui-stuff-instance, .gk-gui-stuff-band)) .flyout-menu { position: fixed; inset-block: var(--gk-gui-stuff-band-h) 0;
     inset-inline-end: 0; block-size: auto; overflow-y: auto; overscroll-behavior: contain; }
 }
+/* A computer's width: the band stands in the flow and scrolls away, but while a part's panel is open it stays at the top
+   of the window, its place in the flow kept, so that the panel follows when the page scrolls (Nästa ställe). At the very
+   top of the page it is no held bar (data-gk-gui-band-top, gk_gui_stuff_marker.js), so a flag right under it stays. What
+   else is held at the top moves down under it; a layer, a whisper and a surface opened from the panel lie over it. A panel
+   never grows past the window, since it now scrolls with it, and the marks' panel leaves the middle of the window free,
+   where Nästa ställe brings the place. */
+@media screen and (min-width: 900px) {
+  body > .gk-gui-stuff-band:has(details[open]):not([data-gk-gui-band-top]) { position: sticky; inset-block-start: 0; z-index: 10001; }
+  body:has(> .gk-gui-stuff-band:not([data-gk-gui-band-top]) details[open]) { --gk-gui-stuff-band-h: 26px; }
+  body:has(> .gk-gui-stuff-band:not([data-gk-gui-band-top]) details[open]) :is(div#sticky-issue-header, .gk-gui-stuff-toc) { inset-block-start: var(--gk-gui-stuff-band-h); }
+  body:has(> .gk-gui-stuff-band details[open]) :is(.gk-gui-stuff-layer, .gk-gui-stuff-notice, .gk-gui-stuff-surface-back) { z-index: 10002; }
+  body > .gk-gui-stuff-band details[open] > .gk-gui-stuff-band-panel { max-block-size: calc(100vh - 40px); overflow-y: auto; }
+  body > .gk-gui-stuff-band details[data-gk-gui-marker-part][open] > .gk-gui-stuff-band-panel { max-block-size: 40vh; }
+}
 
-/* surface */
-.gk-gui-stuff-surface-open { overflow: hidden; }
+/* surface; the page behind keeps the room of core's always-shown scrollbar (html overflow-y: scroll), so it does not
+   move sideways while a surface is open */
+.gk-gui-stuff-surface-open { overflow: hidden; scrollbar-gutter: stable; }
 .gk-gui-stuff-surface-back { position: fixed; inset: 0; z-index: 2000; background: rgba(var(--oc-gray-9-rgb), .62); display: flex; align-items: center; justify-content: center; }
-.gk-gui-stuff-surface { background: var(--oc-white); color: var(--oc-gray-9); border-radius: 6px; box-shadow: 0 10px 40px rgba(var(--oc-black-rgb),.4); display: flex; flex-direction: column;
+.gk-gui-stuff-surface { background: var(--oc-white); color: var(--oc-gray-9); border-radius: 6px; box-shadow: 0 10px 40px color-mix(in srgb, var(--gk-role-ui-shadow) 40%, transparent); display: flex; flex-direction: column;
   inline-size: min(520px, calc(100vw - 24px)); max-block-size: calc(100vh - 24px); }
 .gk-gui-stuff-surface-large .gk-gui-stuff-surface { inline-size: 90vw; block-size: 90vh; }
 .gk-gui-stuff-surface-full .gk-gui-stuff-surface { inline-size: 100vw; block-size: 100vh; max-block-size: 100vh; border-radius: 0; }
@@ -44,26 +126,30 @@
 .gk-gui-stuff-surface-foot .gk-gui-stuff-btn-primary { margin-inline-start: auto; }
 .gk-gui-stuff-btn { padding-block: 4px; padding-inline: 10px; border: 1px solid var(--oc-gray-4); border-radius: 3px; background: var(--oc-gray-0); color: var(--oc-gray-9); cursor: pointer; font: inherit; }
 .gk-gui-stuff-btn:hover, .gk-gui-stuff-btn:focus-visible { border-color: var(--oc-gray-6); }
-.gk-gui-stuff-btn-primary { background: var(--oc-blue-7); border-color: var(--oc-blue-7); color: var(--oc-white); }
+.gk-gui-stuff-btn-primary { background: var(--gk-role-ui-choice); border-color: var(--gk-role-ui-choice); color: var(--oc-white); }
 @media (max-width: 899px) { .gk-gui-stuff-surface-back:not(.gk-gui-stuff-surface-palette) .gk-gui-stuff-surface { inline-size: 100vw; block-size: 100vh; max-block-size: 100vh; border-radius: 0; } }
 
-/* notices; above the sticky Save bar while it shows (sticky_save sets its height) */
-.gk-gui-stuff-notices { position: fixed; inset-block-end: calc(16px + var(--gk-gui-stuff-savebar-size, 0px)); inset-inline-end: 16px; z-index: 1900; display: flex; flex-direction: column; gap: 8px; max-inline-size: min(380px, calc(100vw - 32px)); }
-.gk-gui-stuff-note { display: flex; align-items: center; gap: 8px; background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--oc-gray-4); border-inline-start: 5px solid var(--oc-blue-6);
-  border-radius: 4px; padding-block: 8px; padding-inline: 10px 6px; box-shadow: 0 3px 12px rgba(var(--oc-black-rgb),.2); }
+/* notices; above the sticky Save bar while it shows (sticky_save sets its height); at most the window's height, then the tray scrolls */
+.gk-gui-stuff-notices { position: fixed; inset-block-end: calc(16px + var(--gk-gui-stuff-savebar-size, 0px)); inset-inline-end: 16px; z-index: 1900; display: flex; flex-direction: column; gap: 8px; max-inline-size: min(380px, calc(100vw - 32px)); max-block-size: calc(100vh - 32px - var(--gk-gui-stuff-savebar-size, 0px)); overflow-y: auto; }
+/* on a phone the tray takes the whole width: it stands above Visa var's lower edge while that one shows */
+@media (max-width: 899px) { .gk-gui-stuff-notices { inset-block-end: calc(16px + var(--gk-gui-stuff-savebar-size, 0px) + var(--gk-gui-stuff-where-bottom, 0px)); } }
+.gk-gui-stuff-note { flex: none; display: flex; align-items: center; gap: 8px; background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4)); border-inline-start: 5px solid var(--oc-blue-6);
+  border-radius: 4px; padding-block: 8px; padding-inline: 10px 6px; box-shadow: 0 3px 12px color-mix(in srgb, var(--gk-role-ui-shadow) 20%, transparent); }
 .gk-gui-stuff-note-mark { font-weight: bold; min-inline-size: 1.4em; text-align: center; border: 1px solid currentColor; border-radius: 50%; line-height: 1.3em; font-size: .85em; }
 .gk-gui-stuff-note-text { flex: 1; line-height: 1.35; }
 .gk-gui-stuff-note-mark, .gk-gui-stuff-note-buttons { flex: none; align-self: center; }
 .gk-gui-stuff-note-buttons { display: flex; gap: 4px; align-items: center; }
 .gk-gui-stuff-note-close { border: 0; background: transparent; cursor: pointer; font-size: 1.2em; color: inherit; }
-.gk-gui-stuff-note-notice { border-inline-start-color: var(--oc-green-8); }
+.gk-gui-stuff-note-tip { border-inline-start-color: var(--gk-role-alert-tip); border-inline-start-width: 3px; }
+.gk-gui-stuff-note-notice { border-inline-start-color: var(--gk-role-alert-notice); }
 .gk-gui-stuff-note-warning { border-inline-start-color: var(--oc-yellow-8); border-inline-start-style: double; }
 .gk-gui-stuff-note-alarm { border-inline-start-color: var(--oc-red-8); border-inline-start-width: 8px; }
-.gk-gui-stuff-note-critical { border: 2px solid var(--oc-red-9); border-inline-start-width: 10px; }
+.gk-gui-stuff-note-critical { border: 2px solid var(--gk-role-alert-critical); border-inline-start-width: 10px; }
 .gk-gui-stuff-note-warning .gk-gui-stuff-note-mark, .gk-gui-stuff-note-alarm .gk-gui-stuff-note-mark, .gk-gui-stuff-note-critical .gk-gui-stuff-note-mark { border-radius: 2px; }
 /* an icon is its own mark: no ring around it (the ring is for the character drawn without icons), in the level's colour */
 .gk-gui-stuff-note-mark:has(svg) { border: 0; min-inline-size: 0; line-height: 0; color: var(--oc-blue-7); }
-.gk-gui-stuff-note-notice .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-green-8); }
+.gk-gui-stuff-note-tip .gk-gui-stuff-note-mark:has(svg) { color: var(--gk-role-alert-tip); }
+.gk-gui-stuff-note-notice .gk-gui-stuff-note-mark:has(svg) { color: var(--gk-role-alert-notice); }
 .gk-gui-stuff-note-warning .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-yellow-8); }
 .gk-gui-stuff-note-alarm .gk-gui-stuff-note-mark:has(svg), .gk-gui-stuff-note-critical .gk-gui-stuff-note-mark:has(svg) { color: var(--oc-red-8); }
 .gk-gui-stuff-note-mark svg.gk-gui-stuff-icon { stroke: currentColor; vertical-align: 0; }
@@ -85,7 +171,7 @@
 .gk-gui-stuff-wave-instant { transition: none !important; }
 .gk-gui-stuff-wave-backdrop, .gk-gui-stuff-wave-motion { position: absolute; inset: 0; }
 .gk-gui-stuff-wave-backdrop { background: var(--oc-green-9); transition: background-color .45s ease-out; }
-.gk-gui-stuff-wave-text { position: relative; text-align: center; color: var(--oc-white); transition: color .3s linear; text-shadow: 0 1px 3px rgba(var(--oc-black-rgb),.35); }
+.gk-gui-stuff-wave-text { position: relative; text-align: center; color: var(--oc-white); transition: color .3s linear; text-shadow: 0 1px 3px color-mix(in srgb, var(--gk-role-ui-shadow) 35%, transparent); }
 .gk-gui-stuff-wave-word { font-size: clamp(36px, 9vw, 120px); font-weight: 800; letter-spacing: .06em; line-height: 1; }
 .gk-gui-stuff-wave-text { position: relative; }
 /* the small line hangs under the word, so the word never moves when the line comes */
@@ -95,25 +181,67 @@
 .gk-gui-stuff-wave-loading .gk-gui-stuff-wave-backdrop { background: var(--oc-gray-9); }
 .gk-gui-stuff-flash-waved { display: none; }
 
-/* banner: a row in the page */
-.gk-gui-stuff-banner { display: flex; align-items: center; gap: 10px; margin-block-end: 10px; padding-block: 8px; padding-inline: 12px; border: 1px solid var(--oc-blue-3);
-  border-inline-start: 5px solid var(--oc-blue-6); background: var(--oc-blue-0); color: var(--oc-blue-9); border-radius: 3px; }
+/* banner: a row in the page, in the role of its level; the start edge keeps its width per level; critical is
+   the alarm filled, with white text */
+.gk-gui-stuff-banner { display: flex; align-items: center; gap: 10px; margin-block-end: 10px; padding-block: 8px; padding-inline: 12px; border: 1px solid var(--gk-role-alert-info);
+  border-inline-start: 5px solid var(--gk-role-alert-info); background: var(--gk-role-alert-info-soft); color: var(--gk-role-alert-info); border-radius: 3px; }
 .gk-gui-stuff-banner-text { flex: 1; }
-.gk-gui-stuff-banner-notice { border-color: var(--oc-green-3); border-inline-start-color: var(--oc-green-8); background: var(--oc-green-1); color: var(--oc-green-9); }
-.gk-gui-stuff-banner-warning { border-color: var(--oc-yellow-3); border-inline-start: 5px double var(--oc-yellow-8); background: var(--oc-yellow-1); color: var(--oc-pink-9); }
-.gk-gui-stuff-banner-alarm, .gk-gui-stuff-banner-critical { border-color: var(--oc-red-3); border-inline-start: 8px solid var(--oc-red-8); background: var(--oc-red-1); color: var(--oc-pink-9); }
+.gk-gui-stuff-banner-tip { border-color: var(--gk-role-alert-tip); border-inline-start: 3px solid var(--gk-role-alert-tip); background: var(--gk-role-alert-tip-soft);
+  color: var(--gk-role-alert-tip); }
+/* the notice keeps its tones: a light frame, the strong start edge, and a darker text, mixed from its role */
+.gk-gui-stuff-banner-notice { border-color: color-mix(in srgb, var(--gk-role-alert-notice) 30%, var(--gk-role-alert-notice-soft)); border-inline-start-color: var(--gk-role-alert-notice);
+  background: var(--gk-role-alert-notice-soft); color: color-mix(in srgb, var(--gk-role-alert-notice) 85%, var(--oc-black, #000)); }
+.gk-gui-stuff-banner-warning { border-color: var(--gk-role-alert-warning); border-inline-start: 5px double var(--gk-role-alert-warning); background: var(--gk-role-alert-warning-soft);
+  color: var(--gk-role-alert-warning); }
+.gk-gui-stuff-banner-alarm { border-color: var(--gk-role-alert-alarm); border-inline-start: 8px solid var(--gk-role-alert-alarm);
+  background: var(--gk-role-alert-alarm-soft); color: var(--gk-role-alert-alarm); }
+.gk-gui-stuff-banner-critical { border-color: var(--gk-role-alert-critical); border-inline-start: 8px solid var(--gk-role-alert-critical);
+  background: var(--gk-role-alert-critical); color: var(--oc-white, #fff); }
 .gk-gui-stuff-banner-close { border: 0; background: transparent; cursor: pointer; font-size: 1.2em; color: inherit; }
 
-/* ribbon: a state, in the corner of the page */
+/* ribbon: a state, in the end corner of the page's #main, under the top menu and the header, so that it never covers
+   the top menu's text; an open fly lies over it (the scale in primitives.css). In its role (ui-admin by default,
+   GkGui.ribbon.show's role). On a phone it lies fixed in the window's corner under the instance band, over core's
+   fixed header (9999): z-index 10000, outside the scale. The frame cuts the band at its two edges; its size, the
+   band's length and place and the button's place are set by gk_gui_stuff_elements.js from the word's width */
 .gk-gui-stuff-ribbon-host { position: relative; }
-.gk-gui-stuff-ribbon-frame { position: absolute; inset-block-start: 0; inset-inline-end: 0; inline-size: 260px; block-size: 260px; overflow: hidden; pointer-events: none; z-index: 50; }
-.gk-gui-stuff-ribbon { position: absolute; transform: rotate(45deg); text-align: center; background: var(--oc-gray-8); color: var(--oc-white); padding-block: 5px; pointer-events: auto;
-  text-decoration: none; box-shadow: 0 1px 4px rgba(var(--oc-black-rgb),.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.gk-gui-stuff-ribbon-word { display: block; font-weight: 800; letter-spacing: .1em; }
-.gk-gui-stuff-ribbon-line { display: block; font-size: .8em; opacity: .9; }
+.gk-gui-stuff-ribbon-frame { position: absolute; inset-block-start: 0; inset-inline-end: 0; inline-size: 140px; block-size: 140px; overflow: hidden; pointer-events: none; z-index: 50; }
+@media (max-width: 899px) {
+  .gk-gui-stuff-ribbon-frame { position: fixed; z-index: 10000; inset-block-start: calc(var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
+  /* core's open menu comes in on the ribbon's side: hidden (still measured) so that it covers and catches nothing */
+  html.flyout-is-active .gk-gui-stuff-ribbon-frame { visibility: hidden; }
+}
+/* the band lets the pointer through and is fainter while the pointer is over it (-faded, set from the pointer's
+   place); its action button is the only part that takes the pointer, upright against the band's turn */
+.gk-gui-stuff-ribbon { position: absolute; transform: rotate(45deg); text-align: center; background: var(--gk-gui-fg, var(--oc-gray-8, #343a40)); color: var(--oc-white, #fff);
+  padding-block: 5px; pointer-events: none; transition: opacity .2s;
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--gk-role-ui-shadow) 30%, transparent); white-space: nowrap; overflow: hidden; }
+[dir="rtl"] .gk-gui-stuff-ribbon { transform: rotate(-45deg); }
+.gk-gui-stuff-ribbon.gk-gui-stuff-ribbon-faded { opacity: .2; }
+.gk-gui-stuff-ribbon-text { display: inline-block; vertical-align: middle; }
+.gk-gui-stuff-ribbon-word { display: flex; align-items: center; justify-content: center; gap: .35em; font-weight: 800; letter-spacing: .1em; }
+/* the icons and the button take the word's colour (core draws its icons grey and its links blue) */
+.gk-gui-stuff-ribbon .gk-gui-stuff-ribbon-word > svg { flex: none; stroke: currentColor; }
+.gk-gui-stuff-ribbon .gk-gui-stuff-ribbon-action, .gk-gui-stuff-ribbon .gk-gui-stuff-ribbon-action:is(:link, :visited, :hover) { color: inherit; }
+.gk-gui-stuff-ribbon .gk-gui-stuff-ribbon-action svg { stroke: currentColor; }
+.gk-gui-stuff-ribbon-name { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+.gk-gui-stuff-ribbon-line { display: block; font-size: .8em; opacity: .9; overflow: hidden; text-overflow: ellipsis; }
+.gk-gui-stuff-ribbon-action { position: absolute; inset-block-start: 50%; translate: 0 -50%; rotate: -45deg; pointer-events: auto;
+  display: flex; align-items: center; justify-content: center; box-sizing: border-box; inline-size: 22px; block-size: 22px; margin: 0; padding: 0;
+  border: 1px solid color-mix(in srgb, currentColor 60%, transparent); border-radius: 50%; background: color-mix(in srgb, var(--oc-black, #000) 15%, transparent);
+  color: inherit; font: inherit; line-height: 1; cursor: pointer; }
+[dir="rtl"] .gk-gui-stuff-ribbon-action { rotate: 45deg; }
+.gk-gui-stuff-ribbon-action:is(:hover, :focus-visible) { background: color-mix(in srgb, currentColor 30%, transparent); outline: 2px solid currentColor; outline-offset: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .gk-gui-stuff-ribbon { transition: none; }
+}
 
 /* corner: the fold */
 .gk-gui-stuff-corner-host { position: relative; }
+/* the room above the page's heading: the fold and the ring of Visa var (at most 1.1em outside it) stand over this and never over
+   the heading. There as soon as the page can get a fold, so that nothing moves when the fold comes */
+#content.gk-gui-stuff-corner-room { padding-block-start: calc(56px + 1.1em); }
+@media print { #content.gk-gui-stuff-corner-room { padding-block-start: 0; } }
 /* the fold stands in the start corner of the page (left in a left-to-right language), so that it never covers the
    page's own buttons and the three-dot menu at the end; it pulses twice when it comes */
 .gk-gui-stuff-corner { position: absolute; inset-block-start: 0; inset-inline-start: 0; z-index: 60; }
@@ -123,13 +251,16 @@
 /* the count's middle on the triangle's own middle, a third of the 56 px in from the corner (18.7 px each way) */
 .gk-gui-stuff-corner-count { position: absolute; inset-block-start: 10px; inset-inline-start: 9px; line-height: 18px; font-weight: bold; min-inline-size: 1.4em; text-align: center; }
 .gk-gui-stuff-corner-notice .gk-gui-stuff-corner-count { outline: 2px solid var(--oc-white); border-radius: 50%; }
-.gk-gui-stuff-corner-card { position: absolute; inset-block-start: 40px; inset-inline-start: 8px; inline-size: min(420px, 80vw); background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--oc-gray-4);
-  border-radius: 4px; box-shadow: 0 3px 12px rgba(var(--oc-black-rgb),.2); padding: 10px 12px; }
+.gk-gui-stuff-corner-card { position: absolute; inset-block-start: 40px; inset-inline-start: 8px; inline-size: min(420px, 80vw); background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4));
+  border-radius: 4px; box-shadow: 0 3px 12px color-mix(in srgb, var(--gk-role-ui-shadow) 20%, transparent); padding: 10px 12px; }
 /* an unseen strip from the card up to the fold: the pointer may pass over the row of buttons above the card
    (Ändra, Kopiera) on its way down without the card going away */
 .gk-gui-stuff-corner-card::before { content: ""; position: absolute; inset-inline: 0; inset-block-end: 100%; block-size: 44px; }
 .gk-gui-stuff-corner-card ul { margin-block: 6px; padding-inline-start: 18px; max-block-size: 40vh; overflow: auto; }
-.gk-gui-stuff-corner-buttons { display: flex; gap: 6px; justify-content: flex-start; }
+/* the title with reload and the cross at its end */
+.gk-gui-stuff-corner-head { display: flex; align-items: center; gap: 8px; }
+.gk-gui-stuff-corner-head > strong { flex: 1; }
+.gk-gui-stuff-corner-buttons { display: flex; gap: 2px; flex: none; }
 @keyframes gk-gui-stuff-corner-pulse { 0% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(34, 139, 230, .8)); } 50% { transform: scale(1.12); filter: drop-shadow(0 0 8px rgba(34, 139, 230, .8)); } 100% { transform: scale(1); filter: drop-shadow(0 0 0 rgba(34, 139, 230, 0)); } }
 .gk-gui-stuff-corner-fold.gk-gui-stuff-corner-new { transform-origin: 0 0; animation: gk-gui-stuff-corner-pulse .9s ease-in-out 2; }
 @media (prefers-reduced-motion: reduce) { .gk-gui-stuff-corner-fold.gk-gui-stuff-corner-new { animation: none; } }
@@ -146,7 +277,7 @@
 .gk-gui-stuff-hn-at { outline: 3px solid var(--oc-blue-7); outline-offset: 4px; transition: outline-color 1.2s; }
 
 /* drawer */
-.gk-gui-stuff-drawer { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 1800; background: var(--oc-white); color: var(--oc-gray-9); border-block-start: 2px solid var(--oc-gray-6); box-shadow: 0 -3px 12px rgba(var(--oc-black-rgb),.2);
+.gk-gui-stuff-drawer { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: 1800; background: var(--oc-white); color: var(--oc-gray-9); border-block-start: 2px solid var(--oc-gray-6); box-shadow: 0 -3px 12px color-mix(in srgb, var(--gk-role-ui-shadow) 20%, transparent);
   display: flex; flex-direction: column; block-size: 24vh; }
 .gk-gui-stuff-drawer[data-size="half"] { block-size: 50vh; }
 .gk-gui-stuff-drawer[data-size="full"] { block-size: calc(100vh - 40px); }
@@ -155,8 +286,9 @@
 .gk-gui-stuff-drawer-tabs { display: flex; align-items: stretch; gap: 2px; background: var(--oc-gray-1); padding-inline: 6px; }
 .gk-gui-stuff-drawer-tab { display: flex; align-items: center; border-block-start: 3px solid var(--oc-gray-5); background: var(--oc-gray-2); }
 .gk-gui-stuff-drawer-tab-on { background: var(--oc-white); border-block-start-color: var(--oc-blue-7); }
-.gk-gui-stuff-drawer-name, .gk-gui-stuff-drawer-x, .gk-gui-stuff-drawer-size, .gk-gui-stuff-drawer-close { border: 0; background: transparent; cursor: pointer; color: inherit; font: inherit; padding-block: 5px; padding-inline: 8px; }
-.gk-gui-stuff-drawer-size { margin-inline-start: auto; }
+.gk-gui-stuff-drawer-name, .gk-gui-stuff-drawer-x, .gk-gui-stuff-drawer-close { border: 0; background: transparent; cursor: pointer; color: inherit; font: inherit; padding-block: 5px; padding-inline: 8px; }
+/* the size is the icon button, at the end of the row before the cross */
+.gk-gui-stuff-drawer-tabs > .gk-gui-stuff-drawer-size { margin-inline-start: auto; align-self: center; }
 .gk-gui-stuff-drawer-dot .gk-gui-stuff-drawer-name::after { content: ""; display: inline-block; inline-size: .5em; block-size: .5em; border-radius: 50%; margin-inline-start: 6px; vertical-align: .1em; background: var(--oc-green-8); }
 .gk-gui-stuff-drawer-count { background: var(--oc-gray-8); color: var(--oc-white); border-radius: 9px; padding-inline: 6px; font-size: .8em; }
 @keyframes gk-gui-stuff-drawer-blink { 50% { background: var(--oc-yellow-3); } }
@@ -166,7 +298,7 @@
 .gk-gui-stuff-drawer-handles { position: fixed; inset-inline-end: 0; inset-block-start: 38%; z-index: 1750; display: flex; flex-direction: column; gap: 6px; }
 .gk-gui-stuff-drawer-handle { writing-mode: vertical-rl; transform: rotate(180deg); display: flex; align-items: center; gap: 6px; padding: 10px 5px;
   border: 1px solid var(--oc-gray-5, #adb5bd); border-inline-start: 0; border-radius: 6px 0 0 6px; background: var(--oc-white, #ffffff); color: inherit;
-  font: inherit; font-size: .9em; cursor: pointer; box-shadow: 0 1px 4px rgba(var(--oc-black-rgb), .15); }
+  font: inherit; font-size: .9em; cursor: pointer; box-shadow: 0 1px 4px color-mix(in srgb, var(--gk-role-ui-shadow) 15%, transparent); }
 .gk-gui-stuff-drawer-handle:hover, .gk-gui-stuff-drawer-handle:focus-visible { background: var(--oc-gray-1, #f1f3f5); }
 .gk-gui-stuff-drawer-handle-count { writing-mode: horizontal-tb; transform: rotate(180deg); background: var(--oc-gray-8); color: var(--oc-white); border-radius: 9px; padding-inline: 6px; font-size: .8em; }
 
@@ -210,7 +342,7 @@
 @media (prefers-reduced-motion: reduce) { .gk-gui-stuff-wave, .gk-gui-stuff-wave-backdrop, .gk-gui-stuff-wave-text { transition: none; } .gk-gui-stuff-drawer-blink { animation: none; } }
 @media print {
   .gk-gui-stuff-surface-back, .gk-gui-stuff-notices, .gk-gui-stuff-wave, .gk-gui-stuff-corner, .gk-gui-stuff-drawer, .gk-gui-stuff-drawer-handles, .gk-gui-stuff-branch-btn, .gk-gui-stuff-menu, .gk-gui-stuff-banner-close { display: none !important; }
-  .gk-gui-stuff-instance:not(.gk-gui-stuff-instance-drill) { display: none; }
+  .gk-gui-stuff-instance:not(.gk-gui-stuff-instance-drill), .gk-gui-stuff-band-part:not(.gk-gui-stuff-instance-drill) { display: none; }
 }
 /* a wave the page is born with stands at once (no fade in); the class goes when the kernel adopts it */
 .gk-gui-stuff-wave-born { transition: none !important; }
@@ -246,5 +378,7 @@ html.gk-gui-stuff-sidebar-before #main.collapsedsidebar #sidebar { padding-inlin
 html.gk-gui-stuff-sidebar-before #main.collapsedsidebar #sidebar-switch-panel { margin-inline-start: 0; }
 html.gk-gui-stuff-sidebar-hidden #sidebar { display: none; }
 html.gk-gui-stuff-header-compact #header { padding-block-start: 0; }
-html.gk-gui-stuff-header-compact #header h1 { font-size: 1.1rem; padding-block: 2px; }
+/* the title by GK Core Stuff's mark site-title; #header only gives the rule the weight of core's own; without the mark
+   the title keeps core's size */
+html.gk-gui-stuff-header-compact #header .site-title { font-size: 1.1rem; padding-block: 2px; }
 html.gk-gui-stuff-header-compact #quick-search { margin-block: 2px; }

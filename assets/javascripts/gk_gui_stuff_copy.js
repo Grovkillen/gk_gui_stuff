@@ -4,6 +4,54 @@
 (function () {
   var G = window.GkGui;
   if (!G) return;
+  // core_copy_whisper: what Redmine's own buttons copy is confirmed with the whisper, also a button a later version
+  // brings. Found at the browser's two ways of copying, never by the button: core has several copy functions of its own
+  // and they differ between the series. The answer core waits for never comes, so that its own answer (the check mark) is
+  // not given. A browser that refuses is answered here, by the older way, for the same reason. On a page without
+  // navigator.clipboard (plain http) the same function stands in its place, so that core takes the same road. A copy of
+  // GK's own goes through G.ownCopy.
+  if (G.on('core_copy_whisper')) {
+    var fromEvent = function () {
+      var t = window.event && window.event.target;
+      return t && t.closest ? (t.closest('a, button, [role="button"]') || t) : null;
+    };
+    // a frame later: a menu the button stood in has closed by then, and the whisper goes to the pointer
+    var say = function (from) {
+      window.requestAnimationFrame(function () {
+        var inBlock = from && from.closest('.pre-wrapper'), shown = from && from.isConnected && from.getBoundingClientRect().width;
+        G.whisper(G.t(inBlock ? 'copied_block' : 'copied'), { at: shown ? from : null, place: shown ? undefined : 'pointer' });
+      });
+    };
+    var command = document.execCommand.bind(document);
+    var byCommand = function (text) {
+      var ta = document.createElement('textarea'), done = false;
+      ta.value = text; ta.className = 'gk-gui-stuff-offscreen';
+      document.body.appendChild(ta); ta.select();
+      try { done = command('copy'); } catch (e) { done = false; }
+      ta.remove();
+      return done;
+    };
+    var board = navigator.clipboard, write = board && board.writeText ? board.writeText.bind(board) : null;
+    var writeText = function (text) {
+      if (G.owningCopy()) {
+        if (write) return write(text);
+        return byCommand(text) ? Promise.resolve() : Promise.reject(new Error('not copied'));
+      }
+      var from = fromEvent(), first = write ? write(text) : Promise.reject(new Error('no clipboard'));
+      return new Promise(function (_, refused) {
+        first.then(function () { say(from); }, function (why) {
+          if (byCommand(text)) say(from); else refused(why);
+        });
+      });
+    };
+    if (write) board.writeText = writeText;
+    else if (!board) Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: writeText } });
+    document.execCommand = function (name) {
+      var from = fromEvent(), result = command.apply(document, arguments);
+      if (name === 'copy' && result && !G.owningCopy()) say(from);
+      return result;
+    };
+  }
   G.onContent(function () {
     if (G.on('mailto_copy')) {
       document.querySelectorAll('#content a[href^="mailto:"]:not([data-gk-gui-stuff-copy])').forEach(function (a) {
@@ -12,9 +60,10 @@
         if (!address) return;
         var b = G.put(G.node('button', 'gk-gui-stuff-copy-btn'), 'copy', '\u29C9', 14);
         b.type = 'button';
+        G.effect(b, 'mailto_copy');
         b.title = G.t('copy_address');
         b.setAttribute('aria-label', G.t('copy_address') + ': ' + address);
-        b.addEventListener('click', function (e) { e.preventDefault(); G.copy(address, G.t('copied_mail')); });
+        b.addEventListener('click', function (e) { e.preventDefault(); G.copy(address, G.t('copied_mail'), b); });
         a.insertAdjacentElement('afterend', b);
       });
     }
@@ -25,11 +74,12 @@
       document.querySelectorAll('.pre-wrapper a.copy-pre-content-link:not([data-gk-gui-stuff-copy])').forEach(function (a) {
         a.dataset.gkGuiStuffCopy = '1';
         a.classList.add('gk-gui-stuff-copy-pre');
+        G.effect(a, 'code_copy');
         if (!a.hasAttribute('href')) { a.tabIndex = 0; a.setAttribute('role', 'button'); }
         a.setAttribute('aria-label', G.t('copy_code'));
         a.title = G.t('copy_code');
         a.addEventListener('click', function () {
-          G.whisper(G.t('copied_block'));
+          if (!G.on('core_copy_whisper')) G.whisper(G.t('copied_block'), a);
         });
         a.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); a.click(); } });
       });
@@ -39,11 +89,12 @@
         if (c.closest('pre') || c.closest('a')) return;
         c.dataset.gkGuiStuffCopy = '1';
         c.classList.add('gk-gui-stuff-copy-code');
+        G.effect(c, 'inline_copy');
         c.title = G.t('copy_click');
         c.tabIndex = 0;
         c.setAttribute('role', 'button');
-        c.addEventListener('click', function () { G.copy(c.textContent, G.t('copied_code')); });
-        c.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); G.copy(c.textContent, G.t('copied_code')); } });
+        c.addEventListener('click', function () { G.copy(c.textContent, G.t('copied_code'), c); });
+        c.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); G.copy(c.textContent, G.t('copied_code'), c); } });
       });
     }
   });

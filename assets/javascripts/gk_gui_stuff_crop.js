@@ -30,6 +30,7 @@
 
     var wrap = document.createElement('div');
     wrap.className = 'gk-gui-stuff-crop-stage';
+    G.effect(wrap, 'image_crop');
     wrap.hidden = true;
     var canvas = document.createElement('canvas');
     canvas.width = STAGE; canvas.height = STAGE;

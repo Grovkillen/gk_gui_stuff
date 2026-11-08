@@ -1,0 +1,29 @@
+<%# Krävs "Ordet…" and the box, Valfritt [ Ordet | ✎ ], Av the button; what cannot be undone always asks %>
+<% @gk_gui_stuff_sg_mode = :server %>
+<div class="gk-gui-stuff-sg-tiles">
+  <% [[:label_gk_gui_stuff_sg_required, :required], [:label_gk_gui_stuff_sg_optional, :optional], [:label_gk_gui_stuff_sg_off, nil]].each do |k, mode| %>
+    <%= gk_gui_stuff_sg_row(l(k), "gk_gui_stuff_reason_button(label, reason: #{mode ? ":#{mode}" : 'nil'}, url:, info:)") do %>
+      <%= gk_gui_stuff_reason_button(l(:button_save), reason: mode, url: save, info: l(:text_gk_gui_stuff_sg_fly)) %>
+    <% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_alarm), "gk_gui_stuff_reason_button(label, reason: nil, role: :alarm, url:, info:)") do %>
+    <%= gk_gui_stuff_reason_button(l(:button_delete), reason: nil, role: :alarm, url: save, info: l(:text_gk_gui_stuff_sg_cannot_undo)) %>
+  <% end %>
+  <%# what cannot be undone: "Ordet…" always opens the box in the role alarm, the reason after the place under the
+      buttons; Valfritt drawn open and still (the same helper, its details opened), Krävs as the live button, so
+      that each row shows the button once; the still one is Bara bild, the live one asks the guide's address %>
+  <% irr = ->(mode) { gk_gui_stuff_reason_button(l(:label_gk_gui_stuff_lpe_clear), reason: mode, irreversible: true, url: save, question: l(:text_gk_gui_stuff_lpe_clear_question),
+                                                 info: l(:text_gk_gui_stuff_lpe_clear_what, count: 412, size: number_to_human_size(38 * 1024 * 1024))) } %>
+  <% [[:label_gk_gui_stuff_sg_optional, :optional], [:label_gk_gui_stuff_sg_required, :required]].each do |k, mode| %>
+    <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_irreversible, mode: l(k)), "gk_gui_stuff_reason_button(label, reason: :#{mode}, irreversible: true, url:, question:, info:)", wide: mode == :optional,
+                                                                                                      mode: mode == :optional ? :still : :server) do %>
+      <% if mode == :optional %><div class="gk-gui-stuff-sg-still" inert><%= irr.call(mode).to_str.sub('<details ', '<details open ').html_safe %></div><% end %><%# gk-r17 P6: opens the details of the plugin's own reason button for the still example; the HTML is the helper's own, not Redmine's %>
+      <% unless mode == :optional %><%= irr.call(mode) %><% end %>
+    <% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_elevate), "gk_gui_stuff_reason_button(label, reason:, elevate: true, purpose:)", mode: :nosave) do %>
+    <%# the lock's Stega upp leads to the real step up, so here it says that it leads nowhere; nothing reaches the
+        save address, so the tile reacts in the page only, as the lock's own in Admin %>
+    <span data-gk-gui-sg-example-links><%= gk_gui_stuff_reason_button(l(:label_gk_gui_stuff_sg_example_admin_action), reason: :required, url: save, elevate: true, state: :locked, purpose: l(:text_gk_gui_stuff_sg_admin_purpose)) %></span>
+  <% end %>
+</div>

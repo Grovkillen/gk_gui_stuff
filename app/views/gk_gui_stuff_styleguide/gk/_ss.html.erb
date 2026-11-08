@@ -1,0 +1,53 @@
+<%# select_search with Lägg till: real lists in the page, their options in the roles of their pills; then the
+    chooser on any list, a fixed list with quiet pills and list_filter on a long list of check boxes %>
+<p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_ss_try) %></p>
+<%= module_off.call('select_search') %>
+<%= module_off.call('list_filter') %>
+<% tag_opts = lambda do |chosen, extra = ''|
+     list = [[:p16, 1], [:p16_twin, 1], [:can, 2], [:canopen, 2]]
+     safe_join(list.map { |k, r| t = sample.call(k); content_tag(:option, t, value: t.delete_prefix('#'), selected: chosen.include?(k), data: { gk_gui_role: r }) }) + extra
+   end %>
+<% new_opt = content_tag(:option, sample.call(:weld), value: sample.call(:weld).delete_prefix('#'), selected: true, data: { gk_gui_new: '1', gk_gui_role: 'muted' }) %>
+<% ss_data = ->(mode) { { gk_gui_select: mode, gk_gui_select_prefix: '#', gk_gui_select_new_role: 'muted', gk_gui_select_lower: '1' } } %>
+<% langs = languages_options %>
+<% lang_opts = ->(chosen, role = nil) { safe_join(langs.map { |name, code| content_tag(:option, name, value: code, selected: chosen.include?(code.to_s), data: { gk_gui_role: role }) }) } %>
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ss_create), "data-gk-gui-select=\"create\", -prefix=\"#\", -new-role=\"muted\", -lower") do %>
+    <%= select_tag 'sg_tags[]', tag_opts.call(%i[p16]), multiple: true, id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_ss_create), data: ss_data.call('create') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ss_new), "<option data-gk-gui-new=\"1\" data-gk-gui-role=\"muted\">") do %>
+    <%= select_tag 'sg_tags_new[]', tag_opts.call(%i[p16], new_opt), multiple: true, id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_ss_new), data: ss_data.call('create') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ss_denied), "data-gk-gui-select=\"create-denied\", -prefix=\"#\"") do %>
+    <%= select_tag 'sg_tags_denied[]', tag_opts.call(%i[p16]), multiple: true, id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_ss_denied), data: ss_data.call('create-denied') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ss_single), "<select data-gk-gui-select=\"create\"><option value=\"\"></option>…</select>") do %>
+    <%= select_tag 'sg_parent', content_tag(:option, '', value: '') + tag_opts.call([]), id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_parent), data: ss_data.call('create') %>
+    <%= select_tag 'sg_parent_new', content_tag(:option, '', value: '') + tag_opts.call([], new_opt), id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_parent), data: ss_data.call('create') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_single), "data-gk-gui-select=\"on\"") do %>
+    <%= select_tag 'sg_one', lang_opts.call([current_language.to_s]), id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_single), data: { gk_gui_select: 'on' } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_multiple), "data-gk-gui-select=\"on\", multiple: true") do %>
+    <%= select_tag 'sg_several[]', lang_opts.call([current_language.to_s, 'en']), multiple: true, id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_multiple), data: { gk_gui_select: 'on' } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fixed), "multiple: true, <option data-gk-gui-role=\"muted\">") do %>
+    <%= select_tag 'sg_languages[]', lang_opts.call([current_language.to_s, 'en'], 'muted'), multiple: true, id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_fixed), data: { gk_gui_select: 'on' } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_list_filter), "data-gk-gui-filter") do %>
+    <%= content_tag(:div, safe_join(langs.first(20).map { |name, code| content_tag(:label, check_box_tag('sg_filter[]', code, false, id: nil) + " #{name}") }, tag(:br)), data: { gk_gui_filter: '1' }) %>
+  <% end %>
+  <%# the person's most used fields and the rest, each once, a field in use marked; the chooser is always there
+      (gk_gui_stuff_select.js), so Prova opens it from a script whether the module is on or not %>
+  <% ex = ->(k) { l(:"label_gk_gui_stuff_sg_example_#{k}") } %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_select_groups), "<optgroup label=…>, <option data-gk-gui-used=\"1\">; GkGui.selectSearch.enhance(select, { open: true })") do %>
+    <%= select_tag 'sg_field', content_tag(:optgroup, safe_join([content_tag(:option, l(:field_status), value: 'status'),
+                                                                   content_tag(:option, ex.call(:start_date), value: 'start_date', data: { gk_gui_used: '1' })]), label: ex.call(:most_used)) +
+                               content_tag(:optgroup, safe_join([content_tag(:option, ex.call(:assigned), value: 'assigned_to'), content_tag(:option, ex.call(:subject), value: 'subject'),
+                                                                   content_tag(:option, ex.call(:status_before), value: 'status_before'), content_tag(:option, ex.call(:tag), value: 'tag')]),
+                                           label: ex.call(:all_fields)),
+                   id: 'gk-gui-stuff-sg-field', 'aria-label': l(:label_gk_gui_stuff_sg_select_groups), data: { gk_gui_select: 'off' } %>
+    <%= gk_gui_stuff_sg_try('select', select: 'gk-gui-stuff-sg-field') %>
+  <% end %>
+</div>

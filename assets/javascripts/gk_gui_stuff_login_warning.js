@@ -29,7 +29,7 @@
   function desktop(login) {
     var top = document.getElementById('top-menu');
     if (!top || document.querySelector('.gk-gui-stuff-lw-banner')) return;
-    var banner = G.node('div', 'gk-gui-stuff-lw gk-gui-stuff-lw-banner' + cls);
+    var banner = G.effect(G.node('div', 'gk-gui-stuff-lw gk-gui-stuff-lw-banner' + cls), 'login_warning');
     banner.setAttribute('role', 'status');
     banner.appendChild(G.node('span', 'gk-gui-stuff-lw-text', o.text));
     banner.appendChild(cross());
@@ -62,7 +62,7 @@
     // the banner above everything, as on a desktop. Core's header stands fixed at the top in this layout, so the banner
     // is fixed above it and the header and the page move down by its height (--gk-gui-stuff-lw-h)
     if (!document.querySelector('.gk-gui-stuff-lw-banner')) {
-      var banner = G.node('div', 'gk-gui-stuff-lw gk-gui-stuff-lw-banner gk-gui-stuff-lw-phone');
+      var banner = G.effect(G.node('div', 'gk-gui-stuff-lw gk-gui-stuff-lw-banner gk-gui-stuff-lw-phone'), 'login_warning');
       banner.setAttribute('role', 'status');
       banner.appendChild(G.node('span', 'gk-gui-stuff-lw-text', o.text));
       banner.appendChild(cross());
@@ -79,7 +79,7 @@
       if (!fly || fly.querySelector('.gk-gui-stuff-lw-login')) return;
       var login = fly.querySelector('a.login');
       if (login) {
-        var lift = G.node('div', 'gk-gui-stuff-lw gk-gui-stuff-lw-login');
+        var lift = G.effect(G.node('div', 'gk-gui-stuff-lw gk-gui-stuff-lw-login'), 'login_warning');
         var arrow = G.put(G.node('span', 'gk-gui-stuff-lw-arrow-h'), 'arrow-right', '\u279C', 18);
         arrow.setAttribute('aria-hidden', 'true');
         var copy = login.cloneNode(true);

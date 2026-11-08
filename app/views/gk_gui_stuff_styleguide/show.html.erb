@@ -1,0 +1,35 @@
+<%# The style guide: the elements of GkGuiStuff::Styleguide, grouped by what they do, Redmine's own forms last as
+    a reference, each with its GK counterpart. Each element has its name, its plugin and number of states, "Används
+    för" and "Inte för", and one tile per state with the example in its real size on a canvas and its code folded
+    under it. Only what is built is shown: a release never names what is planned. Elements that open are shown open
+    and still, and what only shows live has a still picture and Prova (gk_gui_stuff_sg_try); hover and focus are never
+    shown still. Every text and every example comes from the locale files. The guide's save address stores nothing.
+    Two forms of the same register and partials, chosen at the top and in the address (?form=library), so that a link
+    or a screenshot can choose: Sida, the side menu and the elements one after the other (_form_sidebar), and
+    Bibliotek, the icon library's form on GK GUI Stuff's library (_form_library). The note at the top, in both forms,
+    folded from the start, says that every example has made-up values and leads nowhere, what each tile's flag means,
+    and that hover and focus are not shown still. Both forms have the page's own bar (Visa all kod, light or dark,
+    computer or phone for every element), which follows on scroll. %>
+<%= render partial: 'gk_gui_stuff_styleguide/assets' %>
+<% html_title l(:label_gk_gui_stuff_styleguide) %>
+<% sections = GkGuiStuff::Styleguide.sections %>
+<%# core's place for the page's own actions, empty here: GK GUI Stuff's three-dot menu goes into it when rows are
+    registered, and it takes no room while it is empty %>
+<div class="contextual gk-gui-stuff-sg-actions"></div>
+<%# the heading first and the choice of form after it, in one row on a computer and under the heading where the row
+    runs out (a phone) %>
+<div class="gk-gui-stuff-sg-head">
+  <%# data-gk-gui-sg-heading: the page's heading, which the browser check holds clear of the three-dot menu %>
+  <h2 data-gk-gui-sg-heading><%= l(:label_gk_gui_stuff_styleguide) %></h2>
+  <div class="gk-gui-stuff-sg-form" data-gk-gui-sg-form>
+    <%# the form only changes the view: the view segment, the address holding the choice %>
+    <%= gk_gui_stuff_view_segment('sg_form', [[l(:label_gk_gui_stuff_sg_form_page), 'page'], [l(:label_gk_gui_stuff_sg_form_library), 'library']], @form,
+                                 label: l(:label_gk_gui_stuff_sg_form_choice), remember: false) %>
+  </div>
+</div>
+<p class="info"><%= l(:text_gk_gui_stuff_styleguide) %></p>
+<%= gk_gui_stuff_sg_dummy_note %>
+<% unless @dark %><p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_no_dark) %></p><% end %>
+<% unless @elements %><p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_try_off) %></p><% end %>
+<% form = @form == 'library' ? 'form_library' : 'form_sidebar' %>
+<%= render partial: "gk_gui_stuff_styleguide/#{form}", locals: { sections: sections, locals: gk_gui_stuff_sg_locals } %>

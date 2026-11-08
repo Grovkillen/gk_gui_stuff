@@ -1,0 +1,8 @@
+/* gk_gui_stuff: the pictures under Visa on Administration, Appearance. A picture shows what a setting does also while its
+   row is off, so a module whose stylesheet changes Redmine's own elements has its rule here as well, held to the On
+   picture of its own row: nothing else on the page changes, the page's own message and badges included. The module's
+   stylesheet comes only with the row on. */
+tr[data-gk-gui-row='gui_stuff.flash_icon'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) div.flash > svg.icon-svg { position: relative; inset-block-start: -0.11em; }
+tr[data-gk-gui-row='gui_stuff.filled_badges'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) .badge.badge-status-open { color: var(--oc-white, #ffffff); background: var(--oc-blue-9, #1864ab); border-color: var(--oc-blue-9, #1864ab); }
+tr[data-gk-gui-row='gui_stuff.filled_badges'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) .badge.badge-status-locked { color: var(--oc-white, #ffffff); background: var(--oc-gray-7, #495057); border-color: var(--oc-gray-7, #495057); }
+tr[data-gk-gui-row='gui_stuff.filled_badges'] .gk-gui-stuff-compare-picture:not(.gk-gui-stuff-sg-still) .badge.badge-status-closed { color: var(--oc-white, #ffffff); background: var(--gk-role-alert-notice); border-color: var(--gk-role-alert-notice); }

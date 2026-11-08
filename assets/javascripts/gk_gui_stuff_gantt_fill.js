@@ -15,7 +15,10 @@
   function fill() {
     var area = document.getElementById('gantt_area'), field = document.getElementById('months');
     if (!area || !field) return;
-    var hdr = area.querySelector('.gantt_hdr'), months = parseInt(field.value, 10), max = parseInt(field.max, 10) || months;
+    // the page the fill went to carries the effect mark on the area it widened
+    if (stored() === window.location.href && G.effect) G.effect(area, 'gantt_fill');
+    // the chart's drawing area (core's id gantt_draw_area) is as wide as the months drawn, whatever header rows core has
+    var hdr = document.getElementById('gantt_draw_area'), months = parseInt(field.value, 10), max = parseInt(field.max, 10) || months;
     if (!hdr || !months || months >= max) return;
     var drawn = hdr.getBoundingClientRect().width + 1, room = area.clientWidth;
     var monthWidth = drawn / months, more = Math.floor((room - drawn) / monthWidth);

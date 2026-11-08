@@ -1,0 +1,5 @@
+<%# The action values' own forms, hidden and empty but for the authenticity token: drawn after the page's form, so
+    that no form nests; each action's reason and button point at its form with HTML's form attribute. %>
+<% gk_gui_stuff_action_forms.each do |form_id, url| %>
+  <%= form_tag(url, method: :post, id: form_id, class: 'gk-gui-stuff-action-form', hidden: true) do %><% end %>
+<% end %>

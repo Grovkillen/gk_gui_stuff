@@ -1,0 +1,84 @@
+<%# The marker (marker.rb, GkGui.marker): where a setting or a function changes something on the page. The dashed
+    outline in the role ui-effect around every place, solid on the current place with the striped flag
+    "Ändrat: … · 1 av N" or "Nytt: …", nothing moved; what went away as a quiet row with Visa var den stod. The places
+    are found only by steady anchors, here the guide's own data attributes. Every list, setting and date is made up %>
+<% ex = ->(k) { l(:"label_gk_gui_stuff_sg_example_marker_#{k}") } %>
+<% setting = ex.call(:setting) %>
+<% of = ->(n, total) { l(:label_gk_gui_stuff_marker_of, n: n, total: total) } %>
+<% gone_words = l(:label_gk_gui_stuff_marker_gone_in, what: ex.call(:column), setting: ex.call(:hide_unused)) %>
+<% badge = ->(k) { content_tag(:span, ex.call(k), class: "badge badge-status-#{k == :open ? 'open' : 'closed'}") } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_marker_saved),
+                          "gk_gui_stuff_mark(badge, current: true, label:); gk_gui_stuff_mark(badge); gk_gui_stuff_marker_row(text, where: true)",
+                          mode: :still, wide: true, id: 'sg-tile-marker-saved') do %>
+    <%# the rows' own box: the container whose width decides how the rows stand (gk_gui_stuff_styleguide.css) %>
+    <div class="gk-gui-stuff-sg-marker-fit">
+    <div class="gk-gui-stuff-sg-marker-list gk-gui-stuff-sg-marker-cols">
+      <div class="gk-gui-stuff-sg-marker-line">
+        <span><%= ex.call(:row_1) %></span>
+        <%= content_tag(:span, gk_gui_stuff_mark(badge.call(:open), current: true, label: "#{l(:label_gk_gui_stuff_marker_changed, setting: setting)} · #{of.call(1, 3)}"), class: 'gk-gui-stuff-sg-marker-room') %>
+        <span>2026-01-01</span>
+      </div>
+      <div class="gk-gui-stuff-sg-marker-line">
+        <span><%= ex.call(:row_2) %></span>
+        <%= content_tag(:span, gk_gui_stuff_mark(badge.call(:closed)), class: 'gk-gui-stuff-sg-marker-room') %>
+        <span>2026-01-02</span>
+      </div>
+      <div class="gk-gui-stuff-sg-marker-line">
+        <span><%= ex.call(:row_3) %></span>
+        <%= content_tag(:span, gk_gui_stuff_mark(badge.call(:open)), class: 'gk-gui-stuff-sg-marker-room') %>
+        <span>2026-01-04</span>
+      </div>
+    </div>
+    </div>
+    <%= gk_gui_stuff_marker_row(gone_words, where: true) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_marker_new), "gk_gui_stuff_mark(item, kind: :new, current: true, label:)", mode: :still) do %>
+    <%# room after the place for the flag's words: on a narrow canvas they stand beside the place, never on it %>
+    <span class="gk-gui-stuff-sg-marker-menu gk-gui-stuff-sg-marker-menu-room">
+      <%= gk_gui_stuff_mark(ex.call(:timers), kind: :new, current: true,
+                            label: "#{l(:label_gk_gui_stuff_marker_new, what: ex.call(:timers))} · #{of.call(1, 1)}") %>
+    </span>
+  <% end %>
+  <% items = [{ key: 'example.labels', setting: setting, kind: 'changed', anchors: ['[data-gk-gui-sg-marker-place~="badge"]'] },
+              { key: 'example.timer', setting: ex.call(:timer), kind: 'new', what: ex.call(:timers), anchors: ['[data-gk-gui-sg-marker-place~="new"]'] },
+              { key: 'example.unused', setting: ex.call(:hide_unused), kind: 'gone', what: ex.call(:column), where: '[data-gk-gui-sg-marker-was]' }] %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_marker_try),
+                          "GkGui.marker.show(items, { mode: 'preview', root, panel, on: false }); GkGui.marker.on(); GkGui.marker.next(); GkGui.marker.prev(); GkGui.marker.all(opener); GkGui.marker.gone(i); GkGui.marker.off()",
+                          mode: :nosave, wide: true) do %>
+    <div class="gk-gui-stuff-sg-marker-try" data-gk-gui-marker-root="1">
+      <div class="gk-gui-stuff-sg-marker-fit">
+      <div class="gk-gui-stuff-sg-marker-list gk-gui-stuff-sg-marker-cols">
+        <div class="gk-gui-stuff-sg-marker-line">
+          <span><%= ex.call(:row_1) %></span>
+          <%= content_tag(:span, badge.call(:open), class: 'gk-gui-stuff-sg-marker-room', data: { gk_gui_sg_marker_place: 'badge' }) %>
+          <%= content_tag(:span, ex.call(:priority), class: 'gk-gui-stuff-sg-marker-was', data: { gk_gui_sg_marker_was: '1' }) %>
+          <span>2026-01-01</span>
+        </div>
+        <div class="gk-gui-stuff-sg-marker-line">
+          <span><%= ex.call(:row_2) %></span>
+          <%= content_tag(:span, badge.call(:closed), class: 'gk-gui-stuff-sg-marker-room', data: { gk_gui_sg_marker_place: 'badge' }) %>
+          <span class="gk-gui-stuff-sg-marker-was"><%= ex.call(:priority) %></span>
+          <span>2026-01-02</span>
+        </div>
+        <div class="gk-gui-stuff-sg-marker-line">
+          <span><%= ex.call(:row_3) %></span>
+          <%= content_tag(:span, badge.call(:open), class: 'gk-gui-stuff-sg-marker-room', data: { gk_gui_sg_marker_place: 'badge' }) %>
+          <span class="gk-gui-stuff-sg-marker-was"><%= ex.call(:priority) %></span>
+          <span>2026-01-04</span>
+        </div>
+      </div>
+      </div>
+      <p class="gk-gui-stuff-sg-marker-menu"><%= content_tag(:span, ex.call(:timers), data: { gk_gui_sg_marker_place: 'new' }) %></p>
+      <%# the panel as it stands before the marks: three badges and a menu item are the four places, one thing is gone %>
+      <%= gk_gui_stuff_marker_panel(scope: 'example', places: 4, rows: [{ text: gone_words, where: true, index: 0 }], items: items) %>
+    </div>
+  <% end %>
+  <%# the band's part opens for real; its panel's buttons have no places of their own to move between and say so %>
+  <% panel = gk_gui_stuff_marker_panel(scope: 'example', places: 3, rows: [{ text: gone_words }], html: { data: { gk_gui_sg_marker_noop: '1' } }) %>
+  <% part = { key: 'sg.marks', role: :admin, icon: 'edit', weight: :other, count: 3, full: l(:label_gk_gui_stuff_marker_part_one, setting: setting),
+              short: l(:label_gk_gui_stuff_marker_part_short), title: l(:label_gk_gui_stuff_marker_part_title), panel: panel } %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_marker_band), "GkGuiStuff::Marker.register_band!; gk_gui_stuff_marker_panel", mode: :nosave, wide: true) do %>
+    <%= gk_gui_stuff_top_band([part], landmark: false) %>
+  <% end %>
+</div>

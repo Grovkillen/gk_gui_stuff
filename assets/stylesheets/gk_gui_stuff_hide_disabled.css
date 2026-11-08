@@ -1,3 +1,8 @@
 /* gk_gui_stuff hide_disabled: an action that may not be used (core draws it dimmed, a.disabled) is not shown at all in
-   the issue list's context menu; with the module off it stays dimmed, with its tooltip */
-#context-menu li:has(> a.disabled) { display: none; }
+   the issue list's context menu; with the module off it stays dimmed, with its tooltip. The row goes with its action:
+   core's menu rows have a padding and a frame of their own that lights up on hover, so a hidden link alone would
+   leave an empty strip. The row is the li that holds core's a.disabled (core's own class on the action), never a
+   folder (core's class li.folder), which stays when one of its choices may not be used. The link is hidden too, for
+   a browser without :has. */
+#context-menu a.disabled { display: none; }
+#context-menu li:not(.folder):has(a.disabled) { display: none; }

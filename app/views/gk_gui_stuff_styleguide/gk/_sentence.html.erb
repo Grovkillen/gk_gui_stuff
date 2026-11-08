@@ -1,0 +1,60 @@
+<%# the sentence with a frame and inline, a long value, the open part with its box shown still (Prova mounts a
+    real GkGui.sentence with the same data and no server), what waits for Verkställ, and the call from a script. The
+    sentences the server draws here are bound to nothing (GkGui.sentence.bind is the caller's), so they are pictures %>
+<% ex = ->(k) { l(:"label_gk_gui_stuff_sg_example_#{k}") } %>
+<% cond = ->(key, field, op, value, **o) { { kind: :condition, key: key, field: field, op: op, value: value }.merge(o) } %>
+<% word = ->(key, logic) { { kind: :word, key: key, text: ex.call(logic == :not ? :and_not : logic), logic: logic, title: ex.call(:switch_word) } } %>
+<% items = [cond.call('status', l(:field_status), ex.call(:op_is), ex.call(:value_open)), word.call('join.1', :and),
+            { kind: :group, items: [cond.call('tag_a', ex.call(:tag), ex.call(:op_is), sample.call(:p16)), word.call('or.1', :or),
+                                    cond.call('tag_b', ex.call(:tag), ex.call(:op_is), sample.call(:p12))] },
+            word.call('join.2', :not), cond.call('assigned', ex.call(:assigned), ex.call(:op_is), nil, incomplete: true)] %>
+<% add = { label: l(:gk_gui_stuff_sentence_add), title: ex.call(:add_title) } %>
+<% lead = "#{ex.call(:condition)}:" %>
+<% options = [{ kind: :text, text: ex.call(:show) }, { kind: :choice, key: 'columns', text: ex.call(:columns_6) },
+              { kind: :text, text: ex.call(:grouped_by) }, { kind: :choice, key: 'group', text: ex.call(:nothing), dashed: true },
+              { kind: :text, text: ex.call(:sorted_by) }, { kind: :choice, key: 'sort', text: ex.call(:updated_newest) }] %>
+<% live = { lead: lead, items: items, add: add, empty: ex.call(:empty), op_is: ex.call(:op_is), op_is_not: ex.call(:op_is_not), operator: ex.call(:operator), value: l(:field_value),
+            and: ex.call(:and), or: ex.call(:or), and_not: ex.call(:and_not), new_field: ex.call(:tag) } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_sentence_framed), "gk_gui_stuff_sentence(lead, items: [{ kind: :condition, … }, { kind: :word, logic: :and }, { kind: :group, items: […] }, …], add: { label:, title: })") do %>
+    <%= gk_gui_stuff_sentence(lead, items: items, add: add, key: 'sg-framed') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_sentence_long), "{ kind: :condition, field:, op:, value: }") do %>
+    <%= gk_gui_stuff_sentence(lead, items: [cond.call('subject', ex.call(:subject), ex.call(:op_contains), ex.call(:long_value))], add: add, key: 'sg-long') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_sentence_open), "open: :value; GkGui.sentence.box({anchor, title, content, remove, onDone, onCancel, onRemove})", mode: :nosave) do %>
+    <%= gk_gui_stuff_sentence(lead, items: [cond.call('status', l(:field_status), ex.call(:op_is), ex.call(:value_open), open: :value)], key: 'sg-open') %>
+    <%# the box drawn still and inert, its frame and content the layer's own markup %>
+    <div class="gk-gui-stuff-sg-still" inert>
+      <div class="gk-gui-stuff-layer" role="dialog" aria-label="<%= l(:field_status) %>">
+        <div class="gk-gui-stuff-layer-head"><h3 class="gk-gui-stuff-layer-title"><%= l(:field_status) %></h3>
+          <button type="button" class="gk-gui-stuff-layer-close" title="<%= l(:gk_gui_stuff_close) %>" aria-label="<%= l(:gk_gui_stuff_close) %>">×</button></div>
+        <div class="gk-gui-stuff-layer-body">
+          <p><%= select_tag 'sg_sentence_op', options_for_select([[ex.call(:op_is), 'is'], [ex.call(:op_is_not), 'not']], 'is'), id: nil, 'aria-label': ex.call(:operator) %>
+            <%= text_field_tag 'sg_sentence_value', ex.call(:value_open), id: nil, 'aria-label': l(:field_value) %></p>
+          <div class="gk-gui-stuff-fly-buttons"><%= button_tag l(:gk_gui_stuff_sentence_done), type: 'button' %><a href="#" class="gk-gui-stuff-sentence-remove"><%= l(:gk_gui_stuff_sentence_remove) %></a></div>
+          <p class="gk-gui-stuff-sentence-keys"><%= l(:gk_gui_stuff_sentence_keys) %></p>
+        </div>
+      </div>
+    </div>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_sentence_try) %>
+      <%= gk_gui_stuff_sg_try('sentence', sentence: live) %></p>
+    <div id="gk-gui-stuff-sg-sentence-live"></div>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_sentence_inline), "gk_gui_stuff_sentence(nil, items: [{ kind: :text }, { kind: :choice }, { kind: :choice, dashed: true }, …], inline: true)") do %>
+    <%= gk_gui_stuff_sentence(nil, items: options, inline: true, key: 'sg-inline') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_sentence_pending), "pending: true; gk_gui_stuff_sentence_note(text), GkGui.sentence.note(after, text)") do %>
+    <%= gk_gui_stuff_sentence(lead, items: items.first(1), add: add, pending: true, key: 'sg-pending') %>
+    <p class="buttons"><%= link_to sprite_icon('checked', l(:button_apply)), '#', class: 'icon icon-checked', data: { gk_gui_sg_noop: '1' } %>
+      <%= gk_gui_stuff_sentence_note(ex.call(:not_applied)) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_sentence_empty), "items: [], empty:") do %>
+    <%= gk_gui_stuff_sentence(lead, items: [], empty: ex.call(:empty), add: add, key: 'sg-empty') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_script), "s = GkGui.sentence.mount(el, {key, lead, inline, empty, items, add, pending, on: {field, value, remove, word, choice, add}}); s.update(model), s.open(key, part), s.pending(on), s.destroy()", mode: :nosave) do %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_sentence_script) %>
+      <%= gk_gui_stuff_sg_try('sentence', sentence: live, host: 'gk-gui-stuff-sg-sentence-script') %></p>
+    <div id="gk-gui-stuff-sg-sentence-script"></div>
+  <% end %>
+</div>

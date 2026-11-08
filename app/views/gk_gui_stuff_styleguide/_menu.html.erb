@@ -1,0 +1,24 @@
+<%# The side menu: the search field, Alla and the groups as choice pills with their counts, shaped as the library's
+    chips (gk_gui_stuff_library, the icon library's form), each group with its elements; the registry's groups and
+    order (GkGuiStuff::Styleguide.menu). A pill shows only its group, the search shows the elements whose name or use
+    matches; the page's script does both. Under 899 px the fold closes and the menu stands at the top. %>
+<% pill = lambda do |text, key, n, pressed|
+     gk_gui_stuff_pill(text, count: n, button: { type: 'button', data: { gk_gui_sg_chip: key } }, choice: true, pressed: pressed, check: false, html: { class: 'gk-gui-stuff-lib-chip' })
+   end %>
+<nav class="gk-gui-stuff-sg-menu" aria-label="<%= l(:label_gk_gui_stuff_sg_menu) %>" data-gk-gui-sg-menu>
+  <details class="gk-gui-stuff-sg-menu-fold" open data-gk-gui-sg-menu-fold>
+    <summary><%= l(:label_gk_gui_stuff_sg_menu) %></summary>
+    <input type="search" class="gk-gui-stuff-lib-search" data-gk-gui-sg-search placeholder="<%= l(:text_gk_gui_stuff_sg_search) %>" aria-label="<%= l(:text_gk_gui_stuff_sg_search) %>">
+    <p class="gk-gui-stuff-sg-menu-all"><%= pill.call(l(:label_gk_gui_stuff_sg_menu_all), 'all', sections.size, true) %></p>
+    <% GkGuiStuff::Styleguide.menu(sections).each do |g| %>
+      <div class="gk-gui-stuff-sg-menu-group" data-gk-gui-sg-menu-group="<%= g[:key] %>">
+        <p class="gk-gui-stuff-sg-menu-head"><%= pill.call(g[:title], g[:key], g[:sections].size, false) %></p>
+        <ul>
+          <% g[:sections].each do |s| %>
+            <li data-gk-gui-sg-item="<%= s.key %>"><%= link_to s.label, "##{s.anchor}" %></li>
+          <% end %>
+        </ul>
+      </div>
+    <% end %>
+  </details>
+</nav>

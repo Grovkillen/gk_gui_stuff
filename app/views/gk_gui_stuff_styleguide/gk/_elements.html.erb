@@ -1,0 +1,66 @@
+<%# The shared elements a script opens: the surface, the drawer, the wave, the corner and the palette, each as a
+    still picture of what its script draws and Prova for the live one; the fold closed, the opener and the table of
+    contents still %>
+<% @gk_gui_stuff_sg_mode = :live %>
+<% entries = [l(:label_gk_gui_stuff_sg_example_action), l(:label_gk_gui_stuff_sg_example_task)] %>
+<% places = [l(:label_issue_plural), l(:label_project_plural), l(:label_wiki), l(:label_news_plural), l(:label_calendar), l(:label_gantt)] %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_surface), "GkGui.surface.open({title, content, size}), GkGui.surface.close()") do %>
+    <%= gk_gui_stuff_sg_still(:surface, title: l(:label_gk_gui_stuff_sg_surface), text: l(:text_gk_gui_stuff_sg_surface)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('surface', title: l(:label_gk_gui_stuff_sg_surface), text: l(:text_gk_gui_stuff_sg_surface)) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_drawer), "GkGui.drawer.add({key, label, render}), GkGui.drawer.remove(key)") do %>
+    <%= gk_gui_stuff_sg_still(:drawer, title: l(:label_gk_gui_stuff_sg_drawer), text: l(:text_gk_gui_stuff_sg_drawer)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('drawer', title: l(:label_gk_gui_stuff_sg_drawer), text: l(:text_gk_gui_stuff_sg_drawer)) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_wave), "GkGui.wave.show({word}), GkGui.wave.hide()") do %>
+    <%= gk_gui_stuff_sg_still(:wave, word: l(:gk_gui_stuff_wave_saved)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('wave', word: l(:gk_gui_stuff_wave_saved)) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_corner), "GkGui.corner.show({count, entries})") do %>
+    <%= gk_gui_stuff_sg_still(:corner, entries: entries) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('corner', entries: entries) %></p>
+  <% end %>
+  <%# the notice the fold says itself with when it is out of the window: Prova stands far from the fold, so it comes %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_corner_notice), "GkGui.corner.show({count, entries}): GkGui.notice.show({level, text, life: 'sticky', closeLabel, buttons}), update(text, level)") do %>
+    <%= gk_gui_stuff_sg_still(:notice, level: 'info', text: l(:text_gk_gui_stuff_where_corner_other, count: 3), words: [l(:label_gk_gui_stuff_where_show), l(:gk_gui_stuff_close)]) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('corner', entries: entries) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_palette), "GkGui.palette.open({placeholder, items, onPick})") do %>
+    <%= gk_gui_stuff_sg_still(:palette, placeholder: l(:label_search), items: places.first(4)) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('palette', placeholder: l(:label_search), items: places) %></p>
+  <% end %>
+  <%# the fold closed, as gk_gui_stuff_fold.js leaves a long block (the same drawing as under Visa for the folds) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fold), "gk_gui_stuff_fold.js: long_fields, notes_collapse, code_blocks; gk_gui_stuff_sg_fold(tag, content, height:)", mode: :still) do %>
+    <% long = content_tag(:p, l(:text_gk_gui_stuff_sg_fold_long)) %>
+    <%= gk_gui_stuff_sg_fold(:div, long + long, html_class: 'wiki') %>
+  <% end %>
+  <%# the fold list's slot, first on the bar: what another plugin lays there stands beside the bar's button %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fold_slot), "data-gk-gui-fold-slot-for=\"<the block's id>\" on the element; GkGui.fold.slot(block), GkGui.fold.fill(block, item), the event gk-gui-fold-bar; gk_gui_stuff_fly(text, icon:, icon_only: true, tap: true, role:); gk_gui_stuff_sg_fold(tag, content, slot:)", mode: :still) do %>
+    <% long = content_tag(:p, l(:text_gk_gui_stuff_sg_fold_slot)) %>
+    <% example = gk_gui_stuff_fly(l(:text_gk_gui_stuff_sg_fold_slot_item), icon: 'lock', icon_only: true, tap: true, role: :admin) { l(:text_gk_gui_stuff_sg_fold_slot_item) } %>
+    <%= gk_gui_stuff_sg_fold(:div, long + long, html_class: 'wiki', slot: example) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_opener), "div.gk-gui-stuff-opener[data-gk-gui-stuff-open], template.gk-gui-stuff-opener-content, button.gk-gui-stuff-opener-button[hidden]", mode: :nosave) do %>
+    <%= content_tag(:div, safe_join([content_tag(:div, l(:text_gk_gui_stuff_sg_opener), class: 'gk-gui-stuff-opener-text'),
+                                     content_tag(:template, content_tag(:p, l(:text_gk_gui_stuff_sg_layer)), class: 'gk-gui-stuff-opener-content'),
+                                     button_tag(l(:label_gk_gui_stuff_sg_open_layer), type: 'button', class: 'gk-gui-stuff-opener-button', hidden: true)]),
+                    class: 'gk-gui-stuff-opener', data: { gk_gui_stuff_open: 'panel', gk_gui_stuff_title: l(:label_gk_gui_stuff_sg_opener) }) %>
+  <% end %>
+  <%# the row that follows at the top of a long page (GkGui.toc marks the section read) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_toc), "gk_gui_stuff_toc([{ title:, items: [[label, anchor], …] }, …]); GkGuiStuff::Styleguide.toc(sections)", mode: :still, wide: true) do %>
+    <div class="gk-gui-stuff-sg-still" inert><%= gk_gui_stuff_toc([{ title: l(:label_gk_gui_stuff_sg_menu_data), items: [[l(:label_gk_gui_stuff_sg_pill), 'sg-pill']] },
+                                                                 { title: l(:label_gk_gui_stuff_sg_menu_flow), items: [[l(:label_gk_gui_stuff_sg_sentence), 'sg-sentence']] },
+                                                                 { title: l(:label_gk_gui_stuff_sg_menu_core), items: [[l(:label_gk_gui_stuff_sg_core_forms), 'sg-core-forms']] }]) %></div>
+  <% end %>
+  <%# Visa under Administration, Appearance: Av and På as inert pictures under the flag Exempel, with and without the
+      middle line; a made-up heading with badges, and a link and a button that say that the example leads nowhere %>
+  <% heading = safe_join([content_tag(:h2, "#{l(:label_issue)} #1", class: 'inline-block'), gk_gui_stuff_sg_badges(l(:label_open_issues), only: [:open, :private])], ' ') %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_compare_mid_line), "gk_gui_stuff_appearance_preview(row, off:, on:, mid_line: true)", mode: :still, wide: true) do %>
+    <%= gk_gui_stuff_sg_compare(off: heading, on: content_tag(:div, heading, class: 'gk-gui-stuff-sg-compare-lower'), mid_line: true) %>
+  <% end %>
+  <% controls = safe_join([link_to("#{l(:label_issue)} #1", '#'), button_tag(l(:button_save), type: 'button')], ' ') %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_compare), "gk_gui_stuff_appearance_preview(row, off:, on:, try_on:, stack:, note:)", mode: :still, wide: true) do %>
+    <%= gk_gui_stuff_sg_compare(off: content_tag(:span, l(:text_gk_gui_stuff_preview_none), class: 'gk-gui-stuff-form-page-quiet'), on: controls) %>
+  <% end %>
+</div>

@@ -1,10 +1,26 @@
-// gk_gui_stuff: the shared elements, so that no plugin draws its own variant (environment manifest 5.10d).
+// gk_gui_stuff: the shared elements, so that no plugin draws its own variant.
 //   GkGui.surface.open({title, content, buttons, footer, size, dismissable, onClose, list})  the one modal surface
-//   GkGui.notice.show({level, text, buttons, life})     the one notice, in a corner (life: brief | sticky)
+//   GkGui.notice.show({level, text, buttons, life, closeLabel, onClose})  the one notice, in a corner (life: brief |
+//                                                       sticky); buttons [{label, action, icon}], with icon: the icon
+//                                                       button; level: tip, info, notice, warning, alarm or critical,
+//                                                       lowest first; closeLabel: a text button in the cross's place,
+//                                                       and onClose when the person closes it there. Returns {close(),
+//                                                       update(text, level)}, which changes the notice where it stands
 //   GkGui.wave.show({word, text, level, duration})      the full-page word that comes and goes
-//   GkGui.banner.show({key, level, text, button, dismiss, before})  a row in the page, not over it
-//   GkGui.ribbon.show({key, word, line, href, priority}) a word in the corner saying what the page is
-//   GkGui.corner.show({count, entries, level, onReload}) the fold: the page changed behind your back
+//   GkGui.banner.show({key, level, text, button, dismiss, before, where})  a row in the page, not over it; button {label,
+//                                                       action, icon}, with icon: the icon button; outside the window
+//                                                       Visa var points it out, where: its word instead of the
+//                                                       banner's, false: no arrow
+//   GkGui.ribbon.show({key, word, line, icon, title, priority, role, action: {label, href | handler}})  a word in the
+//                                                       corner saying what the page is, in its role (admin when none is
+//                                                       given), with an icon of icons before it and the whole sentence
+//                                                       (title) for screen readers and the action button's tooltip;
+//                                                       the band lets the pointer through, only its button takes it;
+//                                                       outside the window Visa var points it out. Returns its frame
+//   GkGui.corner.show({count, entries, level, onReload}) the fold: the page changed behind your back; outside the
+//                                                       window a notice with the count says so, one notice that is
+//                                                       updated, gone when the fold is seen; Visa there does what the
+//                                                       arrow of Visa var does, Stäng closes the notice and not the fold
 //   GkGui.palette.open({placeholder, items, onPick})     type and pick, a small surface at the top
 //   GkGui.drawer.add({key, label, scope, render, attention})  the panel for tools used while looking at the page
 // First editions: colours are neutral until theme_engine's roles exist, icons are characters until icons exists,
@@ -13,7 +29,7 @@
   var G = window.GkGui;
   if (!G) return;
   var N = G.node;
-  var LEVELS = ['info', 'notice', 'warning', 'alarm', 'critical'];
+  var LEVELS = ['tip', 'info', 'notice', 'warning', 'alarm', 'critical'];
   function level(l) { return LEVELS.indexOf(l) >= 0 ? l : 'info'; }
   function focusables(root) {
     return Array.prototype.filter.call(root.querySelectorAll('a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'),
@@ -88,25 +104,43 @@
   var tray = null, shown = [];
   function noticeShow(o) {
     if (!tray) { tray = N('div', 'gk-gui-stuff-notices'); document.body.appendChild(tray); }
-    var lv = level(o.level), sticky = o.life === 'sticky' || LEVELS.indexOf(lv) >= 2; // warning and up always stay
+    var lv = level(o.level), sticky = o.life === 'sticky' || LEVELS.indexOf(lv) >= 3; // warning and up always stay
     var n = N('div', 'gk-gui-stuff-note gk-gui-stuff-note-' + lv);
-    n.setAttribute('role', LEVELS.indexOf(lv) >= 2 ? 'alert' : 'status');
-    n.appendChild(G.put(N('span', 'gk-gui-stuff-note-mark'), { info: 'help', notice: 'checked', warning: 'warning', alarm: 'warning', critical: 'warning' }[lv],
-      { info: 'i', notice: '!', warning: '!', alarm: '!!', critical: '!!!' }[lv], 14)); // Core's icons; the level also shows in the border
-    n.appendChild(N('span', 'gk-gui-stuff-note-text', o.text));
+    n.setAttribute('role', LEVELS.indexOf(lv) >= 3 ? 'alert' : 'status');
+    var markOf = function (m, l) {
+      return G.put(m, { tip: 'help', info: 'help', notice: 'checked', warning: 'warning', alarm: 'warning', critical: 'warning' }[l],
+        { tip: 'i', info: 'i', notice: '!', warning: '!', alarm: '!!', critical: '!!!' }[l], 14); // Core's icons; the level also shows in the border
+    };
+    var noteMark = markOf(N('span', 'gk-gui-stuff-note-mark'), lv), noteText = N('span', 'gk-gui-stuff-note-text', o.text);
+    n.appendChild(noteMark);
+    n.appendChild(noteText);
     var row = N('span', 'gk-gui-stuff-note-buttons');
     var timer = null, ms = Math.max(4000, (G.opt('elements').notice_ms || 6000));
     function drop() { clearTimeout(timer); clearInterval(timer); n.remove(); shown = shown.filter(function (k) { return k !== n; }); }
     function arm() { if (!sticky) timer = setTimeout(drop, ms); }
+    // a button with icon: is the icon button ("Försök igen" is reload), before the cross; without, a text button
     (o.buttons || []).slice(0, 2).forEach(function (b) {
-      var bn = N('button', 'gk-gui-stuff-btn', b.label); bn.type = 'button';
+      var bn = b.icon ? G.iconButton({ icon: b.icon, label: b.label, fallback: b.fallback }) : N('button', 'gk-gui-stuff-btn', b.label);
+      if (!b.icon) bn.type = 'button';
       bn.addEventListener('click', function () { if (b.action) b.action(); drop(); });
       row.appendChild(bn);
     });
-    var x = G.put(N('button', 'gk-gui-stuff-note-close'), 'close', '×', 14); x.type = 'button'; x.setAttribute('aria-label', G.t('dismiss')); x.title = G.t('dismiss');
-    x.addEventListener('click', drop);
+    // beside an icon button the cross is one too, so that the two stand on one line
+    var x = (o.buttons || []).slice(0, 2).some(function (b) { return b.icon; }) ? G.iconButton({ icon: 'close', label: G.t('dismiss'), fallback: '×' }) : G.put(N('button', 'gk-gui-stuff-note-close'), 'close', '×', 14);
+    x.type = 'button'; x.setAttribute('aria-label', G.t('dismiss')); x.title = G.t('dismiss');
+    // a notice with buttons in words may say its closing in a word too
+    if (o.closeLabel) { x = N('button', 'gk-gui-stuff-btn', o.closeLabel); x.type = 'button'; }
+    x.addEventListener('click', function () { drop(); if (o.onClose) o.onClose(); });
     tray.appendChild(n); shown.push(n);
-    while (shown.length > 3) { var old = shown.shift(); old.remove(); } // at most three at a time
+    if (o.effect && G.effect) G.effect(n, o.effect);
+    n.gkGuiStuffStays = sticky;
+    // The shared value says how many at a time. The oldest that goes by itself makes room; one that is to stay is never
+    // taken away, nor the one just shown, so the tray may hold more than the value and then scrolls.
+    var most = G.opt('elements').notice_max || 3;
+    for (var i = 0; i < shown.length - 1 && shown.length > most;) {
+      if (shown[i].gkGuiStuffStays) { i++; continue; }
+      shown.splice(i, 1)[0].remove();
+    }
     // A notice that goes away by itself shows it (the same circle as on core's green message): a click on the
     // circle pauses and resumes, resting the pointer on the notice holds the time, the cross closes at once.
     if (!sticky && G.opt('elements').notice_countdown !== false) {
@@ -143,7 +177,18 @@
       arm();
     }
     row.appendChild(x); n.appendChild(row);
-    return { close: drop };
+    return {
+      close: drop,
+      update: function (text, newLevel) {
+        noteText.textContent = text;
+        var l2 = level(newLevel || lv);
+        if (l2 === lv) return;
+        n.classList.remove('gk-gui-stuff-note-' + lv); n.classList.add('gk-gui-stuff-note-' + l2);
+        n.setAttribute('role', LEVELS.indexOf(l2) >= 3 ? 'alert' : 'status');
+        markOf(noteMark, l2);
+        lv = l2;
+      }
+    };
   }
 
   // ---------------------------------------------------------------- wave
@@ -156,6 +201,7 @@
       waveEl = document.getElementById('gk-gui-stuff-wave');
       if (!waveEl) {
         waveEl = N('div', 'gk-gui-stuff-wave'); waveEl.id = 'gk-gui-stuff-wave';
+        if (G.effect) G.effect(waveEl, 'wave');
         waveEl.appendChild(N('div', 'gk-gui-stuff-wave-backdrop'));
         waveEl.appendChild(N('div', 'gk-gui-stuff-wave-motion')); // empty until a theme fills it
         var t = N('div', 'gk-gui-stuff-wave-text');
@@ -183,7 +229,7 @@
     waveEl.querySelector('.gk-gui-stuff-wave-backdrop').style.opacity = opacity;
     // A standing wave whose word changes cross-fades it, never a gap or a swap
     var wd = waveEl.querySelector('.gk-gui-stuff-wave-word:not(.gk-gui-stuff-wave-word-out)'), nw = String(o.word || '').toUpperCase();
-    if (standing && wd.textContent && wd.textContent !== nw) {
+    if (standing && wd.textContent && wd.textContent !== nw) { // gk-r17 P4r: the word is the wave's own element, drawn by this plugin, not core's
       var old = wd.cloneNode(true); old.className = 'gk-gui-stuff-wave-word gk-gui-stuff-wave-word-out';
       wd.parentNode.insertBefore(old, wd); setTimeout(function () { old.remove(); }, 450);
       wd.classList.remove('gk-gui-stuff-wave-word-in'); void wd.offsetWidth; wd.classList.add('gk-gui-stuff-wave-word-in');
@@ -213,41 +259,167 @@
     if (!host || document.querySelector('.gk-gui-stuff-banner[data-key="' + (o.key || '') + '"]')) return null;
     var b = N('div', 'gk-gui-stuff-banner gk-gui-stuff-banner-' + level(o.level));
     b.dataset.key = o.key || '';
-    b.setAttribute('role', LEVELS.indexOf(level(o.level)) >= 2 ? 'alert' : 'status');
+    b.setAttribute('role', LEVELS.indexOf(level(o.level)) >= 3 ? 'alert' : 'status');
     b.appendChild(N('span', 'gk-gui-stuff-banner-text', o.text));
-    if (o.button) { var bn = N('button', 'gk-gui-stuff-btn', o.button.label); bn.type = 'button'; bn.addEventListener('click', o.button.action); b.appendChild(bn); }
+    // button.icon makes it the icon button (the banner when the contact is lost has reload for "Försök nu")
+    if (o.button) {
+      var bt = o.button, bn = bt.icon ? G.iconButton({ icon: bt.icon, label: bt.label, fallback: bt.fallback }) : N('button', 'gk-gui-stuff-btn', bt.label);
+      if (!bt.icon) bn.type = 'button';
+      bn.addEventListener('click', bt.action);
+      b.appendChild(bn);
+    }
     if (o.dismiss) {
       var x = G.put(N('button', 'gk-gui-stuff-banner-close'), 'close', '×', 14); x.type = 'button'; x.setAttribute('aria-label', G.t('dismiss'));
       x.addEventListener('click', function () { G.set(key, '1'); b.remove(); });
       b.appendChild(x);
     }
     host.insertAdjacentElement('afterbegin', b);
+    if (G.showWhere && o.where !== false) G.showWhere({ key: 'banner.' + (o.key || o.text), target: b, word: o.where || G.showWhere.word('banner') });
     return b;
   }
 
   // ---------------------------------------------------------------- ribbon (at most one, the highest priority wins)
-  var ribbonNow = null;
+  // The band never takes the pointer: a click or a hover goes through to what lies under it. While the pointer is
+  // over the band it is fainter, worked out from the pointer's place since the band hears no events of its own (no
+  // fading with reduced motion, the CSS). A band with an action (a locked page, seeing as, stepped up) has one small
+  // round button with core's cancel, always upright, the only part that takes the pointer: a link (action.href, for a
+  // locked page the live page) or a button (action.handler); action.label is what a screen reader says, and the
+  // tooltip after the band's title. Over the button, or with the focus in it, the band is fully seen. A band without
+  // an action has no button.
+  // The band runs from edge to edge, cut by the two edges of its frame (the window's corner on a phone, the corner of
+  // #main on a computer), with the word in the middle of what is seen. Its distance from the corner follows the
+  // word's measured width, so that the word and the button fit with room between them; the button stands far down
+  // the band, a small gap from the window's edge, and never over the middle of core's menu button on a phone.
+  var ribbonNow = null, ribbonAt = null, ribbonFrame = 0, ribbonHeard = false;
+  var RB = { r: 11, edge: 6, gap: 8, end: 10 }; // the button's radius, its gap to the edge and to the word, room at the ends
+  function ribbonMenu(r) {
+    var m = document.querySelector('#header .mobile-toggle-button');
+    var q = m && m.getBoundingClientRect();
+    if (!q || !q.width) return null;
+    var f = r.el.getBoundingClientRect(), mx = q.left + q.width / 2;
+    return { x: r.rtl ? mx - f.left : f.right - mx, y: q.top + q.height / 2 - f.top };
+  }
+  function ribbonPlace() {
+    var r = ribbonNow;
+    if (!r || !r.band.isConnected) return;
+    var a = r.band, k = Math.SQRT2;
+    r.text.style.maxInlineSize = Math.max(80, Math.round(Math.min(window.innerWidth, r.host.clientWidth || window.innerWidth) * 0.4)) + 'px';
+    var w = r.text.offsetWidth, h = a.offsetHeight;
+    // the corner's distance where the band's middle line meets the edges: the word fits in the band's inner edge
+    var c = (w + 2 * RB.end + h) / k, bx = RB.edge + RB.r;
+    if (r.btn) {
+      // the button's middle bx from the edge, the word's half and the gap and the button between them
+      c = Math.max(c, 2 * bx + (w + 2 * (RB.gap + RB.r)) / k);
+      var m = ribbonMenu(r), need = RB.r + RB.gap;
+      if (m && Math.abs(m.x - bx) < need) c = Math.max(c, m.y + bx + Math.sqrt(need * need - (m.x - bx) * (m.x - bx)));
+    }
+    c = Math.ceil(c);
+    var len = Math.ceil(c * k + 2 * h);
+    a.style.inlineSize = len + 'px';
+    a.style.insetBlockStart = (c / 2 - h / 2) + 'px';
+    a.style.insetInlineEnd = (c / 2 - len / 2) + 'px';
+    r.el.style.inlineSize = r.el.style.blockSize = Math.ceil(c + h) + 'px';
+    if (r.btn) r.btn.style.insetInlineEnd = (len / 2 - k * (c / 2 - bx) - RB.r) + 'px';
+  }
+  function ribbonFade() {
+    ribbonFrame = 0;
+    var r = ribbonNow;
+    if (!r || !r.band.isConnected) return;
+    var over = false;
+    if (ribbonAt && !r.onButton) {
+      var f = r.el.getBoundingClientRect(), x = ribbonAt.x, y = ribbonAt.y;
+      if (x >= f.left && x <= f.right && y >= f.top && y <= f.bottom) {
+        // the pointer in the band's own turned frame: rotate back by the band's angle round its middle
+        var b = r.band.getBoundingClientRect(), dx = x - (b.left + b.width / 2), dy = y - (b.top + b.height / 2);
+        var t = (r.rtl ? -1 : 1) * Math.PI / 4, u = dx * Math.cos(t) + dy * Math.sin(t), v = dy * Math.cos(t) - dx * Math.sin(t);
+        over = Math.abs(u) <= r.band.offsetWidth / 2 && Math.abs(v) <= r.band.offsetHeight / 2;
+      }
+    }
+    r.band.classList.toggle('gk-gui-stuff-ribbon-faded', over);
+  }
+  function ribbonLater() { if (!ribbonFrame) ribbonFrame = window.requestAnimationFrame(ribbonFade); }
+  function ribbonHear() {
+    if (ribbonHeard) return;
+    ribbonHeard = true;
+    document.addEventListener('pointermove', function (e) { ribbonAt = { x: e.clientX, y: e.clientY }; ribbonLater(); }, { passive: true });
+    document.documentElement.addEventListener('pointerleave', function () { ribbonAt = null; ribbonLater(); });
+    window.addEventListener('scroll', ribbonLater, { passive: true, capture: true });
+    window.addEventListener('resize', ribbonPlace);
+    window.addEventListener('load', ribbonPlace);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(ribbonPlace);
+  }
   function ribbonShow(o) {
-    if (ribbonNow && (ribbonNow.priority || 0) >= (o.priority || 0)) return;
+    if (ribbonNow && (ribbonNow.priority || 0) >= (o.priority || 0)) return ribbonNow.el;
     if (ribbonNow) ribbonNow.el.remove();
     var host = document.getElementById('main') || document.body;
     var frame = N('div', 'gk-gui-stuff-ribbon-frame');
-    var a = N(o.href ? 'a' : 'span', 'gk-gui-stuff-ribbon gk-gui-stuff-ribbon-' + (o.key || 'plain'));
-    if (o.href) a.href = o.href;
-    a.appendChild(N('span', 'gk-gui-stuff-ribbon-word', String(o.word || '').toUpperCase()));
-    if (o.line) a.appendChild(N('span', 'gk-gui-stuff-ribbon-line', o.line));
+    var a = N('div', 'gk-gui-stuff-ribbon gk-gui-stuff-ribbon-' + (o.key || 'plain'));
+    var rc = G.roleClass ? G.roleClass(o.role || 'admin') : '';
+    if (rc) a.classList.add(rc);
+    // the icon only from icons (core has neither the shield nor the mask); without it the word stands alone
+    var text = N('span', 'gk-gui-stuff-ribbon-text'), word = N('span', 'gk-gui-stuff-ribbon-word');
+    if (o.icon && window.GkIcons) word.appendChild(G.icon(o.icon, '', 14));
+    word.appendChild(N('span', 'gk-gui-stuff-ribbon-name', String(o.word || '').toUpperCase()));
+    text.appendChild(word);
+    if (o.line) text.appendChild(N('span', 'gk-gui-stuff-ribbon-line', o.line));
+    a.appendChild(text);
+    if (o.title) {
+      text.setAttribute('aria-hidden', 'true');
+      a.appendChild(N('span', 'gk-gui-stuff-sr-only', o.title));
+    }
+    var r = { el: frame, band: a, text: text, btn: null, host: host, priority: o.priority || 0, onButton: false, rtl: false };
+    var act = o.action && o.action.label ? o.action : null;
+    if (act) {
+      var btn = N(act.href ? 'a' : 'button', 'gk-gui-stuff-ribbon-action');
+      if (act.href) btn.href = act.href;
+      else {
+        btn.type = 'button';
+        btn.addEventListener('click', function (e) { e.preventDefault(); if (act.handler) act.handler(e); });
+      }
+      G.put(btn, 'cancel', '↶', 13);
+      // the band takes no pointer, so its sentence is also the button's tooltip, before what the button does
+      btn.title = o.title ? o.title + '\n' + act.label : act.label;
+      btn.setAttribute('aria-label', act.label);
+      r.btn = btn;
+      var full = function (on) { r.onButton = on; ribbonLater(); };
+      btn.addEventListener('pointerenter', function () { full(true); });
+      btn.addEventListener('pointerleave', function () { full(false); });
+      btn.addEventListener('focus', function () { full(true); });
+      btn.addEventListener('blur', function () { full(false); });
+      a.appendChild(btn);
+    }
     frame.appendChild(a); host.classList.add('gk-gui-stuff-ribbon-host'); host.appendChild(frame);
-    // the band's length follows the text, never shorter than the minimum; its middle lies on the diagonal
-    var len = Math.max(120, Math.min(a.scrollWidth + 2 * 18, host.clientWidth * 0.4));
-    a.style.inlineSize = len + 'px';
-    var off = len / (2 * Math.SQRT2);
-    a.style.top = (off - a.offsetHeight / 2) + 'px';
-    a.style.right = (off - len / 2) + 'px';
-    ribbonNow = { el: frame, priority: o.priority || 0 };
+    r.rtl = window.getComputedStyle(a).direction === 'rtl';
+    ribbonNow = r;
+    ribbonPlace();
+    ribbonHear();
+    if (G.showWhere) G.showWhere({ key: 'ribbon', target: frame, word: G.showWhere.word('ribbon') });
+    return frame;
   }
 
   // ---------------------------------------------------------------- corner
-  var cornerEl = null;
+  // The fold stands in the content's corner. Out of the window a notice says the count: one notice, updated and never
+  // stacked, gone when the fold is seen, back when the person scrolls away from it again. Stäng and Visa hold it back until
+  // the count grows. Stäng closes the notice and never the fold.
+  var cornerEl = null, cornerNote = null, cornerStop = null, cornerCount = 0, cornerClosed = 0, cornerLevel = 'info';
+  function cornerTell() {
+    var W = G.showWhere, fold = cornerEl && cornerEl.querySelector('.gk-gui-stuff-corner-fold');
+    var where = W && fold ? W.place(fold) : null;
+    if (!where || where === 'here' || cornerCount <= cornerClosed) {
+      if (cornerNote) { cornerNote.close(); cornerNote = null; }
+      return;
+    }
+    var text = W.word(cornerCount === 1 ? 'corner_one' : 'corner_other', { count: cornerCount });
+    if (cornerNote) { cornerNote.update(text, cornerLevel); return; }
+    cornerNote = noticeShow({ level: cornerLevel, text: text, life: 'sticky', effect: 'corner', closeLabel: G.t('close'),
+                              onClose: function () { cornerClosed = cornerCount; cornerNote = null; },
+                              buttons: [{ label: W.word('show'), action: function () { cornerClosed = cornerCount; cornerNote = null; W.go(fold); } }] });
+  }
+  function cornerGone() {
+    if (cornerStop) { cornerStop(); cornerStop = null; }
+    if (cornerNote) { cornerNote.close(); cornerNote = null; }
+    cornerCount = 0; cornerClosed = 0;
+  }
   function cornerShow(o) {
     var host = document.getElementById('content'); if (!host) return;
     if (!cornerEl) {
@@ -267,7 +439,7 @@
       cornerEl.addEventListener('mouseenter', function () { clearTimeout(leave); clearTimeout(enter); if (card.hidden) enter = setTimeout(function () { open(true); }, wait); });
       cornerEl.addEventListener('mouseleave', function () { clearTimeout(enter); clearTimeout(leave); leave = setTimeout(function () { open(false); }, 250); });
       cornerEl.addEventListener('keydown', function (e) { if (e.key === 'Escape') { open(false); fold.focus(); } });
-      host.classList.add('gk-gui-stuff-corner-host');
+      host.classList.add('gk-gui-stuff-corner-host', 'gk-gui-stuff-corner-room');
       host.insertAdjacentElement('afterbegin', cornerEl);
     }
     cornerEl.className = 'gk-gui-stuff-corner gk-gui-stuff-corner-' + (o.level === 'notice' ? 'notice' : 'info');
@@ -279,18 +451,24 @@
     cornerEl.querySelector('.gk-gui-stuff-corner-fold').setAttribute('aria-label', G.t('corner_title') + ' (' + o.count + ')');
     var card2 = cornerEl.querySelector('.gk-gui-stuff-corner-card');
     card2.textContent = '';
-    card2.appendChild(N('strong', null, G.t('corner_title')));
+    // the title with reload and the cross at its end, top right as in the notices (no "Ladda om" and "Avfärda"
+    // as words at the foot)
+    var head = N('div', 'gk-gui-stuff-corner-head');
+    head.appendChild(N('strong', null, G.t('corner_title')));
+    var row = N('span', 'gk-gui-stuff-corner-buttons');
+    row.appendChild(G.iconButton({ icon: 'reload', label: G.t('reload'), fallback: '↻', onClick: function () { if (o.onReload) o.onReload(); else location.reload(); } }));
+    row.appendChild(G.iconButton({ icon: 'close', label: G.t('dismiss'), fallback: '×', onClick: function () { cornerEl.remove(); cornerEl = null; cornerGone(); if (o.onDismiss) o.onDismiss(); } }));
+    head.appendChild(row);
+    card2.appendChild(head);
     var ul = N('ul');
     var max = G.opt('elements').corner_max || 20;
     (o.entries || []).slice(0, max).forEach(function (e) { ul.appendChild(N('li', null, e)); });
     if ((o.entries || []).length > max) ul.appendChild(N('li', 'gk-gui-stuff-corner-more', G.t('and_more', { count: o.entries.length - max })));
     card2.appendChild(ul);
-    var row = N('div', 'gk-gui-stuff-corner-buttons');
-    var re = N('button', 'gk-gui-stuff-btn', G.t('reload')); re.type = 'button';
-    re.addEventListener('click', function () { if (o.onReload) o.onReload(); else location.reload(); });
-    var x = N('button', 'gk-gui-stuff-btn', G.t('dismiss')); x.type = 'button';
-    x.addEventListener('click', function () { cornerEl.remove(); cornerEl = null; if (o.onDismiss) o.onDismiss(); });
-    row.appendChild(re); row.appendChild(x); card2.appendChild(row);
+    cornerCount = o.count;
+    cornerLevel = o.level === 'notice' ? 'notice' : 'info';
+    if (G.showWhere && !cornerStop) cornerStop = G.showWhere.watch(foldEl, cornerTell);
+    cornerTell();
   }
 
   // ---------------------------------------------------------------- palette
@@ -358,11 +536,31 @@
       x.addEventListener('click', function () { drawerRemove(t.key); });
       tab.appendChild(x); bar.appendChild(tab);
     });
-    var sizes = G.put(N('button', 'gk-gui-stuff-drawer-size'), 'reorder', '↕', 14); sizes.type = 'button'; sizes.title = G.t('drawer_size'); sizes.setAttribute('aria-label', G.t('drawer_size'));
+    // the size button, its tooltip and name the size a click gives: small, half, full, half, small again. Growing it
+    // is core's maximize; in the whole window it is the minimize icon (GK Icons' own; without GK Icons the kernel draws
+    // maximize, with the tooltip that says smaller). From the whole window "Smaller" goes back to half.
+    var nextSize = function () {
+      var now = drawer.dataset.size || 'small';
+      if (now === 'full') return 'half';
+      if (now === 'half') return drawer.dataset.shrink === '1' ? 'small' : 'full';
+      return 'half';
+    };
+    var sizeWord = function (next) { return G.t(next === 'half' && drawer.dataset.size === 'full' ? 'drawer_size_back' : 'drawer_size_' + next); };
+    var sizes = G.iconButton({ icon: 'maximize', label: '', fallback: '⤢', className: 'gk-gui-stuff-drawer-size' });
+    var sizeShow = function () {
+      var next = nextSize(), said = sizeWord(next);
+      var mini = drawer.dataset.size === 'full' && window.GkIcons;
+      G.put(sizes, mini ? 'minimize' : 'maximize', mini ? '⤡' : '⤢', 16);
+      sizes.title = said; sizes.setAttribute('aria-label', said);
+    };
     sizes.addEventListener('click', function () {
-      var order = ['small', 'half', 'full'], next = order[(order.indexOf(drawer.dataset.size || 'small') + 1) % 3];
+      var now = drawer.dataset.size || 'small', next = nextSize();
+      if (now === 'full') drawer.dataset.shrink = '1';
+      if (next === 'full' || (next === 'half' && now === 'small')) delete drawer.dataset.shrink;
       drawer.dataset.size = next; G.set('drawer.size', next);
+      sizeShow();
     });
+    sizeShow();
     var all = G.put(N('button', 'gk-gui-stuff-drawer-close'), 'close', '×', 14); all.type = 'button'; all.title = G.t('drawer_empty'); all.setAttribute('aria-label', G.t('drawer_empty'));
     all.addEventListener('click', function () { tabs = []; chosen = null; drawerPaint(); });
     bar.appendChild(sizes); bar.appendChild(all);

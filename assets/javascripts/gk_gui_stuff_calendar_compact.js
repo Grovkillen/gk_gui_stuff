@@ -27,34 +27,31 @@
     link.setAttribute('aria-pressed', on ? 'true' : 'false');
   }
 
-  // the issue's short line: "#12 Subject", from core's tip (its first link is "Tracker #12", followed by the whole subject)
+  // the issue's short line: "#12 Subject". What it is comes from what core sets on purpose, never from the text of
+  // core's link or tip: the issue's id is the value of the box's ids[] check box (core's context menu reads the same),
+  // the address is core's issue link (a.issue, the one outside core's tip), and the tracker and whole subject come
+  // with the page (window.gkGuiStuffPage.data.calendar_issues, by id); without them the line is the number alone.
+  // Core's own text in the box is left out by the compact view's CSS (gk_gui_stuff_calendar_compact.css), so nothing
+  // in core's box is wrapped or moved.
   function lines(cal) {
-    cal.querySelectorAll('.calbody > div.issue').forEach(function (d) {
-      if (d.querySelector(':scope > .gk-gui-stuff-cal-line')) return;
-      var tip = d.querySelector(':scope > span.tip'), a = tip && tip.querySelector('a[href]');
-      var own = Array.prototype.find.call(d.children, function (n) { return n.tagName === 'A' && n.getAttribute('href'); });
-      if (!a && !own) return;
-      var head = (a || own).textContent.trim(), m = /#(\d+)\s*$/.exec(head);
-      var rest = a && a.nextSibling && a.nextSibling.nodeType === 3 ? a.nextSibling.textContent.replace(/^\s*:\s*/, '').trim() : '';
-      var line = G.node('a', 'gk-gui-stuff-cal-line');
-      line.href = (own || a).getAttribute('href');
-      line.appendChild(G.node('span', 'gk-gui-stuff-cal-no', m ? '#' + m[1] : head));
-      if (rest) line.appendChild(document.createTextNode(' ' + rest));
-      line.setAttribute('aria-label', rest ? head + ': ' + rest : head);
-      // core's own text in the box (project, tracker and number, the subject cut at 30) in an element of its own, so
-      // that the compact view can leave it out; nothing changes in core's view
-      Array.prototype.slice.call(d.childNodes).forEach(function (n) {
-        if (n.nodeType === 3 && n.textContent.trim()) {
-          var s = G.node('span', 'gk-gui-stuff-cal-text');
-          d.insertBefore(s, n);
-          s.appendChild(n);
-        }
-      });
-      // after core's start and end marks, which say as much in the compact view
-      d.insertBefore(line, own || d.firstChild);
+    var data = ((window.gkGuiStuffPage || {}).data || {}).calendar_issues || {};
+    cal.querySelectorAll('.calbody div.issue').forEach(function (d) {
+      if (d.querySelector('.gk-gui-stuff-cal-line')) return;
+      var box = d.querySelector('input[name="ids[]"]'), id = box && box.value;
+      var link = Array.prototype.find.call(d.querySelectorAll('a.issue[href]'), function (a) { return !a.closest('.tip'); });
+      if (!id || !link) return;
+      var it = data[id] || {}, no = '#' + id;
+      var line = G.effect(G.node('a', 'gk-gui-stuff-cal-line'), 'calendar_compact');
+      line.href = link.getAttribute('href');
+      line.appendChild(G.node('span', 'gk-gui-stuff-cal-no', no));
+      if (it.subject) line.appendChild(document.createTextNode(' ' + it.subject));
+      var head = it.tracker ? it.tracker + ' ' + no : no;
+      line.setAttribute('aria-label', it.subject ? head + ': ' + it.subject : head);
+      // after core's start and end marks, which say as much in the compact view, before core's own link
+      link.insertAdjacentElement('beforebegin', line);
     });
-    // a version's line: its whole text as tooltip
-    cal.querySelectorAll('.calbody > span.icon').forEach(function (v) { if (!v.title) v.title = v.textContent.replace(/\s+/g, ' ').trim(); });
+    // a version's line (core's icon-package entry): its whole text, as it is laid out, as tooltip
+    cal.querySelectorAll('.calbody .icon-package').forEach(function (v) { if (!v.title) v.title = v.innerText.trim(); });
   }
 
   G.onContent(function () {
@@ -63,7 +60,7 @@
     if (!cal || !buttons) return;
     lines(cal);
     if (buttons.querySelector('.gk-gui-stuff-cal-mode')) return;
-    var link = G.node('a', 'icon gk-gui-stuff-cal-mode');
+    var link = G.effect(G.node('a', 'icon gk-gui-stuff-cal-mode'), 'calendar_compact');
     link.href = '#';
     link.setAttribute('role', 'button');
     draw(link, cal, !!G.opt('calendar_compact').on);

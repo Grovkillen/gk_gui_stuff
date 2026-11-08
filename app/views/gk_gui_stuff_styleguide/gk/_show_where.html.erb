@@ -1,0 +1,40 @@
+<%# Visa var: a still picture of each part, and tries in a box of its own that scrolls, so that its targets lie above and
+    below what is seen wherever the page stands; the guide's script scrolls the box to its middle at each try. It is the
+    one example that scrolls, and says why; made-up rows between the targets, so that the box is never an empty surface.
+    The arrows themselves stand in the real window's edge. Nothing here is saved; the targets are made up and say so. %>
+<% goal = ->(id, text) { content_tag(:p, text, id: id, class: 'gk-gui-stuff-sg-where-goal') } %>
+<% gap = content_tag(:div, safe_join(Array.new(14) { content_tag(:p, l(:text_gk_gui_stuff_sg_where_row), class: 'gk-gui-stuff-sg-where-row') }), class: 'gk-gui-stuff-sg-where-gap') %>
+<% why = content_tag(:p, l(:text_gk_gui_stuff_sg_where_why), class: 'gk-gui-stuff-direct-note') %>
+<% above = l(:text_gk_gui_stuff_sg_where_above) %>
+<% above2 = l(:text_gk_gui_stuff_sg_where_above2) %>
+<% below = l(:text_gk_gui_stuff_sg_where_below) %>
+<p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_show_where) %></p>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_where_parts), "button.gk-gui-stuff-where-arrow[data-gk-gui-where], .gk-gui-stuff-where-back, .gk-gui-stuff-where-ring, .gk-gui-stuff-where-step", mode: :still, wide: true) do %>
+    <%= gk_gui_stuff_sg_still(:where, word: l(:label_gk_gui_stuff_where_banner), back: l(:button_back), goal: l(:label_gk_gui_stuff_sg_where_goal),
+                                      text: l(:text_gk_gui_stuff_sg_where_step_one), next: l(:label_gk_gui_stuff_where_next)) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_where_arrow), "GkGui.showWhere({target, word, key, life}), GkGui.showWhere.go(target), GkGui.showWhere.place(target)", mode: :nosave, wide: true) do %>
+    <%= why %>
+    <div class="gk-gui-stuff-sg-where-box" id="gk-gui-stuff-sg-where-box" tabindex="0">
+      <%= goal.call('gk-gui-stuff-sg-where-above', above) %>
+      <%= goal.call('gk-gui-stuff-sg-where-above2', above2) %>
+      <%= gap %>
+      <%= goal.call('gk-gui-stuff-sg-where-below', below) %>
+    </div>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_where_up) %> <%= gk_gui_stuff_sg_try('where', box: 'gk-gui-stuff-sg-where-box', targets: [{ target: 'gk-gui-stuff-sg-where-above', word: l(:label_gk_gui_stuff_sg_where_word_above) }]) %></p>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_where_down) %> <%= gk_gui_stuff_sg_try('where', box: 'gk-gui-stuff-sg-where-box', targets: [{ target: 'gk-gui-stuff-sg-where-below', word: l(:label_gk_gui_stuff_sg_where_word_below) }]) %></p>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_where_many) %> <%= gk_gui_stuff_sg_try('where', box: 'gk-gui-stuff-sg-where-box', targets: [{ target: 'gk-gui-stuff-sg-where-above', word: l(:label_gk_gui_stuff_sg_where_word_above) }, { target: 'gk-gui-stuff-sg-where-above2', word: l(:label_gk_gui_stuff_sg_where_word_above2) }, { target: 'gk-gui-stuff-sg-where-below', word: l(:label_gk_gui_stuff_sg_where_word_below) }]) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_where_steps), "GkGui.showWhere({target, word, text, next: {label, action}}); action gets the handle: handle.update({target, word, text}), handle.close()", mode: :nosave, wide: true) do %>
+    <%= why %>
+    <div class="gk-gui-stuff-sg-where-box" id="gk-gui-stuff-sg-where-steps-box" tabindex="0">
+      <%= goal.call('gk-gui-stuff-sg-where-step-one', above) %>
+      <%= gap %>
+      <%= goal.call('gk-gui-stuff-sg-where-step-two', below) %>
+    </div>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_where_steps) %> <%= gk_gui_stuff_sg_try('where_steps', box: 'gk-gui-stuff-sg-where-steps-box', next: l(:label_gk_gui_stuff_where_next), done: l(:gk_gui_stuff_sentence_done),
+                                                                                                         steps: [{ target: 'gk-gui-stuff-sg-where-step-one', word: l(:label_gk_gui_stuff_sg_where_word_above), text: l(:text_gk_gui_stuff_sg_where_step_one) },
+                                                                                                                 { target: 'gk-gui-stuff-sg-where-step-two', word: l(:label_gk_gui_stuff_sg_where_word_below), text: l(:text_gk_gui_stuff_sg_where_step_two) }]) %></p>
+  <% end %>
+</div>

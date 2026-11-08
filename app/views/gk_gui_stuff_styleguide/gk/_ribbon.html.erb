@@ -1,0 +1,33 @@
+<%# The ribbon in #main and a fly put into the real top menu (gk_gui_stuff_styleguide.js), so that the box is seen
+    over the ribbon against core's own header; nothing shows while a ribbon of higher priority is there. The band
+    lets the pointer through and fades while the pointer is over it; the locked band (core's word, a higher priority
+    so that it also shows after the first) has the action button that leads to the live page, which here leads
+    nowhere and says so (the guide's script gives it a handler that whispers, never an address); the
+    third shows the shield before the word and the whole sentence for screen readers and the button's tooltip. The
+    ribbon stays until the page is loaded again (it has no hide) %>
+<p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_ribbon) %></p>
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ribbon_show), "GkGui.ribbon.show({key, word, line, role: 'admin'})") do %>
+    <%= button_tag l(:label_gk_gui_stuff_sg_ribbon_show), type: 'button',
+                   data: { gk_gui_sg_ribbon: { word: l(:label_gk_gui_stuff_sg_ribbon_word), line: l(:label_gk_gui_stuff_styleguide), role: 'admin' }.to_json } %>
+    <template id="gk-gui-stuff-sg-topfly">
+      <%= gk_gui_stuff_fly(l(:label_gk_gui_stuff_sg_example_admin_action), plain: true, ellipsis: false) do %>
+        <p><%= l(:text_gk_gui_stuff_sg_ribbon) %></p>
+        <div class="gk-gui-stuff-fly-buttons"><%= button_tag l(:button_cancel), type: 'button', data: { gk_gui_fly_cancel: '1' } %></div>
+      <% end %>
+    </template>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ribbon_through), "GkGui.ribbon.show({key, word, line, priority, action: {label, href | handler}})") do %>
+    <%= button_tag l(:label_gk_gui_stuff_sg_ribbon_show), type: 'button',
+                   data: { gk_gui_sg_ribbon: { word: l(:status_locked), line: l(:label_gk_gui_stuff_styleguide), priority: 1,
+                                               action: { label: l(:label_gk_gui_stuff_sg_ribbon_to_live) } }.to_json } %>
+    <span class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_ribbon_through) %></span>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ribbon_icon), "GkGui.ribbon.show({key, word, icon, title, priority, action})") do %>
+    <%= button_tag l(:label_gk_gui_stuff_sg_ribbon_show), type: 'button',
+                   data: { gk_gui_sg_ribbon: { word: l(:label_gk_gui_stuff_sg_ribbon_word), icon: 'shield', title: l(:text_gk_gui_stuff_sg_ribbon_icon_title),
+                                               priority: 2, action: { label: l(:label_gk_gui_stuff_sg_ribbon_to_live) } }.to_json } %>
+    <span class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_ribbon_icon) %></span>
+  <% end %>
+</div>

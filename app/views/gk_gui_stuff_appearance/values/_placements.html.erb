@@ -1,0 +1,25 @@
+<%# The buttons' placement: each button the plugins put on a page out among the page's links, out with its icon only or
+    in the three-dot menu, and core's own buttons as Redmine draws them, with icon and text or with the icon only. Empty
+    follows the default: the plugin's for the administrator, the administrator's for a person (person: true). name: the
+    value's field name, value: the stored table %>
+<% menu = GkGuiStuff::Menu %>
+<table class="list gk-gui-stuff-placements">
+  <thead><tr><th><%= l(:label_gk_gui_stuff_button) %></th><th><%= l(:label_gk_gui_stuff_where_shown) %></th><th><%= l(:label_gk_gui_stuff_placement) %></th></tr></thead>
+  <tbody>
+  <% menu.all.values.sort_by { |r| [r.contexts.first.to_s, r.order] }.each do |r| %>
+    <% label = r.name ? l(r.name) : (r.label.respond_to?(:call) ? r.key : l(r.label, count: 'N', project: '')) %>
+    <% default = person ? menu.placement(r, area: menu.area_of(r.contexts)) : r.placement %>
+    <tr><td class="name"><%= sprite_icon(r.icon) if r.icon.is_a?(String) %> <%= label %></td>
+      <td class="text where_shown"><%= r.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
+      <td class="placement"><%= select_tag "#{name}[#{r.key}]", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}")), '']] +
+            menu::PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] }, value[r.key].to_s), id: nil, disabled: disabled, 'aria-label': label %></td></tr>
+  <% end %>
+  <% menu::CORE_BUTTONS.each do |b| %>
+    <% default = person ? menu.core_placement(b, area: menu.area_of(b.contexts)) : 'core' %>
+    <tr><td class="name"><%= sprite_icon(b.icon) %> <%= menu.core_label(b) %></td>
+      <td class="text where_shown"><%= b.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
+      <td class="placement"><%= select_tag "#{name}[#{b.key}]", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}")), '']] +
+            menu::CORE_PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] }, value[b.key].to_s), id: nil, disabled: disabled, 'aria-label': menu.core_label(b) %></td></tr>
+  <% end %>
+  </tbody>
+</table>

@@ -1,0 +1,31 @@
+<%# The guide's library form, on GK GUI Stuff's library (gk_gui_stuff_library), the same form as the icon library: the
+    search, the groups as choice pills with their counts, one item per element of the register with a small picture of
+    its first state (a still copy of the first tile's example, scaled down), Rutnät or Lista, and the panel of the
+    element chosen: its name, plugin and number of states, the choices light or dark and computer or phone, the large
+    picture of its first state, Används för and Inte för, every state as its tile with its code and Prova, and what goes
+    with it (a Redmine form's GK counterpart, the Redmine forms a GK element stands for). The panel's head has the
+    element's short legend after the name: the plugin, the number of states and the tiles' flags counted, whose rows frame the tiles' flags of their kind, and the item's name says the same to a screen reader, since its small picture is hidden from it. A wide element opens under the
+    grid. The elements are drawn by the same partials as the page form (gk_gui_stuff_sg_draw); the anchors are the same,
+    so that a link to an element works in both forms. data-gk-gui-sg-frame and data-gk-gui-sg-dark as in the page form.
+    The page's bar first, as in the page form: light or dark and computer or phone for every element, and Visa all kod. %>
+<% items = sections.map do |s|
+     drawn = gk_gui_stuff_sg_draw(s, locals)
+     body = capture do %>
+       <div class="gk-gui-stuff-sg-lib-element" data-gk-gui-sg-element="<%= s.key %>" data-gk-gui-sg-group="<%= s.group %>">
+         <%= gk_gui_stuff_library_preview(from: '.gk-gui-stuff-sg-shown') %>
+         <%= gk_gui_stuff_sg_uses(s) %>
+         <div class="gk-gui-stuff-sg-body"><%= drawn[:body] %></div>
+         <%= gk_gui_stuff_sg_related(s, sections) %>
+       </div>
+     <% end
+     { key: s.key, anchor: s.anchor, name: s.label, group: s.group, words: [s.uses, *drawn[:states]].join(' '), wide: s.wide,
+       facts: [s.plugin_name, l(:label_gk_gui_stuff_sg_n_states, count: drawn[:n])], summary: gk_gui_stuff_sg_mode_summary(drawn[:modes]),
+       legend: gk_gui_stuff_sg_element_legend(s, drawn[:n], drawn[:modes], area: %([data-gk-gui-sg-element="#{s.key}"])),
+       tools: content_tag(:p, gk_gui_stuff_sg_tools(s, dark: @dark.present?), class: 'gk-gui-stuff-sg-lib-tools', data: { gk_gui_lib_head_tools: '1' }),
+       thumb_from: '.gk-gui-stuff-sg-shown', body: body }
+   end %>
+<div class="gk-gui-stuff-sg-page gk-gui-stuff-sg-lib gk-gui-stuff-lib-tokens" data-gk-gui-sg-page data-gk-gui-sg-frame="<%= gk_gui_stuff_styleguide_frame_path(key: '__key__') %>" data-gk-gui-sg-nowhere="<%= l(:text_gk_gui_stuff_sg_nowhere) %>"<% if @dark %> data-gk-gui-sg-dark="<%= @dark.join(' ') %>"<% end %>>
+  <%= gk_gui_stuff_sg_page_tools(dark: @dark.present?) %>
+  <%= gk_gui_stuff_library('styleguide', items, groups: GkGuiStuff::Styleguide.menu(sections).map { |g| { key: g[:key], title: g[:title] } },
+                           title: l(:label_gk_gui_stuff_sg_menu), search: l(:text_gk_gui_stuff_sg_search), empty: l(:text_gk_gui_stuff_sg_nothing_found)) %>
+</div>

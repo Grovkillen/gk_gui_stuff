@@ -1,0 +1,6 @@
+<%# Visa for filled badges: Redmine's outlined status badges, still, as the style guide draws them; with the setting,
+    the same badges filled in their own colour by the picture's own rule (gk_gui_stuff_pictures.css), which holds only in
+    this row's picture; the module's stylesheet comes only with the row on. row: the setting %>
+<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_pictures') %>
+<% badges = gk_gui_stuff_sg_badges(l(:label_gk_gui_stuff_sg_example_value_open), l(:label_gk_gui_stuff_sg_example_status_closed)) %>
+<%= gk_gui_stuff_appearance_preview(row, off: content_tag(:span, badges, class: 'gk-gui-stuff-sg-still', inert: true), on: badges) %>

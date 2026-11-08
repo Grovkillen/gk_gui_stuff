@@ -1,0 +1,100 @@
+<%# The flag beside the pill: a pennant and a word on top of what it says something about, taking no room. First the
+    temporary kinds new, changed (and changed recently) and gone (striped), which go away once seen and are what a flag
+    is above all for; then fixed states (solid), only where administrators set things up, the short form, the
+    short legend of a heading, two flags on one target, right to left, the short form at the edge of a box that clips (no word over the target), and the flag as an
+    element of its own: in a sentence, in a label (the marker's), its short form, a legend that frames the flags of a
+    row's sort, and a state in a table's column. Every target and word is made up; nothing is kept as seen, so no
+    example has a key. Hover a pennant, or move the focus into a target, to see the frame %>
+<% ex = ->(k) { l(:"label_gk_gui_stuff_sg_example_flag_#{k}") } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_new), "gk_gui_stuff_flag(nil, on: '#id', kind: :new, key:, since:); GkGui.flag.put(target, null, { kind: 'new' })", mode: :nosave) do %>
+    <%= gk_gui_stuff_flagged(ex.call(:timer), [{ kind: :new }]) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_changed), "kind: :changed; kind: :changed, since: (one day)", mode: :nosave, id: 'sg-tile-flag-changed') do %>
+    <span class="gk-gui-stuff-sg-flag-row">
+      <%= gk_gui_stuff_flagged(button_tag(l(:button_save), type: 'button', data: { gk_gui_sg_noop: '1' }), [{ kind: :changed }]) %>
+      <%= gk_gui_stuff_flagged(ex.call(:labels), [{ kind: :changed, since: Time.now - 3600 }]) %>
+    </span>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_gone), "kind: :gone", mode: :nosave) do %>
+    <%= gk_gui_stuff_flagged(ex.call(:old_search), [{ kind: :gone }], html: { class: 'gk-gui-stuff-sg-flag-gone' }) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_fixed), "gk_gui_stuff_flagged(name, [{ text:, role: :tip }]); gk_gui_stuff_flag(text, on: '#id', role: :notice)", mode: :nosave, id: 'sg-tile-flag-fixed') do %>
+    <span class="gk-gui-stuff-sg-flag-row">
+      <%= gk_gui_stuff_flagged(ex.call(:valve), [{ text: ex.call(:off) }]) %>
+      <%= gk_gui_stuff_flagged(ex.call(:pump), [{ text: ex.call(:active), role: :notice }]) %>
+      <%= gk_gui_stuff_flagged(gk_gui_stuff_pill(sample.call(:drift), role: 2), [{ text: ex.call(:admin_only), role: :admin }]) %>
+      <%= gk_gui_stuff_flagged(ex.call(:sensor), [{ text: ex.call(:missing), role: :warning }]) %>
+    </span>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_short), "short: true", mode: :nosave, id: 'sg-tile-flag-short') do %>
+    <%= gk_gui_stuff_flagged(ex.call(:valve), [{ text: ex.call(:off), short: true }]) %>
+  <% end %>
+  <%# facts in a heading are a short legend in the heading's text, after the heading on the same line, with their words;
+      a heading has no flags on top and no short form %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_heading), "content_tag(:h3, name) + gk_gui_stuff_flag_legend([{ text: }, { text:, role:, count:, sort: }], area: '#id')", mode: :nosave,
+                          id: 'sg-tile-flag-heading') do %>
+    <div id="sg-flag-heading-example" class="gk-gui-stuff-sg-flag-heading">
+      <%= content_tag(:h4, ex.call(:pump)) %>
+      <%= gk_gui_stuff_flag_legend([{ text: l(:label_gk_gui_stuff_sg_n_states, count: 2) }, { text: ex.call(:active), role: :notice, count: 2 }], area: '#sg-flag-heading-example',
+                                   label: l(:label_gk_gui_stuff_sg_flag_legend_label)) %>
+    </div>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_stack), "gk_gui_stuff_flagged(name, [{ kind: :new }, { text:, role: :admin }])", mode: :nosave) do %>
+    <%= gk_gui_stuff_flagged(ex.call(:timer), [{ kind: :new }, { text: ex.call(:admin_only), role: :admin }]) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_rtl), "dir=\"rtl\"; kind: :changed", mode: :nosave) do %>
+    <%= content_tag(:div, gk_gui_stuff_flagged(button_tag(l(:button_save), type: 'button', data: { gk_gui_sg_noop: '1' }), [{ kind: :changed }]), dir: 'rtl') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_edge), "gk_gui_stuff_flagged(name, [{ text:, role: :admin }]) (the target at the end of a box that clips)", mode: :nosave, id: 'sg-tile-flag-edge') do %>
+    <div class="gk-gui-stuff-sg-flag-clip"><%= gk_gui_stuff_flagged(ex.call(:pump), [{ text: ex.call(:admin_only), role: :admin }]) %></div>
+  <% end %>
+  <%# the pennant swapped for icons (the setting on Appearance): a made-up choice of one common icon and one of its own
+      for new, so that changed and gone show the common icon's stripes; each flag says its icon itself, so the tile looks
+      the same whatever the instance has chosen. Without GK Icons it shows the pennant %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_icon), "Administration > Appearance: gui_stuff.flag_icons (common, fixed, new, changed, gone)", mode: :nosave, id: 'sg-tile-flag-icon') do %>
+    <%= gk_gui_stuff_flag_sorts_table(GkGuiStuff::FlagIcons::EXAMPLE) %>
+  <% end %>
+  <%# the flag as an element of its own in the text's flow: in a sentence, in a label (the marker's), its short form,
+      a legend whose rows frame the flags of their sort in its area, and a state in a table's column %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_own_text), "gk_gui_stuff_flag(text, inline: true, kind: :new); GkGui.flag.inline(text, { kind: 'new' })",
+                          id: 'sg-tile-flag-own-text') do %>
+    <p class="gk-gui-stuff-sg-flag-text"><%= gk_gui_stuff_sg_with_flags(:text_gk_gui_stuff_sg_example_flag_sentence, new: gk_gui_stuff_flag(nil, inline: true, kind: :new),
+                                                                       changed: gk_gui_stuff_flag(nil, inline: true, kind: :changed)) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_inline), "gk_gui_stuff_flag(text, inline: true, kind: :changed); GkGui.flag.inline(text, { kind: 'changed' })") do %>
+    <%= gk_gui_stuff_flag(l(:text_gk_gui_stuff_sg_example_flag_marker, name: ex.call(:labels)), inline: true, kind: :changed) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_own_short), "gk_gui_stuff_flag(text, inline: true, short: true, role: :notice); GkGui.flag.inline(text, { short: true })",
+                          mode: :nosave, id: 'sg-tile-flag-own-short') do %>
+    <p class="gk-gui-stuff-sg-flag-text"><%= gk_gui_stuff_sg_with_flags(:text_gk_gui_stuff_sg_example_flag_short_sentence,
+                                                                       off: gk_gui_stuff_flag(ex.call(:off), inline: true, short: true),
+                                                                       active: gk_gui_stuff_flag(ex.call(:active), inline: true, short: true, role: :notice),
+                                                                       new: gk_gui_stuff_flag(nil, inline: true, short: true, kind: :new)) %></p>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_own_legend),
+                          "gk_gui_stuff_flag_legend([{ text:, role:, count:, sort: }], area: '#id'); gk_gui_stuff_flagged(name, [{ text:, role:, sort: }])",
+                          mode: :nosave, id: 'sg-tile-flag-own-legend') do %>
+    <div id="sg-flag-legend-area" class="gk-gui-stuff-sg-flag-legend-area">
+      <%= gk_gui_stuff_flag_legend([{ text: ex.call(:active), role: :notice, count: 2, sort: 'active' }, { text: ex.call(:off), count: 1, sort: 'off' },
+                                    { text: ex.call(:missing), role: :warning, count: 1, sort: 'missing' }],
+                                   area: '#sg-flag-legend-area', label: l(:label_gk_gui_stuff_sg_flag_legend_label)) %>
+      <span class="gk-gui-stuff-sg-flag-row">
+        <%= gk_gui_stuff_flagged(ex.call(:pump), [{ text: ex.call(:active), role: :notice, sort: 'active' }]) %>
+        <%= gk_gui_stuff_flagged(ex.call(:valve), [{ text: ex.call(:off), sort: 'off' }]) %>
+        <%= gk_gui_stuff_flagged(ex.call(:timer), [{ text: ex.call(:active), role: :notice, sort: 'active' }]) %>
+        <%= gk_gui_stuff_flagged(ex.call(:sensor), [{ text: ex.call(:missing), role: :warning, sort: 'missing' }]) %>
+      </span>
+    </div>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_flag_own_cell), "content_tag(:td, gk_gui_stuff_flag(state, inline: true, role: :notice))", id: 'sg-tile-flag-own-cell') do %>
+    <table class="list gk-gui-stuff-sg-flag-table">
+      <thead><tr><th><%= l(:field_name) %></th><th><%= l(:label_gk_gui_stuff_sg_flag_state_column) %></th></tr></thead>
+      <tbody>
+        <tr class="odd"><td><%= ex.call(:pump) %></td><td><%= gk_gui_stuff_flag(ex.call(:active), inline: true, role: :notice) %></td></tr>
+        <tr class="even"><td><%= ex.call(:valve) %></td><td><%= gk_gui_stuff_flag(ex.call(:off), inline: true) %></td></tr>
+        <tr class="odd"><td><%= ex.call(:sensor) %></td><td><%= gk_gui_stuff_flag(ex.call(:missing), inline: true, role: :warning) %></td></tr>
+      </tbody>
+    </table>
+  <% end %>
+</div>

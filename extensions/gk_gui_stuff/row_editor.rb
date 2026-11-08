@@ -17,8 +17,11 @@ module GkGuiStuff
       remove = link_to(sprite_icon('del', l(:button_delete), icon_only: true), '#', class: 'icon-only icon-del gk-gui-stuff-row-remove', role: 'button',
                                                                                     title: l(:button_delete), data: { kit: 'remove' })
       add = link_to(sprite_icon('add', l(:label_gk_gui_stuff_rows_add)), '#', class: 'icon icon-add gk-gui-stuff-rows-add-link', role: 'button', data: { kit: 'add' })
+      # the note under a list whose rows have moved: the form waits for Spara
+      note = content_tag(:p, '', class: 'gk-gui-stuff-direct-note gk-gui-stuff-rows-note', role: 'status', 'aria-live': 'polite',
+                                 data: { kit: 'note', gk_gui_text: l(:text_gk_gui_stuff_order_moved_save) })
       safe_join([stylesheet_link_tag('gk_gui_stuff_rows', plugin: 'gk_gui_stuff'),
-                 content_tag(:template, safe_join([handle, remove, add]), id: 'gk-gui-stuff-rows-kit'),
+                 content_tag(:template, safe_join([handle, remove, add, note]), id: 'gk-gui-stuff-rows-kit'),
                  javascript_include_tag('gk_gui_stuff_rows', plugin: 'gk_gui_stuff')], "\n")
     end
   end

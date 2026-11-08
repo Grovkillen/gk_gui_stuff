@@ -1,0 +1,45 @@
+<%# [ sign | switch ] in one frame; the pen means a reason and the lock a step up; the box under the switch says
+    the change and its button makes it; the round check, the segment and the icon toggle have the same mount, and edit
+    in place has the buttons of a reason %>
+<% links = l(:label_gk_gui_stuff_sg_example_links) %>
+<% mount_row = ->(url, on: false, **how) { gk_gui_stuff_rail(url: url) { safe_join([links, gk_gui_stuff_switch('links', on, label: links, **how)], ' ') } } %>
+<% @gk_gui_stuff_sg_mode = :server %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%# the row Av (no reason) draws the switch off too, so that its name and the switch never say two things %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_off), "gk_gui_stuff_rail(url:) { gk_gui_stuff_switch(name, on, label:) }") do %><%= mount_row.call(save) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_optional), "reason: :optional") do %><%= mount_row.call(save, reason: :optional) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_required), "reason: :required | reason: 'plugin.place'") do %><%= mount_row.call(save, reason: :required) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_elevate), "elevate: true, purpose: …", mode: :nosave) do %>
+    <%# the lock's Stega upp leads to the real step up, so here it says that it leads nowhere; the locked switch only
+        opens the lock's box and posts nothing, so the tile reacts in the page only, as the lock's own in Admin %>
+    <div data-gk-gui-sg-example-links><%= mount_row.call(save, elevate: true, state: :locked, purpose: l(:text_gk_gui_stuff_sg_admin_purpose)) %></div>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fails), "url: …?fail=1") do %><%= mount_row.call(fail, on: true, reason: :required) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_round_check), "gk_gui_stuff_round_check(name, checked, label:, reason:)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= gk_gui_stuff_round_check('done', false, label: l(:label_gk_gui_stuff_sg_example_task)) %> <%= l(:label_gk_gui_stuff_sg_example_task) %><% end %><br>
+    <%= gk_gui_stuff_rail(url: save) do %><%= gk_gui_stuff_round_check('done', false, label: l(:label_gk_gui_stuff_sg_example_task), reason: :required) %> <%= l(:label_gk_gui_stuff_sg_example_task) %><% end %>
+  <% end %>
+  <%# the segment, the icon toggle and edit in place with the same mount and the buttons of a reason; the last fails %>
+  <% views = [[l(:label_gk_gui_stuff_sg_example_left), 'left'], [l(:label_gk_gui_stuff_sg_example_right), 'right']] %>
+  <% place = l(:label_gk_gui_stuff_sg_example_place) %>
+  <% phone = l(:label_gk_gui_stuff_sg_phone) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_mount_segment_required), "gk_gui_stuff_segment(name, choices, selected, label:, reason: :required)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= place %> <%= gk_gui_stuff_segment('side', views, 'left', label: place, reason: :required) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_mount_segment_optional), "reason: :optional") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= place %> <%= gk_gui_stuff_segment('side', views, 'left', label: place, reason: :optional) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_mount_icon_toggle), "gk_gui_stuff_icon_toggle(name, pressed, icon:, label:, reason: :required)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= gk_gui_stuff_icon_toggle('watch', true, icon: 'fav', label: l(:button_watch), reason: :required) %> <%= l(:button_watch) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_inline_required), "gk_gui_stuff_inline_edit(name, value, label:, reason: :required)") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= phone %>: <%= gk_gui_stuff_inline_edit('phone', l(:label_gk_gui_stuff_sg_example_phone), label: phone, reason: :required) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_inline_optional), "reason: :optional") do %>
+    <%= gk_gui_stuff_rail(url: save) do %><%= phone %>: <%= gk_gui_stuff_inline_edit('phone', l(:label_gk_gui_stuff_sg_example_phone), label: phone, reason: :optional) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_segment_fails), "url: …?fail=1") do %>
+    <%= gk_gui_stuff_rail(url: fail) do %><%= place %> <%= gk_gui_stuff_segment('side', views, 'left', label: place, reason: :optional) %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_narrow), '', mode: :still) do %><span class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_narrow) %></span><% end %>
+</div>

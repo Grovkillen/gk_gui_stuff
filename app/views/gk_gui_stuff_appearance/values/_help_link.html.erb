@@ -1,0 +1,25 @@
+<%# help_link: the three ways Help can lead (Redmine's own guide, an address, a wiki page here) as core's radio buttons,
+    with the address, the wiki's project and its page under them. name: the value's field name, value: the stored
+    table (kind, url, wiki_project, wiki_page) %>
+<% kind = %w[core url wiki].include?(value['kind'].to_s) ? value['kind'].to_s : 'core' %>
+<div class="gk-gui-stuff-form-page-value" role="radiogroup" aria-label="<%= l(:label_gk_gui_stuff_help_kind) %>">
+  <span class="gk-gui-stuff-form-page-value-label"><%= l(:label_gk_gui_stuff_help_kind) %>:</span>
+  <% %w[core url wiki].each do |k| %>
+    <label class="inline"><%= radio_button_tag "#{name}[kind]", k, kind == k, id: nil, disabled: disabled %> <%= l(:"label_gk_gui_stuff_help_kind_#{k}") %></label>
+  <% end %>
+</div>
+<div class="gk-gui-stuff-form-page-value">
+  <label for="gk-gui-stuff-help-url"><%= l(:label_gk_gui_stuff_help_url) %></label>
+  <%= text_field_tag "#{name}[url]", value['url'].to_s, size: 50, maxlength: 500, id: 'gk-gui-stuff-help-url', disabled: disabled %>
+  <span class="gk-gui-stuff-form-page-quiet"><%= l(:text_gk_gui_stuff_help_url) %></span>
+</div>
+<div class="gk-gui-stuff-form-page-value">
+  <label for="gk-gui-stuff-help-wiki-project"><%= l(:label_gk_gui_stuff_help_wiki_project) %></label>
+  <%= select_tag "#{name}[wiki_project]", options_for_select([['', '']] + Project.active.has_module(:wiki).order(:name).map { |p| [p.name, p.identifier] }, value['wiki_project'].to_s),
+                 id: 'gk-gui-stuff-help-wiki-project', disabled: disabled %>
+</div>
+<div class="gk-gui-stuff-form-page-value">
+  <label for="gk-gui-stuff-help-wiki-page"><%= l(:label_gk_gui_stuff_help_wiki_page) %></label>
+  <%= text_field_tag "#{name}[wiki_page]", value['wiki_page'].to_s, size: 30, maxlength: 200, id: 'gk-gui-stuff-help-wiki-page', disabled: disabled %>
+  <span class="gk-gui-stuff-form-page-quiet"><%= l(:text_gk_gui_stuff_help_wiki_page) %></span>
+</div>

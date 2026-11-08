@@ -24,6 +24,7 @@
       if (examples) {
         var line = document.createElement('em');
         line.className = 'info gk-gui-stuff-key-examples';
+        G.effect(line, 'key_suggest');
         line.style.display = 'block';
         line.textContent = G.t('key_hint', { list: examples });
         key.insertAdjacentElement('afterend', line);

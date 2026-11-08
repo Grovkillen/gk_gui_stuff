@@ -1,0 +1,7 @@
+<%# Visa for long fields: Redmine shows an issue's whole description; with the setting, the description folded at the
+    height with Visa allt under it, as the fold leaves it (the style guide's fold). row: the setting %>
+<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_modules') %>
+<% long = content_tag(:p, l(:text_gk_gui_stuff_preview_long)) %>
+<% issue = ->(body) { content_tag(:div, content_tag(:div, body, class: 'description'), class: 'issue') } %>
+<%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, issue.call(content_tag(:div, long + long, class: 'wiki')), class: 'gk-gui-stuff-sg-still', inert: true),
+                                         on: issue.call(gk_gui_stuff_sg_fold(:div, long + long, html_class: 'wiki'))) %>

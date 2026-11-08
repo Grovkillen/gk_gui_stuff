@@ -7,10 +7,11 @@
 
   G.onContent(function (root) {
     root.querySelectorAll('table.list td.short_description').forEach(function (td) {
-      var wiki = td.querySelector(':scope > .wiki');
+      var wiki = td.querySelector('.wiki'); // core's formatted description in core's cell td.short_description
       if (!wiki || td.dataset.gkGuiStuffShort) return;
       td.dataset.gkGuiStuffShort = '1';
-      if (wiki.scrollHeight > wiki.clientHeight + 1 && !td.title) td.title = wiki.innerText.replace(/\s+\n/g, '\n').trim();
+      G.effect(td, 'short_descriptions');
+      if (wiki.scrollHeight > wiki.clientHeight + 1 && !td.title) td.title = wiki.innerText.trim(); // the text as laid out
     });
   });
 })();
