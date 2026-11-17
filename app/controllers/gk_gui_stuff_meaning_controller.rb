@@ -4,6 +4,7 @@
 # (the page loads again with the same address), and Mitt konto's "Återställ mina val" takes every choice away. Each
 # change is an event on the person (GkGuiStuff::Choices).
 class GkGuiStuffMeaningController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   before_action :require_login
 
   def choose

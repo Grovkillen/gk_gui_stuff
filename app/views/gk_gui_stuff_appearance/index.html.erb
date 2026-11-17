@@ -2,8 +2,9 @@
     each group a body of its own under a row with its fold button and its count; the shared values last. The fill
     links Som Redmine and GK:s förslag stand in core's div.contextual beside the heading; the top row says nothing
     applies before Spara and has the search; the bar at the bottom has the count, Ångra alla and Spara with the reason
-    of the place gui_stuff.appearance (an optional reason while a row needs one in its sharp state, even when the place
-    asks for none). The forms of the action values come after the page's form. %>
+    of the place gui_stuff.appearance (while that place is off, the same box with the changes and the warnings and no
+    field for a reason; a row that needs a reason in its sharp state always asks, so the field is shown, required, while
+    such a row stands changed, on and sharp). The forms of the action values come after the page's form. %>
 <% gk_gui_stuff_form_page_assets %>
 <% form_id = 'gk-gui-stuff-appearance-form' %>
 <% if @register && @groups.present? %>
@@ -25,7 +26,7 @@
   <% fills = { 'redmine' => @register.fill(:redmine), 'proposal' => @register.fill(:proposal) }.transform_values { |h| h.transform_keys { |k| "modes[#{k}]" } } %>
   <% words = %w[off optional forced].to_h { |m| [m, gk_gui_stuff_mode_word(m)] } %>
   <%= form_tag gk_gui_stuff_appearance_path, method: :patch, id: form_id, class: 'gk-gui-stuff-form-page',
-               data: gk_gui_stuff_form_page_data(fills: fills, words: { modes: words }) do %>
+               autocomplete: 'off', data: gk_gui_stuff_form_page_data(fills: fills, words: { modes: words }) do %>
     <%= gk_gui_stuff_form_page_top %>
     <% names = @register.declared.transform_values(&:label) %>
     <div class="autoscroll gk-gui-stuff-form-page-scroll">
@@ -50,7 +51,8 @@
       <% end %>
     </table>
     </div>
-    <%= gk_gui_stuff_form_page_bar(GkGuiStuffAppearanceController::PLACE, floor: gk_gui_stuff_appearance_floor(@groups)) %>
+    <%= gk_gui_stuff_form_page_bar(GkGuiStuffAppearanceController::PLACE,
+                                   sharp: @register.declared.values.any? { |r| r.respond_to?(:reason_when_sharp) && r.reason_when_sharp }) %>
   <% end %>
   <%= render 'gk_gui_stuff_appearance/action_forms' %>
 <% end %>

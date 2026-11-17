@@ -17,9 +17,23 @@
     nav._gkGuiToc = true;
     var links = [].slice.call(nav.querySelectorAll('a[href^="#"]'));
     var targets = links.map(function (a) { return document.getElementById(decodeURIComponent(a.getAttribute('href').slice(1))); });
-    function pad() { document.documentElement.style.scrollPaddingBlockStart = (nav.offsetHeight + 8) + 'px'; }
+    // the row's height and where it is held (under core's header on a phone, under GK's band and login warning), so
+    // that a jump lands below all of it; again when the band is held or let go (a panel opened, the page scrolled)
+    // written only when the value changes, so that scrolling does not make the browser work the page's style out again
+    var padded = null;
+    function pad() {
+      var cs = getComputedStyle(nav), held = parseFloat(cs.insetBlockStart || cs.top) || 0;
+      var px = (nav.offsetHeight + held + 8) + 'px';
+      if (px === padded) return;
+      padded = px;
+      document.documentElement.style.scrollPaddingBlockStart = px;
+    }
     pad();
     window.addEventListener('resize', pad);
+    window.addEventListener('scroll', pad, { passive: true });
+    document.addEventListener('toggle', pad, true);
+    // the band held or let go (the root's mark, gk_gui_stuff_marker.js), told after a scroll this may have heard first
+    document.addEventListener('gk-gui-stuff-band-held', pad);
     if (!window.IntersectionObserver) return;
     function mark() {
       // the last heading above the row's lower edge is the section one reads

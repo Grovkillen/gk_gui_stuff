@@ -1,6 +1,5 @@
 <%# Visa for the corner fold: Redmine shows nothing; with the setting, the fold in the page's corner with what changed,
     a still picture of it, and the style guide's Prova beside it. row: the setting %>
-<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_modules') %>
 <% entries = [l(:label_gk_gui_stuff_sg_example_action), l(:label_gk_gui_stuff_sg_example_task)] %>
 <%= gk_gui_stuff_appearance_preview(row, off: content_tag(:span, l(:text_gk_gui_stuff_preview_none), class: 'gk-gui-stuff-form-page-quiet'),
                                          on: gk_gui_stuff_sg_still(:corner, entries: entries),

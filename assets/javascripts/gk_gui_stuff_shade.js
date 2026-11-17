@@ -53,7 +53,7 @@
       if (!w.x && !w.y) return;
       el.dataset.gkGuiStuffShade = '1';
       // on Redmine's own pages the shade on core's scrolling box (its class autoscroll) is the module's effect
-      if (sel === CORE && el.classList.contains('autoscroll') && window.GkGui && window.GkGui.effect) window.GkGui.effect(el, 'scroll_shade');
+      if (sel === CORE && el.classList.contains('autoscroll')) window.GkGui.effect(el, 'scroll_shade');
       // the shadow is laid in the surface's own frame
       if (window.getComputedStyle(el).position === 'static') el.classList.add('gk-gui-stuff-shade-anchor');
       paint(el);

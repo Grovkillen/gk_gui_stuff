@@ -1,0 +1,16 @@
+<%# The summary row (gk_gui_stuff_summary): the count and its parts, and the same with the count as a link and a flag
+    with its thing last. The counts, the parts and the thing are made up, and the links lead nowhere; the one with the links can be hovered over and tabbed to (Bara grafiskt), the other is a picture only %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_summary_example), class: 'gk-gui-stuff-direct-note') %>
+<% parts = %w[issues document reading person].map { |k| l(:"label_gk_gui_stuff_sg_summary_part_#{k}") } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_summary_parts), "gk_gui_stuff_summary(count, [part, part])") do %>
+    <%= note %>
+    <%= gk_gui_stuff_summary(l(:label_gk_gui_stuff_sg_summary_count), parts) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_summary_flags), "gk_gui_stuff_summary(count, parts, href:, flags: [gk_gui_stuff_flag(text, inline: true, role: :warning) + link])", mode: :graphic) do %>
+    <%= note %>
+    <%= gk_gui_stuff_summary(l(:label_gk_gui_stuff_sg_summary_count), parts, href: '#',
+                             flags: [safe_join([gk_gui_stuff_flag(l(:label_gk_gui_stuff_sg_summary_flag), inline: true, role: :warning), link_to("##{377}", '#')])]) %>
+  <% end %>
+</div>

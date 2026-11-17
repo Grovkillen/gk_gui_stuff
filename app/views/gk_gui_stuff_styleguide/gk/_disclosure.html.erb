@@ -1,0 +1,27 @@
+<%# The disclosure (gk_gui_stuff_disclosure): folded, open, with a count, with one text and with two, each the real
+    one, which opens and closes in the page and saves nothing; last the one a script builds (GkGui.disclosure.make), a
+    still picture and Prova for the real one. The words and the rows are made up %>
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<% two = [l(:label_gk_gui_stuff_sg_example_disclosure_show), l(:label_gk_gui_stuff_sg_example_disclosure_hide)] %>
+<% rows = ->(n) { content_tag(:ul, safe_join((1..n).map { |i| content_tag(:li, l(:label_gk_gui_stuff_sg_example_disclosure_row, n: i)) })) } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_closed), "gk_gui_stuff_disclosure(texts: [closed, open]) { … }") do %>
+    <%= gk_gui_stuff_disclosure(texts: two) { rows.call(3) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_open), "open: true") do %>
+    <%= gk_gui_stuff_disclosure(texts: two, open: true) { rows.call(3) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_disclosure_count), "gk_gui_stuff_disclosure(texts: show_all, count: 12) { … }") do %>
+    <%= gk_gui_stuff_disclosure(texts: l(:label_gk_gui_stuff_sg_example_disclosure_all), count: 12) { rows.call(12) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_disclosure_one_text), "gk_gui_stuff_disclosure(texts: text) { … }") do %>
+    <%= gk_gui_stuff_disclosure(texts: l(:label_gk_gui_stuff_sg_example_disclosure_details)) { rows.call(2) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_script), "d = GkGui.disclosure.make({ texts: [closed, open], open, count, body, id }); GkGui.disclosure.set(d, open)", mode: :live) do %>
+    <%= content_tag(:div, gk_gui_stuff_disclosure(texts: two, count: 2) { rows.call(2) }, inert: true) %>
+    <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('disclosure', texts: two, count: 2,
+                                                            body: [l(:label_gk_gui_stuff_sg_example_disclosure_row, n: 1), l(:label_gk_gui_stuff_sg_example_disclosure_row, n: 2)],
+                                                            host: 'gk-gui-stuff-sg-disclosure-script') %></p>
+    <div id="gk-gui-stuff-sg-disclosure-script"></div>
+  <% end %>
+</div>

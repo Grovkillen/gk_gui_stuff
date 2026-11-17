@@ -1,0 +1,35 @@
+/* gk_gui_stuff: the choices' primitives, drawn by choice_list.rb: the choice list in its two modes
+   (gk_gui_stuff_choice_list), the only choice shown as text (gk_gui_stuff_only_choice) and the writing box under a
+   list of entries (gk_gui_stuff_compose). They set no colour of their own: the quiet texts in them are quiet text
+   (gk_gui_stuff_entry.css). Logical properties only. What stands in a row (a pill, a choice, a link) stands in the
+   middle of the row and follows the font. */
+
+/* the choice list: every row is the choice and, beside it, one running text: its word (a text or a pill) and a quiet
+   hint after it. The choice always stands first on the row; the text wraps beside it when the row is too narrow,
+   never under it. The whole row is a press surface (the script), except where its choice cannot be changed */
+.gk-gui-stuff-choice-list-rows { list-style: none; margin-block: 0.3em; margin-inline: 0; padding: 0; }
+.gk-gui-stuff-choice-list-row { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 0.4em; margin-block: 0.2em; cursor: pointer; }
+.gk-gui-stuff-choice-list-row:has(> .gk-gui-stuff-choice-list-input:disabled) { cursor: default; }
+.gk-gui-stuff-choice-list-row > input { margin: 0; flex: none; }
+.gk-gui-stuff-choice-list-text { flex: 1 1 auto; min-inline-size: 0; overflow-wrap: anywhere; }
+/* the heading: above the list, and in core's .tabular form in the labels' column with the metrics of core's label
+   (the caller puts the list in a div.gk-gui-stuff-tabular-row); the word is the choice's label, not the field's */
+.gk-gui-stuff-choice-list-head { display: block; font-weight: bold; }
+.tabular .gk-gui-stuff-choice-list-head { float: inline-start; margin-inline-start: -180px; inline-size: 175px; text-align: end; line-height: 24px; }
+.tabular .gk-gui-stuff-choice-list-row label.gk-gui-stuff-choice-list-word { display: inline; float: none; margin-inline-start: 0; inline-size: auto; text-align: start; font-weight: normal; }
+/* below 899 px core lays a form's labels above their fields: so the heading, and a choice keeps its own width */
+@media (max-width: 899px) {
+  .tabular .gk-gui-stuff-choice-list-head { float: none; display: block; inline-size: 100%; margin-inline-start: 0; text-align: start; }
+  .tabular .gk-gui-stuff-choice-list-row > input { inline-size: auto; }
+}
+
+/* the only choice: text where the list's text would have stood, on the row's height in core's form; never a pill */
+.gk-gui-stuff-only-choice { display: inline-block; line-height: 24px; }
+
+/* the writing box: the list for the kind with what one answers or corrects after it, the text field over the whole
+   width, the button that adds with Avbryt beside it, and the counter at the end of that row */
+.gk-gui-stuff-compose { margin-block-start: 0.8em; }
+.gk-gui-stuff-compose-head { display: flex; gap: 0.6em; align-items: center; margin-block: 0.3em; }
+.gk-gui-stuff-compose-text { inline-size: 100%; box-sizing: border-box; }
+.gk-gui-stuff-compose-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6em; margin-block: 1em; }
+.gk-gui-stuff-compose-count { margin-inline-start: auto; }

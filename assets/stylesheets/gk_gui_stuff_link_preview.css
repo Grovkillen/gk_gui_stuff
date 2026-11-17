@@ -5,16 +5,16 @@
 /* core's tooltip of the link is not seen while the link's card is on its way or up (gk_gui_stuff_link_preview.js) */
 .gk-gui-stuff-preview-tip-held .ui-tooltip { visibility: hidden; }
 .gk-gui-stuff-preview { position: absolute; z-index: 1000; inline-size: 22em; max-inline-size: calc(100vw - 16px);
-  padding-block: 0.6em; padding-inline: 0.8em; background: var(--oc-white); color: var(--oc-gray-9); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4)); border-radius: 4px;
-  box-shadow: 0 3px 10px rgba(var(--oc-black-rgb), 0.18); font-size: 0.95em; line-height: 1.35; text-align: start; }
+  padding-block: 0.6em; padding-inline: 0.8em; background: var(--gk-role-ui-surface, var(--oc-white, #fff)); color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); border-radius: 4px;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--gk-role-ui-shadow, var(--oc-black, #000)) 18%, transparent); font-size: 0.95em; line-height: 1.35; text-align: start; }
 .gk-gui-stuff-preview-title { display: block; font-weight: bold; }
-.gk-gui-stuff-preview-subtitle { color: var(--oc-gray-6); font-size: 0.9em; }
+.gk-gui-stuff-preview-subtitle { color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); font-size: 0.9em; }
 .gk-gui-stuff-preview-badges { margin-block: 0.4em 0; }
-.gk-gui-stuff-preview-badge { display: inline-block; margin-inline-end: 0.4em; padding-inline: 0.5em; border: 1px solid var(--oc-gray-4);
+.gk-gui-stuff-preview-badge { display: inline-block; margin-inline-end: 0.4em; padding-inline: 0.5em; border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da));
   border-radius: 1em; font-size: 0.85em; }
 .gk-gui-stuff-preview-text { margin-block: 0.5em 0; }
 .gk-gui-stuff-preview-fields { display: grid; grid-template-columns: max-content 1fr; column-gap: 0.8em; row-gap: 0.15em; margin-block: 0.5em 0; }
-.gk-gui-stuff-preview-fields dt { color: var(--oc-gray-6); }
+.gk-gui-stuff-preview-fields dt { color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); }
 .gk-gui-stuff-preview-fields dd { margin: 0; }
 /* the card of an external link */
 .gk-gui-stuff-preview-external { padding: 0; overflow: hidden;
@@ -28,10 +28,12 @@
 /* the site's icon, when the page gives no picture of its own: small, at the start of the title, the title beside it */
 .gk-gui-stuff-preview-title-row { display: flex; gap: 0.5em; align-items: center; }
 .gk-gui-stuff-preview-title-row > .gk-gui-stuff-preview-title { min-inline-size: 0; }
+/* the card of a fetch that failed: the whole address, broken anywhere so that it stays inside the card */
+.gk-gui-stuff-preview-failed .gk-gui-stuff-preview-title { overflow-wrap: anywhere; font-weight: normal; }
 /* the icon is kept as a JPEG on white: the white is its own small tile with a thin edge, so that it also sits well on
    a dark card; never enlarged past its own size (a 16 px icon stays 16 px) */
 .gk-gui-stuff-preview-icon { flex: none; box-sizing: content-box; max-inline-size: 32px; max-block-size: 32px; padding: 2px;
-  object-fit: contain; border-radius: 4px; background: #fff; box-shadow: 0 0 0 1px var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6)); }
+  object-fit: contain; border-radius: 4px; background: #fff; box-shadow: 0 0 0 1px var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6)); } /* gk-u U5: a picture's white backing stays white in dark mode */
 /* the line that says the site gives no preview picture: quiet, as the foot */
 .gk-gui-stuff-preview-note { margin-block: 0.5em 0; font-size: 0.85em; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); }
 .gk-gui-stuff-preview-foot { padding-block: 0.3em; padding-inline: 0.8em; font-size: 0.85em;

@@ -4,6 +4,8 @@
     opens the panel of the line that saves %>
 <% line = ->(key, **o) { gk_gui_stuff_sg_line_data(key, **o) } %>
 <% edit_data = line.call('gk-gui-stuff-sg-line-edit', editable: true) %>
+<%# a tile without its own mode is Bara grafiskt: what it shows can be hovered over and tabbed to, a click leads nowhere %>
+<% @gk_gui_stuff_sg_mode = :graphic %>
 <div class="gk-gui-stuff-sg-tiles">
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_detailed), "gk_gui_stuff_line(data, form: :detailed)", wide: true) do %>
     <%= gk_gui_stuff_line(line.call('gk-gui-stuff-sg-line-detailed'), form: :detailed) %>
@@ -33,7 +35,7 @@
   <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_editable), "gk_gui_stuff_line(data, form: :editable), edit: { form:, limits:, marks:, band_cells: true }", wide: true, mode: :server) do %>
     <%= gk_gui_stuff_line(edit_data, form: :editable) %>
-    <%= form_tag(save, id: 'gk-gui-stuff-sg-line-edit-form', data: gk_gui_stuff_form_changes) do %>
+    <%= form_tag(save, id: 'gk-gui-stuff-sg-line-edit-form', autocomplete: 'off', data: gk_gui_stuff_form_changes) do %>
       <table class="list"><thead><tr><th><%= l(:field_status) %></th><th><%= l(:label_gk_gui_stuff_sg_line_side) %></th><th><%= l(:label_gk_gui_stuff_sg_line_place) %></th>
         <th><%= l(:label_gk_gui_stuff_sg_line_lane) %></th><th><%= l(:label_gk_gui_stuff_sg_line_band) %></th></tr></thead><tbody>
         <% edit_data[:steps].each do |s| %>

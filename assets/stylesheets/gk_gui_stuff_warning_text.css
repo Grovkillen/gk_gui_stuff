@@ -1,0 +1,17 @@
+/* gk_gui_stuff warning_text: the text and the icon of Redmine's yellow boxes take GK's warning colour instead of the
+   alarm's red, which Redmine gives the red and the yellow boxes alike. The boxes are found by Redmine's own classes:
+   the yellow message (div.flash.warning), the box at an edit conflict (.conflict), the warning block (.warning) and the
+   "No data" block (.nodata); the icon is the one Redmine strokes in the message and the conflict box. The colour is the
+   warning role mixed 92 % with black, so that it holds 4.5:1 on Redmine's yellow grounds and follows the role under a
+   theme; the role itself is not changed. Ground and border stay Redmine's. Only in the light tone: nothing here
+   applies under the dark tone (data-gk-tone="dark") nor wherever GK Core Stuff's dark mode class is on html, also when
+   a theme says the light tone there, since that mode draws the boxes dark by its class alone. Off: Redmine's own, also
+   in a still sample (.gk-gui-stuff-sg-still: the style guide, Visa under Administration, Appearance), in another
+   setting's picture under Visa (.gk-gui-stuff-preview-on), which shows that setting alone, and in GK's own empty
+   section text (.gk-gui-stuff-sec-empty), which is muted. Weight: the exclusions stand in :where() and weigh nothing,
+   except one class in each rule, so that each rule weighs one class more than Redmine's own rule for the same boxes
+   (text 0,3,1 against 0,2,1, icon 0,4,2 against 0,3,2) and wins whatever the order the sheets come in; the one class
+   kept is GK's empty section text (0,2,0) in the text rule, the samples in the icon rule. A theme rule for these boxes
+   wins by weighing more than that. */
+:is(div.flash.warning, .conflict, .warning, .nodata):not(.gk-gui-stuff-sec-empty):where(:not(.gk-gui-stuff-sg-still *, .gk-gui-stuff-preview-on *)):where(:not(html[data-gk-tone="dark"] *, html.dark-mode *)) { color: color-mix(in srgb, var(--gk-role-alert-warning) 92%, #000); } /* gk-u U5: the warning role darkened 8 % with black to hold 4.5:1 on Redmine's yellow grounds */
+:is(div.flash.warning, .conflict):not(.gk-gui-stuff-sg-still *, .gk-gui-stuff-preview-on *):where(:not(html[data-gk-tone="dark"] *, html.dark-mode *)) svg.icon-svg { stroke: color-mix(in srgb, var(--gk-role-alert-warning) 92%, #000); } /* gk-u U5: the warning role darkened 8 % with black, the same as the text */

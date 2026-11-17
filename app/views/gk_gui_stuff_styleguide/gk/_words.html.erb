@@ -1,7 +1,7 @@
 <%# the button says what it does %>
 <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_words) %></p>
 <div class="gk-gui-stuff-sg-tiles">
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_plain), "l(:button_save), l(:button_create), l(:button_apply), l(:button_submit)") do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_plain), "l(:button_save), l(:button_create), l(:button_apply), l(:button_submit)", mode: :graphic) do %>
     <%= button_tag l(:button_save), type: 'button' %> <%= button_tag l(:button_create), type: 'button' %> <%= button_tag l(:button_apply), type: 'button' %> <%= button_tag l(:button_submit), type: 'button' %>
   <% end %>
 </div>

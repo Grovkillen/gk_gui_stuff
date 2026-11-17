@@ -1,6 +1,5 @@
 <%# Visa for the outcome notice: Redmine's own message, still, as the style guide draws it, which stands in both; with
     the setting, a still picture of the notice as well, and the style guide's Prova beside it. row: the setting %>
-<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_elements') %>
 <% text = l(:text_gk_gui_stuff_sg_example_flash_notice) %>
 <% said = "#{l(:gk_gui_stuff_wave_saved).upcase}: #{text}" %>
 <% message = content_tag(:div, gk_gui_stuff_sg_flash(notice: text), class: 'gk-gui-stuff-sg-still', inert: true) %>

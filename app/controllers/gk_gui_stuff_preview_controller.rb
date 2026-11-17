@@ -3,6 +3,7 @@
 # link_preview: the card for one object as JSON, for the session's user. The renderer does the same visibility
 # check as the object's own page; an object the user may not see is a 404, as is a type nobody registered.
 class GkGuiStuffPreviewController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   before_action :require_login
 
   def show

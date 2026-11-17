@@ -1,5 +1,7 @@
 <%# Ikonknappen: each accepted icon drawn by gk_gui_stuff_icon_button, and Prova for the banner and the notice
     with the icon button before the cross (the forms and the failed save take) %>
+<%# a tile without its own mode is Bara grafiskt: what it shows can be hovered over and tabbed to, a click leads nowhere %>
+<% @gk_gui_stuff_sg_mode = :graphic %>
 <div class="gk-gui-stuff-sg-tiles">
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_reload), "gk_gui_stuff_icon_button(:reload, label)") do %>
     <%= gk_gui_stuff_icon_button(:reload, l(:gk_gui_stuff_reload)) %>

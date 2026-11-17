@@ -13,19 +13,44 @@
     <% GkGuiStuff::Primitives::BANDS.each do |b| %><%= gk_gui_stuff_pill(l(:"label_gk_gui_stuff_role_band_#{b}"), role: "band-#{b}") %> <% end %>
   <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_plain), "gk_gui_stuff_pill(text, role: 2)") do %><%= gk_gui_stuff_pill(sample.call(:drift), role: 2) %><% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_link), "href: …") do %><%= gk_gui_stuff_pill(sample.call(:drift), role: 2, href: gk_gui_stuff_styleguide_path) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_link), "href: …", mode: :graphic) do %><%= gk_gui_stuff_pill(sample.call(:drift), role: 2, href: gk_gui_stuff_styleguide_path) %><% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_count), "count: 14") do %><%= gk_gui_stuff_pill(sample.call(:drift), role: 2, count: 14) %> <%= gk_gui_stuff_pill(sample.call(:power), role: 6, count: 3) %><% end %>
   <%# the type's icon first, only to read, inside the pill's one link; a tag without a type has none %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_type_icon), "type_icon: 'projects', type_label: …, href: …, count: 12") do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_type_icon), "type_icon: 'projects', type_label: …, href: …, count: 12", mode: :graphic) do %>
     <%= gk_gui_stuff_pill(sample.call(:p16), role: 2, count: 12, href: gk_gui_stuff_styleguide_path, type_icon: 'projects', type_label: l(:text_gk_gui_stuff_sg_type_example)) %>
     <%= gk_gui_stuff_pill(sample.call(:can), role: 7, href: gk_gui_stuff_styleguide_path, type_icon: 'user', type_label: l(:text_gk_gui_stuff_sg_type_person)) %>
     <%= gk_gui_stuff_pill(sample.call(:weld), role: :muted, href: gk_gui_stuff_styleguide_path) %>
   <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_chosen), "chosen: true") do %><%= gk_gui_stuff_pill(sample.call(:drift), role: 2, count: 14, chosen: true) %><% end %>
+  <%# The pill's variants, with made-up statuses as a record's verification steps %>
+  <% steps = { hyp: :notice, unv: :warning, part: :info, ver: :tip } %>
+  <% step = ->(k) { l(:"label_gk_gui_stuff_sg_step_#{k}") } %>
+  <% lock = l(:label_gk_gui_stuff_sg_pill_locked) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_dot), "dot: true") do %>
+    <% steps.each do |k, r| %><%= gk_gui_stuff_pill(step.call(k), role: r, dot: true) %> <% end %><%= gk_gui_stuff_pill(step.call(:none), role: :muted, dot: true) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_icon_after), "icon_after: 'lock', icon_after_label: …", mode: :graphic) do %>
+    <%= gk_gui_stuff_pill(step.call(:ver), role: :tip, dot: true, icon_after: 'lock', icon_after_label: lock) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_current), "current: true") do %>
+    <%= gk_gui_stuff_pill(step.call(:hyp), role: :notice, dot: true) %> <%= gk_gui_stuff_pill(step.call(:unv), role: :warning, dot: true, current: true) %> <%= gk_gui_stuff_pill(step.call(:part), role: :info, dot: true) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_expected), "expected: true", mode: :graphic) do %>
+    <%= gk_gui_stuff_pill(step.call(:ver), role: :tip, dot: true, expected: true, icon_after: 'lock', icon_after_label: lock) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_muted), "muted: true") do %>
+    <% steps.each do |k, r| %><%= gk_gui_stuff_pill(step.call(k), role: r, dot: true, muted: true) %> <% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_chosen_dot), "chosen: true, dot: true") do %>
+    <% steps.each do |k, r| %><%= gk_gui_stuff_pill(step.call(k), role: r, dot: true, chosen: true) %> <% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_as_button), "as: :button, html: { 'aria-expanded': 'false', 'aria-haspopup': 'dialog' }", mode: :graphic) do %>
+    <%= gk_gui_stuff_pill(step.call(:unv), role: :warning, dot: true, as: :button, html: { 'aria-expanded': 'false', 'aria-haspopup': 'dialog' }) %>
+  <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_note_remove), "note: …, remove: …", mode: :server) do %>
     <%= gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_example_mark), role: 7, note: l(:text_gk_gui_stuff_sg_example_note), remove: save) %>
   <% end %>
-  <%# A mark: the note icon is a button whose tooltip is the note, opening a small fly with the whole note and Ändra
+  <%# A mark: the note icon is a button whose tooltip is the note, opening a small popover with the whole note and Ändra
       lappen; written out, the icon and the text are one part. Every divider runs over the pill's whole height.
       Someone else's shared mark has neither note nor x %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_note_icon), "note: …, note_icon: true, note_hint: …, note_edit: …, remove: …", mode: :server) do %>
@@ -47,11 +72,11 @@
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_alerts), "role: :warning, :alarm") do %><%= gk_gui_stuff_pill(sample.call(:leak), role: :warning) %> <%= gk_gui_stuff_pill(sample.call(:fire), role: :alarm, count: 2) %><% end %>
   <%# A tag's pill in two links: the whole pill to the list, the arrow last to the page %>
   <% split = ->(text, role, count = nil) { gk_gui_stuff_pill(text, role: role, href: gk_gui_stuff_styleguide_path, href_title: l(:text_gk_gui_stuff_sg_pill_list), part_href: gk_gui_stuff_styleguide_path, part_title: l(:text_gk_gui_stuff_sg_pill_page), count: count) } %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_part), "href: …, href_title: …, part_href: …, part_title: …, count: 3") do %><%= split.call(sample.call(:p16), 1, 3) %><% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_all_roles), "role: 1..12, :warning, :alarm") do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_part), "href: …, href_title: …, part_href: …, part_title: …, count: 3", mode: :graphic) do %><%= split.call(sample.call(:p16), 1, 3) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_all_roles), "role: 1..12, :warning, :alarm", mode: :graphic) do %>
     <% (GkGuiStuff::Primitives::CATEGORIES + %w[warning alarm]).each_with_index do |r, i| %><%= split.call(role_name.call(r), r, i + 1) %> <% end %>
   <% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_no_count), "part_href: …") do %><%= split.call(sample.call(:p16), 1) %> <%= split.call(sample.call(:can), 2) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_no_count), "part_href: …", mode: :graphic) do %><%= split.call(sample.call(:p16), 1) %> <%= split.call(sample.call(:can), 2) %><% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_not_split), "remove: …; chosen: true, remove: …, remove_method: :get; role: :muted", mode: :server) do %>
     <%= gk_gui_stuff_pill(sample.call(:p16), role: 1, remove: save) %>
     <%# the cross that is a plain link would leave the page, so here it says that it leads nowhere %>
@@ -64,7 +89,7 @@
                                      gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_example_mark), role: 10, note: l(:text_gk_gui_stuff_sg_example_note), note_icon: true, note_open: true)], ' '),
                     class: 'gk-gui-stuff-sg-narrow', data: { gk_gui_sg_example_links: '1' }) %>
   <% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_rtl), "dir=\"rtl\"") do %><%= content_tag(:span, split.call(sample.call(:p16), 1, 3), dir: 'rtl') %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_rtl), "dir=\"rtl\"", mode: :graphic) do %><%= content_tag(:span, split.call(sample.call(:p16), 1, 3), dir: 'rtl') %><% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_new_in_field), "note: l(:gk_gui_stuff_ss_new), remove: …", mode: :server) do %>
     <%= gk_gui_stuff_pill(sample.call(:weld), role: :muted, note: l(:gk_gui_stuff_ss_new), remove: save) %>
   <% end %>
@@ -75,9 +100,9 @@
                          part_buttons: [{ content: l(:label_gk_gui_stuff_sg_example_is_open), aria: { haspopup: 'true', expanded: open.to_s } },
                                         { content: '×', title: l(:button_delete), aria_label: l(:button_delete) }])
      end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_buttons), "role: :choice, button: { aria: { haspopup: 'true', expanded: 'false' } }, part_buttons: [{ content:, aria: }, { content: '×', aria_label: }]") do %><%= part_pill.call(false) %><% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_open), "open: true, part_buttons: [{ content:, aria: { expanded: 'true' } }, …]") do %><%= part_pill.call(true) %><% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_dashed), "gk_gui_stuff_pill(l(:label_none), dashed: true, button: {})") do %><%= gk_gui_stuff_pill(l(:label_none), dashed: true, button: {}) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_buttons), "role: :choice, button: { aria: { haspopup: 'true', expanded: 'false' } }, part_buttons: [{ content:, aria: }, { content: '×', aria_label: }]", mode: :graphic) do %><%= part_pill.call(false) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_open), "open: true, part_buttons: [{ content:, aria: { expanded: 'true' } }, …]", mode: :graphic) do %><%= part_pill.call(true) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pill_dashed), "gk_gui_stuff_pill(l(:label_none), dashed: true, button: {})", mode: :graphic) do %><%= gk_gui_stuff_pill(l(:label_none), dashed: true, button: {}) %><% end %>
   <%# the system's suggestion: the pill and the row %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_line_suggestion), "gk_gui_stuff_pill(text, count: 7, suggested: true); gk_gui_stuff_suggestion(text)") do %>
     <%= gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_example_step_verification), count: 7, suggested: true) %>

@@ -17,13 +17,18 @@ module GkGuiStuff
     # the side menu's groups in their order; label_gk_gui_stuff_sg_menu_<group>
     GROUPS = %w[base buttons data input flow surfaces core].freeze
     # What a tile's example does, the closed set every tile carries one of as its badge (label_gk_gui_stuff_sg_mode_<mode>,
-    # explained by text_gk_gui_stuff_sg_mode_<mode>): still, only a picture, nothing in it reacts; nosave, reacts in the
-    # page and saves nothing; server, asks the guide's own address, which stores nothing; live, a still picture of what
-    # only shows live and Prova for the real one. A tile that says nothing is still
-    MODES = %w[still nosave server live].freeze
+    # explained by text_gk_gui_stuff_sg_mode_<mode>): still, only a picture, nothing in it reacts to the pointer, the
+    # keyboard or a click; graphic, it can be hovered over and tabbed to, so that one sees how it reacts, but a click
+    # leads nowhere and nothing is sent; nosave, reacts in the page and saves nothing; server, asks the guide's own
+    # address, which stores nothing; live, a still picture of what only shows live and Prova for the real one. A tile
+    # that says nothing is still
+    MODES = %w[still graphic nosave server live].freeze
     DEFAULT_MODE = 'still'
-    # the badge's role, so that the four are told apart also by their tone
-    MODE_ROLES = { 'still' => :muted, 'nosave' => :notice, 'server' => :info, 'live' => :tip }.freeze
+    # the modes whose links, buttons and fields only say that the example leads nowhere (the guide's script and the
+    # pointer's rule in its stylesheet name the same two)
+    NOWHERE_MODES = %w[still graphic].freeze
+    # the badge's role, so that the five are told apart also by their tone
+    MODE_ROLES = { 'still' => :muted, 'graphic' => :choice, 'nosave' => :notice, 'server' => :info, 'live' => :tip }.freeze
 
     # The object of core's form in the part Redmine (labelled_form_for), in memory only; its fields are named sg_demo[…]
     class Demo
@@ -101,7 +106,8 @@ module GkGuiStuff
     def register_own!
       OWN_GK.each do |group, keys|
         keys.each_with_index do |key, i|
-          label = { 'count' => :label_gk_gui_stuff_sg_count_h, 'meaning' => :label_gk_gui_stuff_sg_meaning_switch }.fetch(key, :"label_gk_gui_stuff_sg_#{key}")
+          label = { 'count' => :label_gk_gui_stuff_sg_count_h, 'quiet' => :label_gk_gui_stuff_sg_quiet_h,
+                    'meaning' => :label_gk_gui_stuff_sg_meaning_switch }.fetch(key, :"label_gk_gui_stuff_sg_#{key}")
           register(key, plugin: :gk_gui_stuff, label: label, group: group, part: :gk, order: (i + 1) * 10, wide: WIDE.include?(key))
         end
       end
@@ -112,14 +118,14 @@ module GkGuiStuff
     end
 
     # gui_stuff's GK sections by group, in the menu's order
-    OWN_GK = { 'base' => %w[roles icon_button words admin], 'buttons' => %w[reason_buttons fly mount rail card],
-               'data' => %w[pill flag marker count bars group lists], 'input' => %w[ss category_picker form], 'flow' => %w[line sentence meaning],
+    OWN_GK = { 'base' => %w[roles icon_button words admin], 'buttons' => %w[reason_buttons popover mount rail card button_row],
+               'data' => %w[pill flag marker count bars group disclosure changelog lists quiet entry values thing reason_shown pre table summary], 'input' => %w[ss category_picker form choice_list only_choice compose], 'flow' => %w[line sentence meaning],
                'surfaces' => %w[layer elements messages copy top_band ribbon show_where] }.freeze
     # Redmine's forms and the GK section that does the same (nil: GK uses Redmine's own)
     OWN_CORE = [%w[forms form], %w[buttons reason_buttons], %w[tables lists], ['journals', nil], ['tabs', nil], %w[flash messages],
                 ['pagination', nil], %w[toolbar icon_button], %w[context_menu lists], %w[tooltip copy], %w[badges pill], %w[dialog elements]].freeze
     # the elements whose every state takes the whole row; in the library form their panel stands under the grid over
     # the whole width (the marker's rows with the label's words after them)
-    WIDE = %w[line sentence meaning lists form marker top_band core_forms core_tables core_context_menu core_journals core_dialog core_flash core_toolbar core_tabs core_pagination].freeze
+    WIDE = %w[line sentence meaning lists form marker top_band entry table core_forms core_tables core_context_menu core_journals core_dialog core_flash core_toolbar core_tabs core_pagination].freeze
   end
 end

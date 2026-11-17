@@ -2,11 +2,13 @@
 
 # Administration > Funktioner: every function the plugins have declared in gk_records' register, per plugin, as one
 # form like Administration > Utseende. Each function is a radio button under Av and På, the default marked quietly;
-# nothing applies before Spara, one reason by the place gui_stuff.feature_switch goes with every switch, and every
+# nothing applies before Spara, one reason by the place gui_stuff.feature_switch goes with every switch (none is offered
+# and none is kept while that place is off), and every
 # switch is an event in records. Every function is off until it is switched on, unless its registration says
 # default: true. Nothing is deleted when a function is switched off. Without gk_records there is no register: the page
 # lists no function and every one is off. Also as JSON through the API.
 class GkGuiStuffFeaturesController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   layout 'admin'
   self.main_menu = false
   before_action :require_admin
@@ -45,13 +47,14 @@ class GkGuiStuffFeaturesController < ApplicationController
       end
     end
 
-    # The place gui_stuff.feature_switch in gk_records decides whether the reason is required; the page always offers
-    # the pen, so what was written is kept in every mode
+    # The place gui_stuff.feature_switch in gk_records decides whether the reason is required. Off is off everywhere:
+    # the place's own check answers no text while the place is off, whatever was sent, so no reason is kept then; in
+    # the other modes it answers what was written
     check = GkRecords::Reasons.check(PLACE, params[:reason])
     return refuse(check.error) unless check.ok
 
     before = changes.keys.to_h { |k| [k, @register.on?(k)] }
-    changed = @register.set_many!(changes, reason: GkGuiStuff::Primitives.written_reason(params[:reason]), reason_key: PLACE)
+    changed = @register.set_many!(changes, reason: check.text, reason_key: PLACE)
     # the next page this administrator sees marks what the switched functions add and take away (the marker, marker.rb)
     GkGuiStuff::Marker.note(session, User.current, from: 'features', changes: changed.to_h { |k| [k, [before[k], @register.on?(k)]] }) unless api_request?
     respond_to do |format|

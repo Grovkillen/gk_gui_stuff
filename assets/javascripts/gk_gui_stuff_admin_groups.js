@@ -3,7 +3,8 @@
 // a row stands in and the word it carries come from the server (AdminGroups.options). A heading folds its group
 // and remembers it in this browser; the group with the page one is on is always open. Plain DOM, no jQuery.
 (function () {
-  if (!window.GkGui || !GkGui.on('admin_groups')) return;
+  var turnedOn = GkGui.on('admin_groups');
+  if (!turnedOn) return;
   var opt = GkGui.opt('admin_groups'), rows = opt.rows || [], groups = opt.groups || [];
   if (!rows.length || !groups.length) return;
 

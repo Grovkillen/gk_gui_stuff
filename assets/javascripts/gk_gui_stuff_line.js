@@ -46,8 +46,8 @@
       [sh, bh].forEach(function (n) { if (n) n.style.setProperty('--gk-gui-half-min', need + 'px'); });
     });
     root.querySelectorAll('.gk-gui-stuff-line-scroll').forEach(function (box) {
-      // a step's box is open over the page (-flying): the line stays as it is until the box closes
-      if (box.classList.contains('gk-gui-stuff-line-flying')) return;
+      // a step's box is open over the page (-popover-open): the line stays as it is until the box closes
+      if (box.classList.contains('gk-gui-stuff-line-popover-open')) return;
       ends(box, flat);
       // never taken off first: a box that stops scrolling for a moment forgets where it was scrolled to, and the
       // overflow says nothing about the widths compared here
@@ -70,13 +70,13 @@
     box.style.setProperty('--gk-gui-end-s', s + 'px');
     box.style.setProperty('--gk-gui-end-e', e + 'px');
   }
-  // a step's box (details.gk-gui-stuff-fly, a step with its reason) opened in a line that scrolls would open in the
+  // a step's box (details.gk-gui-stuff-popover, a step with its reason) opened in a line that scrolls would open in the
   // scroll, cut and with a scroll of its own: while it is open the line is cut at its sides only and kept where it was
-  // scrolled to (-flying, --gk-gui-scrolled), and when it closes the line scrolls again from the same place. Caught on
-  // the window before the fly's own listener on the document places the box, so that it measures the room it gets
+  // scrolled to (-popover-open, --gk-gui-scrolled), and when it closes the line scrolls again from the same place. Caught on
+  // the window before the popover's own listener on the document places the box, so that it measures the room it gets
   window.addEventListener('toggle', function (e) {
     var d = e.target;
-    if (!d.matches || !d.matches('details.gk-gui-stuff-fly')) return;
+    if (!d.matches || !d.matches('details.gk-gui-stuff-popover')) return;
     var box = d.closest('.gk-gui-stuff-line-scroll');
     if (!box) return;
     if (d.open) {
@@ -84,10 +84,10 @@
       var at = box.scrollLeft;
       box._gkGuiScrolled = at;
       box.style.setProperty('--gk-gui-scrolled', (-at) + 'px');
-      box.classList.add('gk-gui-stuff-line-flying');
+      box.classList.add('gk-gui-stuff-line-popover-open');
       box.classList.remove('gk-gui-stuff-line-scrolls');
-    } else if (box.classList.contains('gk-gui-stuff-line-flying') && !box.querySelector('details.gk-gui-stuff-fly[open]')) {
-      box.classList.remove('gk-gui-stuff-line-flying');
+    } else if (box.classList.contains('gk-gui-stuff-line-popover-open') && !box.querySelector('details.gk-gui-stuff-popover[open]')) {
+      box.classList.remove('gk-gui-stuff-line-popover-open');
       box.style.removeProperty('--gk-gui-scrolled');
       var root = box.closest(LINE);
       if (root) layout(root);
@@ -379,21 +379,21 @@
   function open(root, o) {
     o = o || {};
     var tpl = root.querySelector(':scope > template.gk-gui-stuff-line-tpl'), btn = toggleOf(root);
-    if (!tpl || !G.layer || root._gkGuiLayer) return;
+    if (!tpl || root._gkGuiLayer) return;
     var key = root.getAttribute('data-gk-gui-line-key');
     root._gkGuiLayer = G.layer.open({ key: 'line-' + key, title: root.getAttribute('aria-label'), content: tpl.content.cloneNode(true),
                                       anchor: o.anchor || (btn && btn.getClientRects().length ? btn : null) || root.querySelector('.gk-gui-stuff-line-bar') || root, opener: btn, width: 'wide', focus: o.focus,
                                       onClose: function () { closed(root); } });
     root._gkGuiLayer.body.querySelectorAll(LINE).forEach(mount);
     root.setAttribute('data-gk-gui-line-open', '1');
-    if (btn && G.group) G.group.set(btn, true);
+    if (btn) G.group.set(btn, true);
     if (o.remember !== false) remember(root, true);
   }
   function closed(root) {
     var btn = toggleOf(root);
     root._gkGuiLayer = null;
     root.setAttribute('data-gk-gui-line-open', '0');
-    if (btn && G.group) G.group.set(btn, false);
+    if (btn) G.group.set(btn, false);
     remember(root, false);
   }
   function close(root) { if (root._gkGuiLayer) root._gkGuiLayer.close(true); }
@@ -430,17 +430,19 @@
     page.dispatchEvent(new CustomEvent('gk-gui-line-choose', { bubbles: true, detail: { id: now } }));
   }
   function send(root, name, value, reason) {
-    if (!G.save) return null;
     var fd = new FormData();
     fd.append(name, value);
     if (reason !== null) fd.append('reason', reason);
-    return G.save.post(root, fd, null);
+    // the rail and the notice say a failure; the promise is rejected then, so a caller waits only for the answer
+    var p = G.save.post(root, fd, null);
+    p.catch(function () { /* said on the rail */ });
+    return p;
   }
   // the reason that goes with a button: the one in its box, or for the button beside Valfritt's pen what was written
   // there, also when the box has closed; the primitives keep the pen's field off while blank and after Avbryt or Esc
   function reasonFieldOf(sub) {
     var live = '.gk-gui-stuff-reason textarea:not([disabled])';
-    var box = sub.closest('.gk-gui-stuff-fly-box');
+    var box = sub.closest('.gk-gui-stuff-popover-box');
     if (box) return box.querySelector(live);
     var pen = sub.matches('.gk-gui-stuff-btn-split-main') ? sub.parentElement.querySelector(':scope > details.gk-gui-stuff-btn-split-pen') : null;
     var ta = pen && pen.querySelector(live);
@@ -478,16 +480,15 @@
       e.preventDefault();
       var ta = reasonFieldOf(sub);
       var p = send(root, sub.name, sub.value, ta ? ta.value.trim() : null);
-      var d = sub.closest('details.gk-gui-stuff-fly');
+      var d = sub.closest('details.gk-gui-stuff-popover');
       // the box's own button sends what was written, so a refused save leaves it to go with the button beside the pen
-      if (d && G.fly) { G.fly.close(d); d.removeAttribute('data-gk-gui-reason-left'); }
-      if (p && p.then && ta) {
-        p.then(function (j) {
-          if (!j) return;
+      if (d) { G.popover.close(d); d.removeAttribute('data-gk-gui-reason-left'); }
+      if (ta) {
+        p.then(function () {
           ta.value = '';
           var pen = ta.closest('details.gk-gui-stuff-btn-split-pen');
           if (pen && !pen.open) ta.disabled = true;
-        });
+        }, function () { /* a refused save keeps what was written */ });
       }
       return;
     }

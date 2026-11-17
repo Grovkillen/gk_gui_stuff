@@ -1,12 +1,16 @@
 # frozen_string_literal: true
 
+require_relative 'gate' # the gate to GK Compat, which the listener below asks
+require_relative 'tone' # the tone of the surface, and the sheet with the roles' dark values
+
 module GkGuiStuff
   # The modules: what each loads. Whether a module is on, and for whom, is its appearance setting in records' register
   # (Appearance, appearance.rb): off, optional (on, and each person may switch it off) or forced, and for a setting
   # that applies to all or none only off and forced. Every module is off in a new installation, and without records
   # every module is off. A module that is off loads nothing: no script, no stylesheet, the page is core's.
-  # kernel: the module needs the shared client kernel (gk_gui_stuff_core.js: one content observer, the notice, local
-  # memory). texts: locale keys the script needs. anonymous: also loaded for someone not logged in (then only the
+  # kernel: the module uses the shared client kernel (gk_gui_stuff_core.js: one content observer, the notice, local
+  # memory), which every page loads (ALWAYS_SCRIPTS); the mark says what the module builds on.
+  # texts: locale keys the script needs. anonymous: also loaded for someone not logged in (then only the
   # instance's level counts, there is no user to choose). options: a lambda giving the module's values to the script.
   # always: true is forced on and cannot be switched off (actions_menu, the only way other plugins put their buttons on
   # an issue); it has no appearance setting.
@@ -235,8 +239,28 @@ module GkGuiStuff
     'footer_text' => '.gk-gui-stuff-footer-text > * { margin-block: 0; }'
   }.freeze unless const_defined?(:CORE_RULES, false)
 
+  # What every page loads whatever is on (Hooks#instance_head): the kernel (gk_gui_stuff_core.js: GkGui.copy, the
+  # whisper, onContent, local memory) and the shared elements (gk_gui_stuff_elements.js: notice, surface, banner,
+  # ribbon, corner, palette, drawer), with the stylesheets that draw them (the whisper in gk_gui_stuff_modules, the
+  # elements in gk_gui_stuff_elements). Loading them starts nothing that shows: the kernel reads the modules that are
+  # on from the page's configuration (none without it) and the elements only define their functions; what shows is
+  # started by a module or a page that calls them
+  ALWAYS_SCRIPTS = %w[gk_gui_stuff_core gk_gui_stuff_elements].freeze unless const_defined?(:ALWAYS_SCRIPTS, false)
+  ALWAYS_SHEETS = %w[gk_gui_stuff_modules gk_gui_stuff_elements].freeze unless const_defined?(:ALWAYS_SHEETS, false)
+  # The shared elements' own words: init.rb's elements modules send them with their texts, and they also come on every
+  # page with the elements' values (Hooks#elements_base), so that a notice called with no elements module on (an
+  # anonymous visitor, core's password confirmation) speaks the person's language with the installation's values
+  ELEMENT_TEXTS = %i[gk_gui_stuff_close gk_gui_stuff_dismiss gk_gui_stuff_reload gk_gui_stuff_reload_unsaved gk_gui_stuff_and_more gk_gui_stuff_no_hits
+                     gk_gui_stuff_corner_title gk_gui_stuff_drawer_size_small gk_gui_stuff_drawer_size_half gk_gui_stuff_drawer_size_full
+                     gk_gui_stuff_drawer_size_back gk_gui_stuff_drawer_empty gk_gui_stuff_menu gk_gui_stuff_view_not_saved gk_gui_stuff_flash_pause
+                     gk_gui_stuff_flash_resume gk_gui_stuff_wave_saved gk_gui_stuff_wave_deleted gk_gui_stuff_wave_failed].freeze unless const_defined?(:ELEMENT_TEXTS, false)
+
   class Hooks < Redmine::Hook::ViewListener
-    # Only what is on for this user is loaded; with nothing on, the head is core's
+    include GkGuiStuff::Gate::Listener # without GK Compat no hook answers
+
+    # Only what is on for this user is loaded; with nothing on, the head holds what instance_head always gives (the
+    # primitives, the kernel and the shared elements, which start nothing that shows by themselves). The modules'
+    # configuration comes before it, since the kernel (in instance_head) reads it when it is loaded
     def view_layouts_base_html_head(context = {})
       always = instance_head(context[:controller], context[:hook_caller])
       # core's password confirmation (sudo mode) is rendered in place of the page asked for: it is not that page,
@@ -277,6 +301,7 @@ module GkGuiStuff
                                    retry_ms: 3000, new_tab: r ? r.on_for?('gui_stuff.external_new_tab', User.current) : false,
                                    new_tab_hidden: ::I18n.t(:text_gk_gui_stuff_new_tab_hidden), new_tab_foot: ::I18n.t(:text_gk_gui_stuff_new_tab_foot),
                                    no_picture: { icon: ::I18n.t(:text_gk_gui_stuff_lpe_no_picture_icon), none: ::I18n.t(:text_gk_gui_stuff_lpe_no_picture_none) },
+                                   failed: ::I18n.t(:text_gk_gui_stuff_lpe_failed),
                                    icon: view.respond_to?(:gk_gui_stuff_icon) ? view.gk_gui_stuff_icon('world', 'link', size: 14).to_s : '' }
       end
       if mods.any? { |m| m.key == 'report_clarity' }
@@ -312,30 +337,40 @@ module GkGuiStuff
           tab = { 'issues' => 'issues', 'wiki' => 'wiki', 'activities' => 'activity', 'versions' => 'roadmap' }[context[:controller].controller_name].to_s
           cfg[:branch] = { project.identifier => Branch.of(project, User.current, tab) }
         end
-        cfg[:opt]['elements'] = { notice_ms: Switches.value('notices', 'notice_seconds', 6) * 1000,
-                                  notice_max: Switches.value('notices', 'notice_max', 3),
-                                  wave_opacity: Switches.value('wave', 'wave_opacity_pct', 60).clamp(0, 100) / 100.0,
-                                  corner_max: Switches.value('corner', 'corner_max_entries', 20),
-                                  notice_countdown: Switches.value('notices', 'notice_countdown', true) }
+        cfg[:opt]['elements'] = elements_opt
         cfg[:opt]['beat'] = { seconds: Switches.value('beat', 'beat_seconds', 30) }
       end
-      sheets = mods.filter_map(&:stylesheet)
-      sheets << 'gk_gui_stuff_elements' if mods.any?(&:elements)
+      # the kernel's and the elements' stylesheets and scripts are always there (instance_head), never twice
+      sheets = mods.filter_map(&:stylesheet) - ALWAYS_SHEETS
       tags = sheets.uniq.map { |s| stylesheet_link_tag(s, plugin: 'gk_gui_stuff') }
-      tags << content_tag('script', json_escape(cfg.to_json).html_safe, type: 'application/json', id: 'gk-gui-stuff-stuff-config')
-      scripts = mods.filter_map(&:script).uniq
-      scripts.unshift('gk_gui_stuff_elements') if mods.any?(&:elements)
-      scripts.unshift('gk_gui_stuff_core') if mods.any?(&:kernel)
+      config = content_tag('script', json_escape(cfg.to_json).html_safe, type: 'application/json', id: 'gk-gui-stuff-stuff-config')
+      scripts = mods.filter_map(&:script).uniq - ALWAYS_SCRIPTS
       tags.concat(scripts.map { |s| javascript_include_tag(s, plugin: 'gk_gui_stuff') })
       mark_css = mods.any? { |m| m.key == 'custom_mark' } ? CustomMark.css : ''
-      tags << content_tag('style', mark_css.html_safe, id: 'gk-gui-stuff-custom-mark') if mark_css.present?
+      tags << content_tag('style', mark_css.html_safe, id: 'gk-gui-stuff-custom-mark') if mark_css.present? # gk-u U1: the installation's own mark built from its settings
       # A module's rule on core's markup: the rule in the head, with its own id, when the module is on
       mods.each do |m|
         css = CORE_RULES[m.key]
         css = css.call if css.respond_to?(:call)
-        tags << content_tag('style', css.html_safe, id: "gk-gui-stuff-#{m.key.tr('_', '-')}") if css
+        tags << content_tag('style', css.html_safe, id: "gk-gui-stuff-#{m.key.tr('_', '-')}") if css # gk-u U1: a module's rule built from its setting's value
       end
-      safe_join([always] + tags, "\n")
+      safe_join([config, always] + tags, "\n")
+    end
+
+    # The shared elements' values from the installation's settings (the notices', the wave's, the corner's)
+    def elements_opt
+      { notice_ms: Switches.value('notices', 'notice_seconds', 6) * 1000,
+        notice_max: Switches.value('notices', 'notice_max', 3),
+        wave_opacity: Switches.value('wave', 'wave_opacity_pct', 60).clamp(0, 100) / 100.0,
+        corner_max: Switches.value('corner', 'corner_max_entries', 20),
+        notice_countdown: Switches.value('notices', 'notice_countdown', true) }
+    end
+
+    # What the always-loaded kernel and elements need on every page, also with no module on: their words and their
+    # values. The kernel takes from it only what the modules' configuration lacks (gk_gui_stuff_core.js)
+    def elements_base
+      texts = (ELEMENT_TEXTS + [:gk_gui_stuff_copied]).to_h { |k| [k.to_s.sub('gk_gui_stuff_', ''), ::I18n.t(k)] }
+      { t: texts, opt: { 'elements' => elements_opt } }
     end
 
     # A page of GK's own: a controller named gk_* (Utseende, Funktioner, the style guide, every plugin's own pages),
@@ -358,13 +393,21 @@ module GkGuiStuff
       # there, and it gives a field that asks for it the chooser whether select_search is on or not), the sentence (sentence.rb)
       # and the page's own (the table of contents and the Meaning switch)
       out << stylesheet_link_tag('gk_gui_stuff_primitives', plugin: 'gk_gui_stuff')
+      # the disclosure (disclosure.rb), which the change log's box and the plugins' folded lists draw
+      out << stylesheet_link_tag('gk_gui_stuff_disclosure', plugin: 'gk_gui_stuff')
+      # the lists' primitives (entry.rb): quiet text, the entry, values, the thing, the shown reason and the scroll box
+      out << stylesheet_link_tag('gk_gui_stuff_entry', plugin: 'gk_gui_stuff')
+      # the table on top of core's list, the summary row and the button row (table.rb)
+      out << stylesheet_link_tag('gk_gui_stuff_table', plugin: 'gk_gui_stuff')
+      # the choice list, the only choice shown as text and the writing box (choice_list.rb)
+      out << stylesheet_link_tag('gk_gui_stuff_choice_list', plugin: 'gk_gui_stuff')
       out << stylesheet_link_tag('gk_gui_stuff_line', plugin: 'gk_gui_stuff')
       out << stylesheet_link_tag('gk_gui_stuff_select', plugin: 'gk_gui_stuff')
       # the flag (flag.rb), which a script may also lay on any page (the marker of a change)
       out << stylesheet_link_tag('gk_gui_stuff_flag', plugin: 'gk_gui_stuff')
       # the pennant swapped for icons (flag_icons.rb), off from the start; its address is checked there, so as it is
       icons = FlagIcons.head_css
-      out << content_tag('style', icons.html_safe, id: 'gk-gui-stuff-flag-icons') if icons.present?
+      out << content_tag('style', icons.html_safe, id: 'gk-gui-stuff-flag-icons') if icons.present? # gk-u U1: per installation icon masks built from GK Icons' addresses
       # the marker (marker.rb), which must work on any page: after a save and in the preview mode
       out << stylesheet_link_tag('gk_gui_stuff_marker', plugin: 'gk_gui_stuff')
       # Visa var, which points out what came up outside the window; it draws nothing until something calls it
@@ -379,7 +422,7 @@ module GkGuiStuff
                 sentence_field: :gk_gui_stuff_sentence_field, sentence_edit: :gk_gui_stuff_sentence_edit,
                 sentence_incomplete: :gk_gui_stuff_sentence_incomplete, sentence_add: :gk_gui_stuff_sentence_add, cancel: :button_cancel,
                 pill_type: :text_gk_gui_stuff_pill_type, flag_new: :label_gk_gui_stuff_flag_new, flag_changed: :label_gk_gui_stuff_flag_changed,
-                flag_gone: :label_gk_gui_stuff_flag_gone,
+                flag_gone: :label_gk_gui_stuff_flag_gone, values_before: :text_gk_gui_stuff_values_before,
                 where_back: :button_back, where_next: :label_gk_gui_stuff_where_next, where_default: :label_gk_gui_stuff_where_default,
                 where_go_up: :text_gk_gui_stuff_where_go_up, where_go_down: :text_gk_gui_stuff_where_go_down, where_go_here: :text_gk_gui_stuff_where_go_here,
                 where_banner: :label_gk_gui_stuff_where_banner, where_ribbon: :label_gk_gui_stuff_where_ribbon, where_show: :label_gk_gui_stuff_where_show,
@@ -390,10 +433,15 @@ module GkGuiStuff
       # its head; on core's pages only with the module scroll_shade
       out << stylesheet_link_tag('gk_gui_stuff_shade', plugin: 'gk_gui_stuff')
       out << tag.meta(name: 'gk-gui-stuff-page', content: 'gk') if gk_page?(ctrl)
-      %w[gk_gui_stuff_primitives gk_gui_stuff_parts gk_gui_stuff_layer gk_gui_stuff_inline gk_gui_stuff_line gk_gui_stuff_select gk_gui_stuff_select_pass gk_gui_stuff_sentence gk_gui_stuff_page
-         gk_gui_stuff_shade gk_gui_stuff_flag gk_gui_stuff_marker gk_gui_stuff_show_where].each do |s|
+      %w[gk_gui_stuff_primitives gk_gui_stuff_parts gk_gui_stuff_disclosure gk_gui_stuff_layer gk_gui_stuff_inline gk_gui_stuff_line gk_gui_stuff_select gk_gui_stuff_select_pass gk_gui_stuff_sentence gk_gui_stuff_page
+         gk_gui_stuff_shade gk_gui_stuff_flag gk_gui_stuff_marker gk_gui_stuff_show_where gk_gui_stuff_choice_list].each do |s|
         out << javascript_include_tag(s, plugin: 'gk_gui_stuff')
       end
+      # the kernel after the primitives (it keeps what they put on GkGui), the elements after the kernel (they build on
+      # it); the modules' configuration they read stands before this head (view_layouts_base_html_head)
+      # (and the words and values they need with no module on, which the kernel reads when it is loaded)
+      out << content_tag('script', json_escape(elements_base.to_json).html_safe, type: 'application/json', id: 'gk-gui-stuff-elements-base')
+      ALWAYS_SCRIPTS.each { |s| out << javascript_include_tag(s, plugin: 'gk_gui_stuff') }
       # what this page marks after a save on Utseende or Funktioner, for the administrator who saved (Marker.for_page)
       marks = Marker.for_page(ctrl)
       if marks.any?
@@ -401,42 +449,42 @@ module GkGuiStuff
       end
       band = Instance.band_word
       parts = view && TopBand.any?(view)
-      out << stylesheet_link_tag('gk_gui_stuff_elements', plugin: 'gk_gui_stuff') if band || parts
-      out << javascript_tag("document.title = #{"[#{band}] ".to_json} + document.title;") if band
+      # the whisper's and the shared elements' stylesheets (also the instance band's and the wave's), on every page
+      ALWAYS_SHEETS.each { |s| out << stylesheet_link_tag(s, plugin: 'gk_gui_stuff') }
+      out << javascript_tag("document.title = #{"[#{band}] ".to_json} + document.title;") if band # gk-u U2: the band's word in the tab title before the first paint
       # the parts' script (their lengths and +N by the room, from the first paint) and what their panels draw with; the
       # band comes after the head, so its panels cannot add their own files
       if parts
         TopBand::HEAD_STYLESHEETS.each { |s| out << stylesheet_link_tag(s, plugin: 'gk_gui_stuff') }
         TopBand::HEAD_SCRIPTS.each { |s| out << javascript_include_tag(s, plugin: 'gk_gui_stuff') }
       end
-      on = Switches.active
-      # wave: its stylesheet early, for the wave the body's first script draws (wave_carry below)
-      out << stylesheet_link_tag('gk_gui_stuff_elements', plugin: 'gk_gui_stuff') if on.any? { |m| m.key == 'wave' }
       # A box (core's.warning and.nodata, centred) aligned to the start or the end by the one writing the view; logical,
-      # so it follows the language's direction. Its appearance setting, off in a new installation
-      if Appearance.on_for?('align')
-        out << content_tag('style', ('.gk-gui-stuff-align-start, .warning.gk-gui-stuff-align-start, .nodata.gk-gui-stuff-align-start { text-align: start; } ' \
-                                     '.gk-gui-stuff-align-end, .warning.gk-gui-stuff-align-end, .nodata.gk-gui-stuff-align-end { text-align: end; }').html_safe, id: 'gk-gui-stuff-align')
-      end
+      # so it follows the language's direction. Its appearance setting, off in a new installation; its sheet is loaded
+      # only while the setting is on
+      out << stylesheet_link_tag('gk_gui_stuff_align', plugin: 'gk_gui_stuff') if Appearance.on_for?('align')
       # The account menu's dropdown keeps core's link colours on its light surface: a rule for the top menu's links
       # (a theme's light text on a dark bar) must not reach the items, so this one outranks such a rule by its two ids.
       # The items are found by GK Core Stuff's mark on a menu's links (data-menu, menu_marks), never by where they sit.
-      # Its appearance setting, off in a new installation, and there only with that mark
-      if Appearance.on_for?('account_menu')
-        item = '#top-menu #account .dropdown-content a[data-menu="account_menu"]'
-        out << content_tag('style', ("#{item}, #{item}:visited { color: var(--oc-blue-9); } " \
-                                     "#{item}:hover { color: var(--oc-blue-9); background-color: var(--oc-gray-1); text-decoration: none; }").html_safe,
-                           id: 'gk-gui-stuff-account-menu')
-      end
+      # Its appearance setting, off in a new installation, and there only with that mark; its sheet is loaded only while
+      # the setting is on
+      out << stylesheet_link_tag('gk_gui_stuff_account_menu', plugin: 'gk_gui_stuff') if Appearance.on_for?('account_menu')
+      # The light, dark or automatic button's place in the top menu (color_mode.rb), only where the person has the button
+      out << stylesheet_link_tag(ColorMode::STYLESHEET, plugin: 'gk_gui_stuff') if ColorMode.button?(::User.current)
       # GK lists: on GK's own pages (a controller named gk_*) the columns of projects and people at the start and every
       # heading set as its cells, whatever modules are on; core's pages are left as they are
       if ctrl.respond_to?(:controller_name) && ctrl.controller_name.to_s.start_with?('gk_')
         out << stylesheet_link_tag('gk_gui_stuff_gk_lists', plugin: 'gk_gui_stuff')
         out << javascript_include_tag('gk_gui_stuff_gk_lists', plugin: 'gk_gui_stuff')
       end
+      # The roles' dark values (tone.rb): after the primitives' sheet, whose root block they override by order, and
+      # after every other sheet this method links. The modules' own sheets come later in the head
+      # (view_layouts_base_html_head); none of them declares a role, so the order to them does not matter. On screen
+      # only, as a printed page is the light one. Always linked, with or without GK Core Stuff's dark mode: the sheet's
+      # selector alone decides, so that a theme that says the dark tone gets the dark values in any installation
+      out << stylesheet_link_tag(Tone::DARK_SHEET, plugin: 'gk_gui_stuff', media: 'screen')
       dm = Registry.find('declutter')
       css = dm && Switches.active.include?(dm) ? Declutter.css : ''
-      out << content_tag('style', css.html_safe, id: 'gk-gui-stuff-declutter') if css.present?
+      out << content_tag('style', css.html_safe, id: 'gk-gui-stuff-declutter') if css.present? # gk-u U1: the rows each installation chose to hide
       safe_join(out, "\n")
     end
 
@@ -449,10 +497,18 @@ module GkGuiStuff
       view = context[:hook_caller]
       parts = view ? TopBand.parts(view) : []
       return wave_carry(context) unless word || parts.any?
-      return instance_band(word) + wave_carry(context) if parts.empty?
+      return instance_band(word) + band_mark('instance') + wave_carry(context) if parts.empty?
 
       inst = word ? instance_band(word, part: true) : nil
-      view.gk_gui_stuff_top_band(parts, instance: inst) + wave_carry(context)
+      view.gk_gui_stuff_top_band(parts, instance: inst) + band_mark('band') + wave_carry(context)
+    end
+
+    # The root says which of GK's bars stands at the top of the page (data-gk-gui-stuff-band: instance or band), so that
+    # the root's own rules (the band's height and the scroll padding that keeps a jump below it, gk_gui_stuff_elements.css)
+    # find it by GK's own mark and never by the body's children; the mark is the script tag's own attribute, copied onto
+    # the root right after the bar, before the first paint (gk_gui_stuff_root_mark.js, never deferred)
+    def band_mark(kind)
+      javascript_include_tag('gk_gui_stuff_root_mark', plugin: 'gk_gui_stuff', data: { gk_gui_stuff_band: kind })
     end
 
     # The instance's band alone, or (part:) its segment of the top band
@@ -474,11 +530,8 @@ module GkGuiStuff
              end
       return band unless tag
 
-      script = javascript_tag("(function(){var b=document.querySelector('.gk-gui-stuff-instance-copy');if(!b)return;var n=b.textContent;b.addEventListener('click',function(){" \
-                              "var own=function(f){return window.GkGui&&GkGui.ownCopy?GkGui.ownCopy(f):f();},t=b.dataset.tag,ok=function(){b.textContent=b.dataset.done;setTimeout(function(){b.textContent=n;},1400);};" \
-                              "if(navigator.clipboard&&window.isSecureContext){own(function(){navigator.clipboard.writeText(t).then(ok,function(){});});}else{var a=document.createElement('textarea');a.value=t;" \
-                              "a.style.position='fixed';a.style.top='-1000px';document.body.appendChild(a);a.select();try{if(own(function(){return document.execCommand('copy');}))ok();}catch(e){}a.remove();}});})();")
-      band + script
+      # the copy button's script comes with the band, the login page included; it reads data-tag and data-done
+      band + javascript_include_tag('gk_gui_stuff_instance_copy', plugin: 'gk_gui_stuff', defer: true)
     end
 
     # The wave carried over from the page before (SPARAR, KÖRS): drawn by the body's first script, before the first
@@ -497,7 +550,7 @@ module GkGuiStuff
       outcome = if fl && fl[:error].present? then { kind: 'error', text: ActionController::Base.helpers.strip_tags(fl[:error].to_s).squish.first(160) }
                 elsif fl && fl[:notice].present? then { kind: 'done', text: ActionController::Base.helpers.strip_tags(fl[:notice].to_s).squish.first(160) }
                 end
-      javascript_tag(<<~JS.gsub(/\n\s*/, ''))
+      javascript_tag(<<~JS.gsub(/\n\s*/, '')) # gk-u U2: draws the carried wave as the body's first script, before the first paint
         (function(){try{
         var w=JSON.parse(sessionStorage.getItem('gkguistuff.wave')||'null'),out=#{json_escape(outcome.to_json)},now=Date.now();
         sessionStorage.removeItem('gkguistuff.wave');window.gkGuiStuffWaveHanded=w||false;window.gkGuiStuffWaveOutcome=out||false;
@@ -521,7 +574,8 @@ module GkGuiStuff
     # as core_stuff gives it (GkCoreStuff::FooterVersion), and nothing without core_stuff.
     # Also the page's data and the pulse (page_data.rb), for one logged in, whatever is switched on
     def view_layouts_base_body_bottom(context = {})
-      out = [page_package(context), meaning_tags(context)]
+      # the light, dark or automatic button in a template, which its script puts in the top menu (color_mode.rb)
+      out = [page_package(context), meaning_tags(context), ColorMode.tags(context[:hook_caller])]
       m = Registry.find('footer_text')
       text = Switches.value('footer_text', 'footer_text', '').to_s.strip.lines.first.to_s.strip
       if m && text.present? && Switches.active.include?(m)
@@ -534,6 +588,8 @@ module GkGuiStuff
     end
 
     # window.gkGuiStuffPage: the page's data from every plugin that gives some, and the pulse's address; then the pulse.
+    # The data is a JSON element (#gk-gui-stuff-page-data), never a script that runs; the kernel
+    # (gk_gui_stuff_core.js) reads it as window.gkGuiStuffPage on first use, so every reader keeps that name.
     # One not logged in gets the data of the blocks registered for anonymous readers (what the page shows them: the
     # page's name, an issue's parent, the calendar's subjects, each only when its module is on for them) and no pulse
     def page_package(context)
@@ -547,8 +603,8 @@ module GkGuiStuff
 
       pkg = { data: data }
       pkg[:pulse] = { url: "#{Redmine::Utils.relative_url_root}/gk_gui_stuff/pulse", seconds: Pulse.seconds } if pulse
-      # json_escape: a subject or a title with </script> or a line separator in it stays inside the script
-      tags = [javascript_tag("window.gkGuiStuffPage = #{json_escape(pkg.to_json)};".html_safe)]
+      # json_escape: a subject or a title with </script> or a line separator in it stays inside the element
+      tags = [content_tag('script', json_escape(pkg.to_json).html_safe, type: 'application/json', id: 'gk-gui-stuff-page-data')]
       tags << javascript_include_tag('gk_gui_stuff_pulse', plugin: 'gk_gui_stuff') if pulse
       safe_join(tags, "\n")
     rescue StandardError => e
@@ -595,8 +651,10 @@ module GkGuiStuff
       t = Help.target(Page.of(context[:controller]))
       return '' unless t
 
-      javascript_tag("(function(){document.querySelectorAll('#top-menu a.help, .js-flyout-menu a.help').forEach(function(a){a.href=#{t[:href].to_json};" \
-                     "#{t[:new_tab] ? '' : "a.removeAttribute('target');"}if(window.GkGui&&GkGui.effect)GkGui.effect(a,'help_link');});})();")
+      # the target as data, and the module's script (gk_gui_stuff_help_link.js) that points the link at it
+      content_tag('script', json_escape({ href: t[:href], new_tab: t[:new_tab] ? true : false }.to_json).html_safe,
+                  type: 'application/json', id: 'gk-gui-stuff-help-link') +
+        javascript_include_tag('gk_gui_stuff_help_link', plugin: 'gk_gui_stuff', defer: true)
     end
 
     # Mitt konto: the link to the person's own choices

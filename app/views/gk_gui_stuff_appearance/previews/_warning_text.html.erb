@@ -1,0 +1,7 @@
+<%# Visa for the warning's text: Redmine's yellow and red messages and its "No data" block, still, as Redmine draws them;
+    with the setting, the same with the yellow ones' text and icon in GK's warning colour by the picture's own rule
+    (gk_gui_stuff_pictures.css), which holds only in this row's picture and only in the light tone; the module's
+    stylesheet comes only with the row on. row: the setting %>
+<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_pictures') %>
+<% shown = %i[warning error].map { |k| gk_gui_stuff_sg_flash(k => l(:"text_gk_gui_stuff_sg_example_flash_#{k}")) } + [content_tag(:p, l(:label_no_data), class: 'nodata')] %>
+<%= gk_gui_stuff_appearance_preview(row, off: shown, on: shown) %>

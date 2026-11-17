@@ -9,6 +9,7 @@
 # The records made up are never saved: negative ids, so that what core reads for them (attachments, reactions, other
 # plugins' rows) finds nothing, and nothing is written for them.
 class GkGuiStuffStyleguideController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   # A page of its own, as the icon library under Administration: core's page frame (layout base) without the
   # administration's side menu and without a project's main menu, so that both pages have the same width
   self.main_menu = false
@@ -16,19 +17,21 @@ class GkGuiStuffStyleguideController < ApplicationController
   before_action :require_login
   before_action :require_account_admin
   helper :gk_gui_stuff_styleguide
+  # the form page's parts (the box at the top, the table with its level columns, the fact cell) are drawn by its helper
+  helper :gk_gui_stuff_form_page
   # core's partials need their own helpers (Redmine draws with include_all_helpers off)
   helper :queries, :issues, :journals, :context_menus, :watchers, :custom_fields, :sort
   helper_method :demo
 
-  # @on: the modules on for the viewer, since the shared elements, the whisper and the choosers load only with a
-  # module that uses them; the page says so where a Prova would show nothing. @form: the page's form, Sida (page,
+  # @on: the modules on for the viewer, for the note where an example needs a module that is off (the kernel, the
+  # whisper and the shared elements are on every page, core.rb ALWAYS_SCRIPTS). @form: the page's form, Sida (page,
   # the side menu) unless the address asks for Bibliotek (form=library, the icon library's form)
   def show
     @form = params[:form].to_s == 'library' ? 'library' : 'page'
     page_state
   end
 
-  # Telefon: one element's tiles on a page of their own, which the guide shows in a frame 375 px wide, so that every
+  # Telefon: one element's tiles on a page of their own, which the guide shows in a phone's screen 390 px wide, so that every
   # rule for a narrow window applies as on a phone. Redmine's own page frame (layout base) with the page's own
   # parts hidden by the guide's stylesheet (core's body classes for the controller and the action)
   def frame
@@ -84,21 +87,20 @@ class GkGuiStuffStyleguideController < ApplicationController
   private
 
   def page_state
-    @dark = dark_classes
+    @dark = dark_class
     mods = GkGuiStuff::Switches.active
     @on = mods.map(&:key)
-    @elements = mods.any?(&:elements)
-    @kernel = mods.any?(&:kernel)
   end
 
-  # theme_engine's dark classes for the page's root, only where its basic mode gives this viewer a dark mode (the head
-  # hook writes the dark values then, and only then); with the engine on, the theme's own classes stand on the page and
-  # the choice is not drawn, so that it never puts the basic mode's classes over a theme
-  def dark_classes
-    b = defined?(::GkThemeEngine::Basic) ? ::GkThemeEngine::Basic : nil
-    return nil unless b && b.respond_to?(:on?) && b.respond_to?(:dark_classes)
+  # The class of GK Core Stuff's dark mode for the page's root, which the guide's Light and Dark choice puts on and
+  # takes off: the preview is GK Core Stuff's dark mode itself, with its class and its stylesheets (the guide links
+  # them where the look is off for the viewer, _assets.html.erb), and the roles' dark values follow the class. Without
+  # GK Core Stuff's dark mode, or with another class than the dark sheet is written for, nil: the guide has no dark
+  # choice then
+  def dark_class
+    return nil unless defined?(::GkCoreStuff::DarkMode) && ::GkCoreStuff::DarkMode.respond_to?(:stylesheet_tags)
 
-    b.on?(User.current) ? b.dark_classes : nil
+    GkGuiStuff::Tone.dark_class
   rescue StandardError => e
     Rails.logger.warn("[gk_gui_stuff] style guide dark mode: #{e.class} #{e.message}")
     nil

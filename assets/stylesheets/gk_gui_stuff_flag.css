@@ -13,7 +13,7 @@
 .gk-gui-stuff-flags { position: absolute; inset-block-start: 0; inset-inline-start: 0; inline-size: 0; block-size: 0; overflow: visible; pointer-events: none; }
 
 .gk-gui-stuff-flag { position: absolute; z-index: 30; display: flex; flex-direction: row; align-items: flex-start; gap: 3px; direction: ltr;
-  margin: 0; padding: 0; color: var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057))); font-family: inherit; font-size: 10px; font-weight: bold;
+  margin: 0; padding: 0; color: var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057))); font-family: inherit; font-size: 10px; font-weight: bold; /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
   line-height: 10px; white-space: nowrap; pointer-events: none; }
 .gk-gui-stuff-flag.gk-gui-stuff-flag-word-first { flex-direction: row-reverse; }
 /* hidden, its word and its surface take no room in the page, while the script can still read the word's width */
@@ -28,7 +28,7 @@
   clip-path: var(--gk-gui-flag-clip, polygon(0 0, 100% 0, 60% 50%, 100% 100%, 0 100%));
   -webkit-mask: var(--gk-gui-flag-mask, none) center / contain no-repeat; mask: var(--gk-gui-flag-mask, none) center / contain no-repeat; }
 .gk-gui-stuff-flag-rtl .gk-gui-stuff-flag-pennant { clip-path: var(--gk-gui-flag-clip, polygon(0 0, 100% 0, 100% 100%, 0 100%, 40% 50%)); }
-.gk-gui-stuff-flag-temp .gk-gui-stuff-flag-pennant { background: var(--gk-gui-flag-fill, repeating-linear-gradient(135deg, currentColor 0 1.5px, transparent 1.5px 3px)); }
+.gk-gui-stuff-flag-temp .gk-gui-stuff-flag-pennant { background: var(--gk-gui-flag-fill, repeating-linear-gradient(135deg, currentColor 0 1.5px, transparent 1.5px 3px)); } /* gk-u U4: the pennant's fill, an icon set per installation */
 .gk-gui-stuff-flag > .gk-gui-stuff-flag-pennant { pointer-events: auto; cursor: default; }
 
 /* the word: 70 % with a thin outline in the surface colour, so that it reads on top of whatever lies under it */
@@ -45,13 +45,13 @@
    where it is. Not drawn while it is off, so that it takes no room at the window's edge; a screen reader has the
    word from the target */
 .gk-gui-stuff-flag.gk-gui-stuff-flag-short { padding: 2px 3px; margin: -2px -3px; border-radius: 4px; }
-.gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on { background: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 14%, transparent);
-  outline: 1px solid color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 45%, transparent); }
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on { background: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 14%, transparent); /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
+  outline: 1px solid color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 45%, transparent); } /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
 .gk-gui-stuff-flag.gk-gui-stuff-flag-short:not(.gk-gui-stuff-flag-on) .gk-gui-stuff-flag-word { display: none; }
-.gk-gui-stuff-flag.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word { position: absolute; z-index: 30; left: calc(100% - 4px); bottom: calc(100% + 3px);
-  padding: 2px 6px; border: 1px solid var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)); border-radius: 3px; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff));
-  color: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 70%, var(--oc-gray-9, #212529));
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); font-size: 0.8rem; font-weight: bold; line-height: 1.3; opacity: 1; text-shadow: none; pointer-events: none; }
+.gk-gui-stuff-flag.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word { position: absolute; z-index: 30; inset-inline-start: calc(100% - 4px); bottom: calc(100% + 3px);
+  padding: 2px 6px; border: 1px solid var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)); border-radius: 3px; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff)); /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
+  color: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 70%, var(--gk-role-ui-text, var(--oc-gray-9, #212529))); /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--gk-role-ui-shadow, var(--oc-black, #000)) 15%, transparent); font-size: 0.8rem; font-weight: bold; line-height: 1.3; opacity: 1; text-shadow: none; pointer-events: none; }
 /* no room above the window's top: the box under the pennant instead (the script) */
 .gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-tip-below > .gk-gui-stuff-flag-word { top: calc(100% + 3px); bottom: auto; }
 /* the padding would pass the window's edge and make the page wider: none at that side there (the script) */
@@ -65,17 +65,17 @@
    its surface, so that its own tooltip stays */
 @media (max-width: 899px), (any-pointer: coarse) {
   .gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-reach::before,
-  .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-reach::before { content: ''; position: absolute; top: -5px; left: calc(var(--gk-gui-flag-reach-x, 0px) + 3px + (var(--gk-gui-flag-w, 8px) - 24px) / 2);
-    inline-size: 24px; block-size: 24px; pointer-events: auto; cursor: default; }
+  .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-reach::before { content: ''; position: absolute; top: -5px; inset-inline-start: calc(3px + (var(--gk-gui-flag-w, 8px) - 24px) / 2);
+    transform: translateX(var(--gk-gui-flag-reach-x, 0px)); inline-size: 24px; block-size: 24px; pointer-events: auto; cursor: default; }
   .gk-gui-stuff-flag-short.gk-gui-stuff-flag-reach > .gk-gui-stuff-flag-pennant { position: relative; }
 }
 
 /* under 899 px the dashed frame is what shows the focus on a flagged target: no solid outline in addition (the script
    marks the element that has the focus) */
-.gk-gui-stuff-flag-focus-plain:focus, .gk-gui-stuff-flag-focus-plain:focus-visible { outline: none !important; }
+.gk-gui-stuff-flag-focus-quiet:focus, .gk-gui-stuff-flag-focus-quiet:focus-visible { outline: none !important; }
 
 /* the frame the hover draws around the whole target, 4 px outside it, dashed in the pennant's role */
-.gk-gui-stuff-flag-frame { position: absolute; z-index: 29; box-sizing: border-box; border: 1.5px dashed var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057)));
+.gk-gui-stuff-flag-frame { position: absolute; z-index: 29; box-sizing: border-box; border: 1.5px dashed var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057))); /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
   border-radius: 4px; pointer-events: none; }
 .gk-gui-stuff-flag-frame:not(.gk-gui-stuff-flag-frame-on) { display: none; }
 
@@ -85,7 +85,7 @@
    since nothing lies under it, and the two together 2 px above the text's middle; in a row with a heading the row says
    how it stands on the heading's line (--gk-gui-flag-shift). Never a button and never a pill */
 .gk-gui-stuff-flag-inline { position: relative; inset-block-start: var(--gk-gui-flag-shift, -2px); display: inline-flex; align-items: center; gap: 3px; vertical-align: middle;
-  color: var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057))); font-weight: bold; white-space: nowrap; cursor: default; }
+  color: var(--gk-gui-fg, var(--gk-role-alert-tip, var(--oc-gray-7, #495057))); font-weight: bold; white-space: nowrap; cursor: default; } /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
 .gk-gui-stuff-flag-inline > .gk-gui-stuff-flag-word { font-size: 0.85em; opacity: 1; text-shadow: none; }
 /* its short form: only the pennant, on a tone of its own that the hover and a tap (-on, set by the script) fill in its
    role with a thin frame; the padding is there all the time and the margin takes it back, so nothing moves. The
@@ -97,12 +97,12 @@
    white); the hue stays the role's */
 .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short { padding: 2px 3px; margin-inline: -3px; border-radius: 4px; }
 .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short:hover, .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on {
-  background: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 14%, transparent);
-  outline: 1px solid color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 45%, transparent); }
+  background: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 14%, transparent); /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
+  outline: 1px solid color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 45%, transparent); } /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
 .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word { position: absolute; z-index: 30; inset-inline-start: calc(100% - 4px); inset-block-end: calc(100% + 3px);
-  padding: 2px 6px; border: 1px solid var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)); border-radius: 3px; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff));
-  color: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 70%, var(--oc-gray-9, #212529));
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); font-size: 0.8rem; line-height: 1.3; opacity: 0; pointer-events: none; }
+  padding: 2px 6px; border: 1px solid var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)); border-radius: 3px; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff)); /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
+  color: color-mix(in srgb, var(--gk-gui-fg, var(--gk-role-alert-tip, #495057)) 70%, var(--gk-role-ui-text, var(--oc-gray-9, #212529))); /* gk-u U4: the primitive's own tone, set by a role or category class; the fallback is its plain look */
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--gk-role-ui-shadow, var(--oc-black, #000)) 15%, transparent); font-size: 0.8rem; line-height: 1.3; opacity: 0; pointer-events: none; }
 .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short:hover > .gk-gui-stuff-flag-word,
 .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on > .gk-gui-stuff-flag-word,
 .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-lit > .gk-gui-stuff-flag-word { opacity: 1; }
@@ -122,7 +122,7 @@
 @media (forced-colors: active) {
   .gk-gui-stuff-flag-pennant { background: CanvasText; }
   /* the system's text colour in the stripes as well, and through an icon's mask; a solid fill is currentColor, which is that colour here */
-  .gk-gui-stuff-flag-temp .gk-gui-stuff-flag-pennant { background: var(--gk-gui-flag-fill, repeating-linear-gradient(135deg, CanvasText 0 1.5px, transparent 1.5px 3px)); }
+  .gk-gui-stuff-flag-temp .gk-gui-stuff-flag-pennant { background: var(--gk-gui-flag-fill, repeating-linear-gradient(135deg, CanvasText 0 1.5px, transparent 1.5px 3px)); } /* gk-u U4: the pennant's fill, an icon set per installation */
   .gk-gui-stuff-flag-frame { border-color: Highlight; }
   .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short:hover, .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on, .gk-gui-stuff-flag.gk-gui-stuff-flag-short.gk-gui-stuff-flag-on { outline-color: Highlight; }
   .gk-gui-stuff-flag-inline.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word, .gk-gui-stuff-flag.gk-gui-stuff-flag-short > .gk-gui-stuff-flag-word { border-color: CanvasText; background: Canvas; color: CanvasText; }

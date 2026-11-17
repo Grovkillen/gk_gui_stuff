@@ -89,7 +89,7 @@
       ta.remove();
     }
     // a copy this library says itself, which core_copy_whisper leaves alone
-    function own(fn) { return window.GkGui && window.GkGui.ownCopy ? window.GkGui.ownCopy(fn) : fn(); }
+    function own(fn) { return window.GkGui.ownCopy(fn); }
     if (navigator.clipboard && window.isSecureContext) own(function () { navigator.clipboard.writeText(text).then(ok, old); }); else old();
   }
   function codeOf(btn) {
@@ -132,7 +132,7 @@
         if (!x[1]) return;
         // the large picture shows the flags the real one has, on the copy's own places (the small pictures, drawn
         // smaller, show none): each flagged place marked for the copy by a data attribute of its own, then unmarked
-        var flagged = x[3] && window.GkGui && window.GkGui.flag && window.GkGui.flag.copy ?
+        var flagged = x[3] ?
           [x[1]].concat(Array.prototype.slice.call(x[1].querySelectorAll('*'))).filter(function (n) { return n._gkGuiFlags && n._gkGuiFlags.length; }) : [];
         flagged.forEach(function (n, i) { n.setAttribute('data-gk-gui-lib-flag-ref', String(i)); });
         var c = still(x[1]);
@@ -310,7 +310,7 @@
     if (e.wide) n.setAttribute('data-gk-gui-lib-wide', '1');
     if (typeof o.title === 'function') n.title = o.title(item) || '';
     if (st.checkingNow) n.appendChild(checkBox(st, e, el('span', 'gk-gui-stuff-lib-check')));
-    var th = el('div', 'gk-gui-stuff-lib-thumb gk-gui-stuff-lib-thumb-plain');
+    var th = el('div', 'gk-gui-stuff-lib-thumb gk-gui-stuff-lib-thumb-bare');
     th.setAttribute('aria-hidden', 'true');
     var pic = typeof o.thumb === 'function' ? o.thumb(item) : null;
     if (pic) th.appendChild(pic);
@@ -595,7 +595,7 @@
     var legend = [];
     (facts || []).forEach(function (f) {
       if (f && f.nodeType) head.appendChild(f);
-      else if (f != null && f !== '' && window.GkGui && window.GkGui.flag) {
+      else if (f != null && f !== '') {
         if (typeof f === 'object') { window.GkGui.flag.put(nm, f.text, f); head.classList.add('gk-gui-stuff-lib-panel-head-flagged'); }
         else legend.push({ text: String(f) });
       }
@@ -938,9 +938,9 @@
     var st = stateOf(t.closest('[data-gk-gui-lib]'));
     if (!st) return;
     if (e.key === 'Escape' && st.open && !e.defaultPrevented) {
-      // a layer, a fly or a box open in the panel takes its own Esc first, and a reason being written keeps it; a plain
+      // a layer, a popover or a box open in the panel takes its own Esc first, and a reason being written keeps it; a plain
       // fold (a tile's Kod) has none
-      if (t.closest('[data-gk-gui-lib-panel]') && t.closest('.gk-gui-stuff-layer, details.gk-gui-stuff-fly[open], .gk-gui-stuff-mount-box, textarea, [data-gk-reason]')) return;
+      if (t.closest('[data-gk-gui-lib-panel]') && t.closest('.gk-gui-stuff-layer, details.gk-gui-stuff-popover[open], .gk-gui-stuff-mount-box, textarea, [data-gk-reason]')) return;
       e.preventDefault();
       close(st, true);
       return;

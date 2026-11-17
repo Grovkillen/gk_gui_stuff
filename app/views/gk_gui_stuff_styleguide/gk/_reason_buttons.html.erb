@@ -3,11 +3,15 @@
 <div class="gk-gui-stuff-sg-tiles">
   <% [[:label_gk_gui_stuff_sg_required, :required], [:label_gk_gui_stuff_sg_optional, :optional], [:label_gk_gui_stuff_sg_off, nil]].each do |k, mode| %>
     <%= gk_gui_stuff_sg_row(l(k), "gk_gui_stuff_reason_button(label, reason: #{mode ? ":#{mode}" : 'nil'}, url:, info:)") do %>
-      <%= gk_gui_stuff_reason_button(l(:button_save), reason: mode, url: save, info: l(:text_gk_gui_stuff_sg_fly)) %>
+      <%= gk_gui_stuff_reason_button(l(:button_save), reason: mode, url: save, info: l(:text_gk_gui_stuff_sg_popover)) %>
     <% end %>
   <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_alarm), "gk_gui_stuff_reason_button(label, reason: nil, role: :alarm, url:, info:)") do %>
     <%= gk_gui_stuff_reason_button(l(:button_delete), reason: nil, role: :alarm, url: save, info: l(:text_gk_gui_stuff_sg_cannot_undo)) %>
+  <% end %>
+  <%# what always asks but can be undone: the same box in the button's own role, the general question %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ask), "gk_gui_stuff_reason_button(label, reason: nil, ask: true, url:)") do %>
+    <%= gk_gui_stuff_reason_button(l(:label_gk_gui_stuff_sg_example_disconnect), reason: nil, ask: true, url: save) %>
   <% end %>
   <%# what cannot be undone: "Ordet…" always opens the box in the role alarm, the reason after the place under the
       buttons; Valfritt drawn open and still (the same helper, its details opened), Krävs as the live button, so

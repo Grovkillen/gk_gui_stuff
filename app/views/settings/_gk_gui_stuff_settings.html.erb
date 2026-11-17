@@ -1,14 +1,34 @@
-<%# gk_gui_stuff: only what is not an appearance setting: Om pluginet, the grant of Like Redmine for me, the GK plugins'
-    top menu words, the counters' cache time and the change log. The modules and every other appearance setting are on
-    Administration > Utseende. Every change here is a records event. %>
+<%# gk_gui_stuff: first the one thing about GK Compat that is not met, as core's own warning line: it is missing, or
+    it is too old, with the version that is required (without it nothing of gui_stuff is active, so the line is core's
+    form and no helper of this plugin draws it; the version comes from the gate's constant and is named only when the
+    installed one is too old), then Om pluginet. With GK Compat only what is not an
+    appearance setting: the grant of Like Redmine for me, the GK plugins' top menu words, the counters' cache time and
+    the change log; the modules and every other appearance setting are on Administration > Utseende, and every change
+    here is a records event. Without it nothing else is drawn, and the stored settings go back as hidden fields,
+    because core's Save on this page writes what is posted over what is stored (an empty hash posts nothing, an empty
+    list comes back as [""], every other value as text) %>
 <% plugin = Redmine::Plugin.find(:gk_gui_stuff) %>
 <% sw = GkGuiStuff::Switches %>
-<% changelog = ["CHANGELOG.#{current_language}.md", 'CHANGELOG.md'].map { |f| File.join(plugin.directory, f) }.find { |f| File.exist?(f) } %>
+<% compat_closed = GkGuiStuff.compat_closed %>
+<% compat = compat_closed.nil? %>
+<% if compat_closed == :missing %><p class="warning"><%= l(:text_gk_gui_stuff_compat_missing) %></p>
+<% elsif compat_closed == :old %><p class="warning"><%= l(:text_gk_gui_stuff_compat_required, version: GkGuiStuff::COMPAT_MIN) %></p><% end %>
 <fieldset class="box"><legend><%= l(:label_gk_gui_stuff_about) %></legend>
   <div><strong><%= plugin.name %></strong> <%= plugin.version %></div>
   <div><%= l(:text_gk_gui_stuff_description) %></div>
-  <div><%= link_to l(:label_gk_gui_stuff_appearance), gk_gui_stuff_appearance_path %></div>
+  <% if compat %><div><%= link_to l(:label_gk_gui_stuff_appearance), gk_gui_stuff_appearance_path %></div><% end %>
 </fieldset>
+<% unless compat %>
+  <% keep = nil %>
+  <% keep = lambda do |name, value|
+       case value
+       when Hash then value.flat_map { |k, v| keep.call("#{name}[#{k}]", v) }
+       when Array then value.empty? ? [hidden_field_tag("#{name}[]", '', id: nil)] : value.map { |v| hidden_field_tag("#{name}[]", v.to_s, id: nil) }
+       else [hidden_field_tag(name, value.to_s, id: nil)]
+       end
+     end %>
+  <%= safe_join((settings.is_a?(Hash) ? settings : {}).flat_map { |k, v| keep.call("settings[#{k}]", v) }) %>
+<% else %>
 <fieldset class="box tabular"><legend><%= l(:label_gk_gui_stuff_settings_own) %></legend>
   <p data-gk-gui-search="<%= gk_gui_stuff_form_page_search_text(key: 'user_core_like', label_key: :label_gk_gui_stuff_user_core_like) %>"><label for="gk_gui_stuff_user_core_like"><%= l(:label_gk_gui_stuff_user_core_like) %></label>
     <%= hidden_field_tag 'settings[user_core_like]', '0', id: nil %>
@@ -51,11 +71,6 @@
 <% GkGuiStuff::TopMenu.stored.except(*tm_names).each do |name, row| %>
   <% (row.is_a?(Hash) && row['caption'].is_a?(Hash) ? row['caption'] : {}).each do |lang, text| %><%= hidden_field_tag "settings[top_menu][#{name}][caption][#{lang}]", text, id: nil %><% end %>
 <% end %>
-<% if changelog %>
-<fieldset class="box"><legend><%= l(:label_gk_gui_stuff_changelog) %></legend>
-  <% unless current_language.to_s.start_with?('en') %><div class="gk-changelog-note"><em><%= l(:text_gk_gui_stuff_changelog_english) %></em></div><% end %>
-  <details class="gk-changelog"><summary><%= l(:button_show) %></summary>
-  <div class="wiki"><%= Redmine::WikiFormatting.to_html('common_mark', File.read(changelog, encoding: 'UTF-8').sub(/\A.*?(?=^## )/m, '')).html_safe %></div>
-  </details>
-</fieldset>
+<%# the change log, drawn by the shared helper (changelog.rb); nothing when the plugin has no change log %>
+<%= gk_gui_stuff_changelog(plugin) %>
 <% end %>

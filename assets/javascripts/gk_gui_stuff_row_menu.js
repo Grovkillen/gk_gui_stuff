@@ -9,14 +9,18 @@
 //   <table class="list" data-gk-gui-rowmenu>
 //     <tr>...<td class="buttons">
 //       <%= link_to l(:button_edit), edit_path, class: 'icon icon-edit', data: { gk_gui_row_action: true } %>
-//       <%= link_to l(:button_delete), path, method: :delete, data: { confirm: l(:text_are_you_sure), gk_gui_row_action: true }, class: 'icon icon-del' %>
+//       <%= link_to l(:button_delete), path, method: :delete, data: { gk_gui_confirm: l(:text_are_you_sure), gk_gui_row_action: true }, class: 'icon icon-del' %>
+//         (or data: gk_gui_stuff_confirm_data.merge(gk_gui_row_action: true))
 //       <%= button_to l(:button_x), path, form: { data: { gk_gui_row_action: true } } %>   (a form: its button is pressed)
 //       <%= link_to l(:button_y), path, data: { gk_gui_row_action: 'keep' } %>          (stays visible in the row too)
 //     </td></tr>
 //   </table>
 //   <%= gk_gui_stuff_row_menu %>
 // An action is a link, a button or a form (button_to); it stays in the row, hidden, and the menu's item presses it:
-// the same click, so Rails' data-confirm and data-method (and any script on it) work exactly as before. Without
+// the same click, so Rails' data-method (and any script on it) work exactly as before. An action with
+// data-gk-gui-confirm, on it or on its form, is asked in the upper layer first (GkGui.confirm, gk_gui_stuff_layer.js):
+// the menu closes, the entry's word is the button, the delete's in the role alarm, and the focus goes back to the
+// "..." button; at OK the action is pressed. A Rails data-confirm left on an action still asks the browser's way. Without
 // JavaScript nothing moves: the actions stand in the row as they always did. An action with data-gk-gui-row-action=
 // "delete", a.icon-del, data-method=delete or a form with _method=delete is the delete and goes last. The "..." button
 // goes into the cell of the row's first action (else the row's last cell); data-gk-gui-row-menu-label on the row names
@@ -111,9 +115,15 @@
       it.addEventListener('click', function (e) {
         e.preventDefault();
         if (it.getAttribute('aria-disabled') === 'true') return;
+        var b = opener, t = target(a);
         close(true);
-        // the action's own click: Rails' confirm and method, and every script on it, as when it stood in the row
-        target(a).click();
+        // a question of its own: asked in the upper layer, and the action pressed at OK
+        if (a.hasAttribute('data-gk-gui-confirm') || t.hasAttribute('data-gk-gui-confirm')) {
+          window.GkGui.confirm.ask(t, { ok: label(a), role: del ? 'alarm' : null, opener: b });
+          return;
+        }
+        // the action's own click: Rails' method, and every script on it, as when it stood in the row
+        t.click();
       });
       li.appendChild(it);
       ul.appendChild(li);

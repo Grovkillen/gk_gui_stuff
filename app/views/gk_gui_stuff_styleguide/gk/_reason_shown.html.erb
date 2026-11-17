@@ -1,0 +1,15 @@
+<%# The shown reason (gk_gui_stuff_reason_shown): with who on the line at its top, and with the word for a reason
+    when who already stands in a heading above it. The person and the reasons are made up; pictures only %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_reason_shown_example), class: 'gk-gui-stuff-direct-note') %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_reason_shown_by), "gk_gui_stuff_reason_shown(text, by: who)") do %>
+    <%= note %>
+    <%= gk_gui_stuff_reason_shown(l(:text_gk_gui_stuff_sg_reason_shown_text_1),
+                                  by: "#{l(:label_gk_gui_stuff_sg_example_person_5_first)} #{l(:label_gk_gui_stuff_sg_example_person_5_last)}") %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_reason_shown_word), "gk_gui_stuff_reason_shown(text)") do %>
+    <%= note %>
+    <%= gk_gui_stuff_reason_shown(l(:text_gk_gui_stuff_sg_reason_shown_text_2)) %>
+  <% end %>
+</div>

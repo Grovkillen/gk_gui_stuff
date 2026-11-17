@@ -1,0 +1,19 @@
+<%# The thing (gk_gui_stuff_thing): the kind's pill and the thing as a link, and the same with words before it, the
+    place in the thing and a part after it. The thing, the place and the status are made up, and the link leads
+    nowhere; it can be hovered over and tabbed to (Bara grafiskt) %>
+<% @gk_gui_stuff_sg_mode = :graphic %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_thing_example), class: 'gk-gui-stuff-direct-note') %>
+<% kind = -> { gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_thing_example_kind), role: 1) } %>
+<% thing = -> { link_to(l(:label_gk_gui_stuff_sg_thing_example_issue), '#') } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_thing_parts), "gk_gui_stuff_thing(kind, link)") do %>
+    <%= note %>
+    <%= gk_gui_stuff_thing(kind.call, thing.call) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_thing_full), "gk_gui_stuff_thing(kind, link, lead:, place:, place_title:, after: [status])") do %>
+    <%= note %>
+    <%= gk_gui_stuff_thing(kind.call, thing.call, lead: l(:label_gk_gui_stuff_sg_thing_example_lead), place: l(:label_gk_gui_stuff_sg_thing_example_place),
+                                                  place_title: l(:label_gk_gui_stuff_sg_thing_example_place_title),
+                                                  after: [content_tag(:span, l(:label_gk_gui_stuff_sg_example_marker_closed), class: 'badge badge-status-closed')]) %>
+  <% end %>
+</div>

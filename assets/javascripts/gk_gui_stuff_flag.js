@@ -235,7 +235,7 @@
     }
     return b;
   }
-  // over whatever the target stands in: a fly, a layer or a sheet lie higher than the page
+  // over whatever the target stands in: a popover, a layer or a sheet lie higher than the page
   function layerOf(t) {
     var z = BASE_Z, fixed = false;
     for (var p = t; p && p !== document.body && p !== document.documentElement; p = p.parentElement) {
@@ -621,8 +621,8 @@
       if (!!t._gkGuiFocus !== has) { t._gkGuiFocus = has; paintFrame(t); }
     });
     var now = framed && narrow() ? e.target : null;
-    if (plain && plain !== now) plain.classList.remove('gk-gui-stuff-flag-focus-plain');
-    if (now) now.classList.add('gk-gui-stuff-flag-focus-plain');
+    if (plain && plain !== now) plain.classList.remove('gk-gui-stuff-flag-focus-quiet');
+    if (now) now.classList.add('gk-gui-stuff-flag-focus-quiet');
     plain = now;
   }
   document.addEventListener('focusin', function (e) { focusTo(true, e); });

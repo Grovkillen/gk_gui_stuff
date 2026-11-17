@@ -31,7 +31,7 @@
     <% if in_core %><%= gk_gui_stuff_in_core_flag %><% end %>
     <span class="gk-gui-stuff-form-page-quiet"><%= in_core ? 'Redmine' : row.plugin_name %></span>
     <%= gk_gui_stuff_form_page_key(row.key) %>
-    <% unless shared %><%= gk_gui_stuff_fly(l(:button_show), plain: true, ellipsis: false) { gk_gui_stuff_appearance_show(row) } %><% end %>
+    <% unless shared %><%= gk_gui_stuff_popover(l(:button_show), plain: true, ellipsis: false) { gk_gui_stuff_appearance_show(row) } %><% end %>
     <span class="gk-gui-stuff-form-page-was" hidden></span>
     <% if row.help.present? %><span class="gk-gui-stuff-form-page-help"><%= row.help %></span><% end %>
     <% if warning.present? %>

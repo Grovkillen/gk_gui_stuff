@@ -1,6 +1,5 @@
 <%# Visa for code blocks: Redmine shows a long code block whole; with the setting, the block folded at the height with
     Visa allt under it, as the fold leaves it (the style guide's fold). row: the setting %>
-<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_modules') %>
 <% code = (1..14).map { |i| "x#{i} = #{i * i}" }.join("\n") %>
 <%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, content_tag(:pre, code), class: 'wiki gk-gui-stuff-sg-still', inert: true),
                                          on: content_tag(:div, gk_gui_stuff_sg_fold(:pre, code), class: 'wiki')) %>

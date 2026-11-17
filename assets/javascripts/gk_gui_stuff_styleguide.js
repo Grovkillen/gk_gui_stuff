@@ -2,10 +2,10 @@
 // search and the group pills), the page's bar that follows on scroll (Visa all kod and the page's own light or dark
 // and computer or phone, which set every element's), the room a jump leaves under core's fixed header, and each
 // element's choices (the copy button under each tile and the
-// library form are the library's script, gk_gui_stuff_library.js): light or dark, with theme_engine's dark classes on the page (its basic
-// mode; the choice is the page's only and is not saved), and computer or phone (the element's frame page in a frame
-// 375 px wide). The fly a script opens at a link (GkGui.fly.open), and the ribbon with a
-// fly put into the real top menu, so that the layers are seen against core's own header. The layer under a pill,
+// library form are the library's script, gk_gui_stuff_library.js): light or dark, with GK Core Stuff's dark mode class on the page's root
+// (the choice is the page's only and is not saved), and computer or phone (the element's frame page in
+// a phone's screen 390 px wide, its tiles scrolling inside it). The popover a script opens at a link (GkGui.popover.open), and the ribbon with a
+// popover put into the real top menu, so that the layers are seen against core's own header. The layer under a pill,
 // opened by its value part ([data-gk-gui-sg-parent]). Prova ([data-gk-gui-sg-try]) opens the layer, the whisper, the
 // banner, a notice, the surface, the drawer, the wave, the corner, the palette, the line's panel, the chooser with
 // groups (GkGui.selectSearch.enhance), a sentence with no server, core's context menu on the guide's issue list and Visa
@@ -21,8 +21,8 @@
     return n;
   }
   // the box of the demo: the words, a table of rows each with its button, Avbryt
-  function flyContent(t) {
-    var f = document.createDocumentFragment(), tb = el('tbody'), tab = el('table', 'gk-gui-stuff-fly-table');
+  function popoverContent(t) {
+    var f = document.createDocumentFragment(), tb = el('tbody'), tab = el('table', 'gk-gui-stuff-popover-table');
     f.appendChild(el('p', null, t.intro || ''));
     (t.rows || []).forEach(function (r) {
       var tr = el('tr'), b = el('button', null, t.button || '');
@@ -33,9 +33,9 @@
     });
     tab.appendChild(tb);
     f.appendChild(tab);
-    var bar = el('div', 'gk-gui-stuff-fly-buttons'), c = el('button', null, t.cancel || '');
+    var bar = el('div', 'gk-gui-stuff-popover-buttons'), c = el('button', null, t.cancel || '');
     c.type = 'button';
-    c.setAttribute('data-gk-gui-fly-cancel', '1');
+    c.setAttribute('data-gk-gui-popover-cancel', '1');
     bar.appendChild(c);
     f.appendChild(bar);
     return f;
@@ -59,7 +59,7 @@
   var whereDrawn = [];
   function whereStart(a, G, d) {
     var box = document.getElementById(d('box'));
-    if (!box || !G.showWhere) return false;
+    if (!box) return false;
     box.scrollTop = (box.scrollHeight - box.clientHeight) / 2;
     whereDrawn.forEach(function (h) { h.close(); });
     whereDrawn = [];
@@ -93,16 +93,28 @@
     for (var i = 0; i < cornerTries; i++) rows = rows.concat(en);
     G.corner.show({ count: rows.length, entries: rows });
   }
+  // The answers the rail built in a script is tried with: saved, every row saved, one row not saved
+  var SAVE_RAIL_ANSWERS = { ok: { ok: true }, rows: { rows: [{ ok: true }, { ok: true }] }, row_failed: { rows: [{ ok: true }, { ok: false }] } };
+  // the rail's tile: the row is built in the script, as a plugin's own row would be, and made a rail
+  function saveRails() {
+    document.querySelectorAll('[data-gk-gui-sg-save-rail]').forEach(function (host) {
+      if (host._gkGuiRail) return;
+      var row = el('div', 'gk-gui-stuff-sg-save-rail-row', host.getAttribute('data-gk-gui-sg-save-rail'));
+      host.appendChild(row);
+      host._gkGuiRail = window.GkGui.save.rail(row, '#');
+    });
+  }
   function tryIt(a, G) {
     var d = function (k) { return a.getAttribute('data-gk-gui-sg-' + k) || ''; };
     var text = function () { return el('p', null, d('text')); };
     switch (d('try')) {
       // an entry the row menu pressed is hidden in its row: the layer opens under the row
-      case 'layer': if (G.layer) G.layer.open({ key: 'styleguide', title: d('title'), content: text(), anchor: a.getClientRects().length ? a : (a.closest('tr') || a) }); break;
+      case 'layer': G.layer.open({ key: 'styleguide', title: d('title'), content: text(), anchor: a.getClientRects().length ? a : (a.closest('tr') || a) }); break;
+      // above: the layer opened from inside an open popover, under the link, stands over the popover's box (65 over 55)
+      case 'layer_above': G.layer.open({ key: 'styleguide-above', title: d('title'), content: text(), anchor: a, above: 'popover' }); break;
       // the whisper in the place the tile shows (the link itself where the tile names none)
-      case 'copy': if (G.copy) G.copy(d('text'), d('said'), { at: a, place: d('place') || undefined }); break;
+      case 'copy': G.copy(d('text'), d('said'), { at: a, place: d('place') || undefined }); break;
       case 'banner':
-        if (!G.banner) break;
         var old = document.querySelector('.gk-gui-stuff-banner[data-key="styleguide"]');
         if (old) old.remove();
         G.set('banner.styleguide', null);
@@ -111,33 +123,40 @@
                         button: d('icon') ? { icon: d('icon'), label: d('label'), action: function () { var b = document.querySelector('.gk-gui-stuff-banner[data-key="styleguide"]'); if (b) b.remove(); } } : null });
         break;
       case 'notice':
-        if (G.notice && G.notice.show) G.notice.show({ level: d('level'), text: d('text'), buttons: d('icon') ? [{ icon: d('icon'), label: d('label') }] : [] });
+        G.notice.show({ level: d('level'), text: d('text'), buttons: d('icon') ? [{ icon: d('icon'), label: d('label') }] : [] });
         break;
-      case 'surface': if (G.surface) G.surface.open({ title: d('title'), content: text(), size: 'small' }); break;
+      case 'surface': G.surface.open({ title: d('title'), content: text(), size: 'small' }); break;
       // the drawer's size button remembers the size for every drawer (drawer.size); the size the person had before is
       // put back when the guide's drawer is gone and when the page is left, so that trying it changes no real drawer
       case 'drawer':
-        if (!G.drawer) break;
         if (!drawerKept) drawerKept = { size: G.get('drawer.size') };
         G.drawer.add({ key: 'styleguide', label: d('title'), render: function (body) { body.appendChild(text()); } });
         break;
-      case 'wave': if (G.wave) G.wave.show({ word: d('word') }); break;
-      case 'line': { var ln = document.getElementById(d('line')); if (ln && G.line) G.line.open(ln, { focus: true }); } break;
-      case 'corner': if (G.corner) cornerTry(a, G); break;
+      case 'wave': G.wave.show({ word: d('word') }); break;
+      case 'line': { var ln = document.getElementById(d('line')); if (ln) G.line.open(ln, { focus: true }); } break;
+      case 'corner': cornerTry(a, G); break;
       // the save bar's sweep: a made-up answer on the example's own row, nothing sent
       case 'sweep': {
         var sw = a.closest('[data-gk-gui-sg-sweep]'), swRail = sw && sw.querySelector('.gk-gui-stuff-rail');
-        if (swRail && G.save && G.save.rehearse) G.save.rehearse(swRail, { answer: d('answer'), delay: parseInt(d('delay'), 10), sweep: d('sweep-mode'), flip: true });
+        if (swRail) G.save.rehearse(swRail, { answer: d('answer'), delay: parseInt(d('delay'), 10), sweep: d('sweep-mode'), flip: true });
+      } break;
+      // a row a script built (GkGui.save.rail) and a made-up answer read as a real one: nothing is sent
+      case 'save_rail': {
+        var srTile = a.closest('.gk-gui-stuff-sg-tile'), srHost = srTile && srTile.querySelector('[data-gk-gui-sg-save-rail]');
+        var srAnswer = SAVE_RAIL_ANSWERS[d('answer')];
+        if (srHost && srHost._gkGuiRail && srAnswer) srHost._gkGuiRail.rehearse(srAnswer).catch(function () { /* the rail says it */ });
       } break;
       case 'where': whereTargets(a, G, d); break;
       case 'where_steps': whereSteps(a, G, d); break;
       case 'palette':
-        if (G.palette) {
-          G.palette.open({ placeholder: d('placeholder'), items: list(a, 'data-gk-gui-sg-items').map(function (l) { return { label: l }; }), onPick: function () {} });
-        }
+        G.palette.open({ placeholder: d('placeholder'), items: list(a, 'data-gk-gui-sg-items').map(function (l) { return { label: l }; }), onPick: function () {} });
         break;
-      case 'select': { var sel = document.getElementById(d('select')); if (sel && G.selectSearch) G.selectSearch.enhance(sel, { open: true }); } break;
+      case 'select': { var sel = document.getElementById(d('select')); if (sel) G.selectSearch.enhance(sel, { open: true }); } break;
       case 'sentence': sentenceDemo(data(a, 'data-gk-gui-sg-sentence'), G, d('host')); break;
+      case 'disclosure': {
+        var dh = document.getElementById(d('host'));
+        if (dh) { dh.textContent = ''; dh.appendChild(G.disclosure.make({ texts: list(a, 'data-gk-gui-sg-texts'), count: Number(d('count')), body: list(a, 'data-gk-gui-sg-body'), open: true })); }
+      } break;
       case 'context_menu': {
         // core's own script opens its menu on a right click on a row of the issue list in Prova's own tile (the
         // section's small list), else the first of the guide's issue lists
@@ -155,7 +174,7 @@
   // put back what stood, the word turns and, or, and not; "+ Villkor" adds one not filled in and opens it
   function sentenceDemo(o, G, hostId) {
     var host = document.getElementById(hostId || 'gk-gui-stuff-sg-sentence-live');
-    if (!host || !G.sentence) return;
+    if (!host) return;
     if (host._gkGuiS) host._gkGuiS.destroy();
     var items = JSON.parse(JSON.stringify(o.items || [])), s = null, n = 0;
     function walk(list, fn) { list.forEach(function (i, at) { fn(i, list, at); if (i.items) walk(i.items, fn); }); }
@@ -215,29 +234,27 @@
     if (pr) { e.preventDefault(); if (G) tryIt(pr, G); return; }
     // the layer under a pill: right after the pill, the value part its opener; a second click closes it
     var part = t.closest && t.closest('[data-gk-gui-sg-parent]');
-    if (part && G && G.layer) {
+    if (part) {
       e.preventDefault();
       if (part._gkGuiLayer && part._gkGuiLayer.el.isConnected) { part._gkGuiLayer.close(); return; }
       var o = data(part, 'data-gk-gui-sg-parent');
       part._gkGuiLayer = G.layer.open({ key: 'styleguide-parent', title: o.title, content: el('p', null, o.text || ''), parent: part.closest('.gk-gui-stuff-pill'), opener: part });
       return;
     }
-    var fly = t.closest && t.closest('[data-gk-gui-sg-fly]');
-    if (fly && G && G.fly && G.fly.open) { e.preventDefault(); G.fly.open(fly, flyContent(data(fly, 'data-gk-gui-sg-fly'))); return; }
+    var popover = t.closest && t.closest('[data-gk-gui-sg-popover]');
+    if (popover) { e.preventDefault(); G.popover.open(popover, popoverContent(data(popover, 'data-gk-gui-sg-popover'))); return; }
     var rb = t.closest && t.closest('[data-gk-gui-sg-ribbon]');
     if (rb) {
       var o = data(rb, 'data-gk-gui-sg-ribbon');
       // with action (the locked band): its button would lead to the live page; here a handler, never an address, so
       // that it says that the example leads nowhere and the page stays
-      if (G && G.ribbon) {
-        var rbFrame = G.ribbon.show({ key: 'styleguide', word: o.word, line: o.line, icon: o.icon, title: o.title, role: o.role, priority: o.priority || 0,
-                                      action: o.action ? { label: o.action.label, handler: function (ev) { sayNowhere(ev.currentTarget || rb); } } : null });
-        // also when a band of higher priority stands and this one did not come: the arrow leads to the band that is there
-        if (rbFrame && G.showWhere) G.showWhere({ key: 'ribbon', target: rbFrame, word: G.showWhere.word('ribbon') });
-      }
+      var rbFrame = G.ribbon.show({ key: 'styleguide', word: o.word, line: o.line, icon: o.icon, title: o.title, role: o.role, priority: o.priority || 0,
+                                    action: o.action ? { label: o.action.label, handler: function (ev) { sayNowhere(ev.currentTarget || rb); } } : null });
+      // also when a band of higher priority stands and this one did not come: the arrow leads to the band that is there
+      if (rbFrame) G.showWhere({ key: 'ribbon', target: rbFrame, word: G.showWhere.word('ribbon') });
       if (o.action) return;
-      var tpl = document.getElementById('gk-gui-stuff-sg-topfly'), acc = document.querySelector('#top-menu #account');
-      if (tpl && acc && !acc.querySelector('details.gk-gui-stuff-fly')) {
+      var tpl = document.getElementById('gk-gui-stuff-sg-toppopover'), acc = document.querySelector('#top-menu #account');
+      if (tpl && acc && !acc.querySelector('details.gk-gui-stuff-popover')) {
         var d = tpl.content.firstElementChild.cloneNode(true);
         acc.insertBefore(d, acc.firstChild);
         d.open = true;
@@ -277,12 +294,14 @@
   }
   function page() { return document.querySelector('[data-gk-gui-sg-page]'); }
   function narrow() { return window.matchMedia && window.matchMedia('(max-width: 899px)').matches; }
-  // light or dark is the page's (theme_engine's dark sits on the page's root), so every element's choice follows, every
+  // GK Core Stuff's dark mode class, which the page gives (data-gk-gui-sg-dark) when that dark mode is there; '' without
+  function darkClass() { var p = page(); return (p && p.getAttribute('data-gk-gui-sg-dark')) || ''; }
+  // light or dark is the page's (the dark mode's class sits on the page's root), so every element's choice follows, every
   // phone frame too, and the element whose choice was pressed stays where it was in the window
   function setScheme(dark, keep) {
-    var p = page(), h = document.documentElement, before = keep ? keep.getBoundingClientRect().top : 0;
-    var cls = ['gk-theme-on'].concat(((p && p.getAttribute('data-gk-gui-sg-dark')) || '').split(' ').filter(Boolean));
-    var paint = function (root) { root.setAttribute('data-gk-scheme', dark ? 'dark' : 'light'); cls.forEach(function (c) { root.classList.toggle(c, dark); }); };
+    var h = document.documentElement, before = keep ? keep.getBoundingClientRect().top : 0, cls = darkClass();
+    if (!cls) return;
+    var paint = function (root) { root.classList.toggle(cls, dark); };
     paint(h);
     document.querySelectorAll('iframe[data-gk-gui-sg-phone]').forEach(function (f) { try { if (f.contentDocument) paint(f.contentDocument.documentElement); } catch (e) { /* not loaded */ } });
     scheme();
@@ -321,14 +340,22 @@
     });
     measure();
   }
-  // every scheme segment presses what the page shows (theme_engine's head script set data-gk-scheme before it was
-  // drawn); nothing is posted and html's style is never touched, so the drawer's unsaved values stay
+  // whether the page is dark now: the dark mode's class on the page's root, which GK Core Stuff's head script set from
+  // the device before the page was drawn, or the guide's choice after
+  function isDark() { var cls = darkClass(); return !!cls && document.documentElement.classList.contains(cls); }
+  // every scheme segment presses what the page shows; nothing is posted and html's style is never touched, so the
+  // drawer's unsaved values stay
   function scheme() {
-    var now = document.documentElement.getAttribute('data-gk-scheme') === 'dark' ? 'dark' : 'light';
+    var now = isDark() ? 'dark' : 'light';
     document.querySelectorAll('[data-gk-gui-sg-choice="scheme"] [data-gk-gui-view-segment]').forEach(function (sw) { press(sw, now); });
   }
-  // Telefon: the element's tiles in a frame 375 px wide, the guide's frame page for the element, so that every rule for
-  // a narrow window applies; the frame takes the height of its page and follows it. Dator puts the tiles back
+  // Telefon: the element's tiles in a phone's screen, a frame 390 px wide and as high as a phone (844 px, always, also
+  // in a lower window, the stylesheet), the guide's frame page for the element, so that every rule for a narrow
+  // window applies. The tiles scroll inside the frame as on a phone, so that what opens at the bottom of the window (a
+  // popover's sheet, a layer) opens at the bottom of the phone's screen and not under the whole element. The screen
+  // stands in a phone's shell (a thick frame with round corners and a mark for the speaker, the stylesheet; the mark
+  // is only a picture) with its size in words under it (data-gk-gui-sg-phone-caption), so that it reads at once as a
+  // small screen and not as a box. Dator puts the tiles back
   function phone(sec, on, title) {
     if (!sec) return;
     var body = sec.querySelector('.gk-gui-stuff-sg-body'), box = sec.querySelector('.gk-gui-stuff-sg-phone');
@@ -348,38 +375,36 @@
         var d = f.contentDocument;
         if (!d) return;
         setSchemeIn(d.documentElement);
-        // the frame grows with its page, so core's always-shown scrollbar (html overflow-y: scroll) would only take
-        // room from the 375 px
-        d.documentElement.style.overflowY = 'hidden';
-        var fit = function () { f.style.blockSize = Math.max(120, d.documentElement.scrollHeight) + 'px'; };
-        fit();
-        if (window.ResizeObserver) new ResizeObserver(fit).observe(d.body);
-      } catch (e) { /* the frame stays at its own height */ }
+      } catch (e) { /* the frame keeps the guide's light or dark of its own load */ }
     });
-    box.appendChild(f);
+    var shell = el('div', 'gk-gui-stuff-sg-phone-shell'), ear = el('span', 'gk-gui-stuff-sg-phone-ear'), words = p.getAttribute('data-gk-gui-sg-phone-caption');
+    ear.setAttribute('aria-hidden', 'true');
+    shell.appendChild(ear);
+    shell.appendChild(f);
+    box.appendChild(shell);
+    if (words) box.appendChild(el('p', 'gk-gui-stuff-sg-phone-caption', words));
     body.hidden = true;
     body.insertAdjacentElement('afterend', box);
   }
   function setSchemeIn(root) {
-    var h = document.documentElement, dark = h.getAttribute('data-gk-scheme') === 'dark', p = page();
-    var cls = ['gk-theme-on'].concat(((p && p.getAttribute('data-gk-gui-sg-dark')) || '').split(' ').filter(Boolean));
-    root.setAttribute('data-gk-scheme', dark ? 'dark' : 'light');
-    cls.forEach(function (c) { root.classList.toggle(c, dark); });
+    var cls = darkClass();
+    if (cls) root.classList.toggle(cls, isDark());
   }
-  // the page's mode can change without a press: while the account stands on Auto, theme_engine follows the computer and
-  // sets the page's root. Every scheme choice then says what the page shows, and every phone frame follows. The root is
-  // what is read, so the guide never needs to know the account's choice, and an account on Ljust or Mörkt stays. An
-  // element's choice of computer or phone is its own and is left alone; nothing is saved, and the mode moves nothing
+  // the page's mode can change without a press: while the dark mode follows the device, GK Core Stuff's script puts the
+  // class on the page's root or takes it off when the device changes. Every scheme choice then says what the page
+  // shows, and every phone frame follows. The root is what is read, so the guide never needs to know the account's
+  // choice. An element's choice of computer or phone is its own and is left alone; nothing is saved, and the mode
+  // moves nothing
   function followPage() {
-    if (!window.MutationObserver) return;
-    var h = document.documentElement, last = h.getAttribute('data-gk-scheme');
+    if (!window.MutationObserver || !darkClass()) return;
+    var h = document.documentElement, last = isDark();
     new MutationObserver(function () {
-      var now = h.getAttribute('data-gk-scheme');
+      var now = isDark();
       if (now === last) return;
       last = now;
       scheme();
       document.querySelectorAll('iframe[data-gk-gui-sg-phone]').forEach(function (f) { try { if (f.contentDocument) setSchemeIn(f.contentDocument.documentElement); } catch (e) { /* not loaded */ } });
-    }).observe(h, { attributes: true, attributeFilter: ['data-gk-scheme'] });
+    }).observe(h, { attributes: true, attributeFilter: ['class'] });
   }
 
   // ---- Visa all kod: every tile's code open, or all closed again; the button's words say what a click does (Dölj all
@@ -488,7 +513,9 @@
   }
   // ---- what leads nowhere. Every example has made-up values; what in it would lead somewhere does nothing but say so,
   // with the whisper "Exempel: leder ingenstans" under the element (the text from the page, data-gk-gui-sg-nowhere):
-  // every link, button and field in a tile marked Bara bild (data-gk-gui-sg-mode="still"), an element of the guide's own
+  // every link, button and field in a tile marked Bara bild or Bara grafiskt (data-gk-gui-sg-mode "still" or "graphic",
+  // NOWHERE_MODES, the same two as GkGuiStuff::Styleguide::NOWHERE_MODES; a graphic tile can be hovered over and
+  // tabbed to, a still one has nothing that can), an element of the guide's own
   // that only shows (data-gk-gui-sg-noop) in any tile, a link to an address in a part marked
   // data-gk-gui-sg-example-links (the guide's issue lists, the lock's Stega upp), and the links of core's context menu
   // opened from the guide's issue lists. A still copy is inert, so a click on one of its controls lands on what holds
@@ -498,14 +525,15 @@
   // click would otherwise give its field the focus or turn its check box
   var CONTROL = 'a[href], button, input, select, textarea, summary, label, [role="button"]';
   var FIELD = 'input, select, textarea';
-  var HOOKED = '[data-gk-gui-sg-try], [data-gk-gui-sg-fly], [data-gk-gui-sg-ribbon], [data-gk-gui-sg-parent]';
+  var HOOKED = '[data-gk-gui-sg-try], [data-gk-gui-sg-popover], [data-gk-gui-sg-ribbon], [data-gk-gui-sg-parent]';
   var COPY = '[data-gk-gui-lib-thumb-from], [data-gk-gui-lib-from]';
   var AWAY = 'a[href]:not([href^="#"]):not([href^="javascript:"])';
+  var NOWHERE_MODES = ['still', 'graphic'];
   function nowhereText(n) {
     var h = (n.closest && n.closest('[data-gk-gui-sg-nowhere]')) || document.querySelector('[data-gk-gui-sg-nowhere]');
     return h ? h.getAttribute('data-gk-gui-sg-nowhere') : '';
   }
-  function sayNowhere(at) { var G = window.GkGui, t = nowhereText(at); if (t && G && G.whisper) G.whisper(t, at); }
+  function sayNowhere(at) { var G = window.GkGui, t = nowhereText(at); if (t) G.whisper(t, at); }
   // the element under t that leads nowhere, or null
   function nowhere(t) {
     if (!t || !t.closest || t.closest(COPY)) return null;
@@ -518,7 +546,7 @@
     if (!c || c.closest(HOOKED)) return null;
     if (c.matches(AWAY) && c.closest('[data-gk-gui-sg-example-links]')) return c;
     var shown = c.closest('.gk-gui-stuff-sg-shown'), tile = shown && shown.closest('[data-gk-gui-sg-mode]');
-    return tile && tile.getAttribute('data-gk-gui-sg-mode') === 'still' ? c : null;
+    return tile && NOWHERE_MODES.indexOf(tile.getAttribute('data-gk-gui-sg-mode')) >= 0 ? c : null;
   }
   // a control of a still copy under the pointer at x, y in t's tile or in a comparison under Visa, or null
   function stillAt(t, x, y) {
@@ -702,9 +730,9 @@
     var now = heldNow();
     if (now === held) return;
     held = now;
-    var G = window.GkGui || {};
-    if (G.flag && G.flag.place) G.flag.place();
-    if (G.marker && G.marker.relay) G.marker.relay();
+    var G = window.GkGui;
+    G.flag.place();
+    G.marker.relay();
   }
   var pinQueued = false;
   function pinSoon() { if (!pinQueued) { pinQueued = true; window.requestAnimationFrame(function () { pinQueued = false; pin(); pinBar(); relayOnTop(); keepArrows(); }); } }
@@ -714,9 +742,21 @@
     document.querySelectorAll('[data-gk-gui-sg-menu-fold]').forEach(function (d) { d.open = !n; });
     pinSoon();
   }
+  // ---- the writing box's example: what stands after the list and when Avbryt shows is the caller's script's to say,
+  // and here the guide is the caller. A box in a part marked data-gk-gui-sg-compose-context gets that text after its
+  // list and its Avbryt shown; Avbryt takes both away again, as a page's own script would
+  function composeDemo() {
+    document.querySelectorAll('[data-gk-gui-sg-compose-context]').forEach(function (w) {
+      var ctx = w.querySelector('.gk-gui-stuff-compose-context'), cancel = w.querySelector('.gk-gui-stuff-compose-cancel');
+      if (!ctx || !cancel) return;
+      ctx.textContent = w.getAttribute('data-gk-gui-sg-compose-context');
+      cancel.hidden = false;
+      cancel.addEventListener('click', function (e) { e.preventDefault(); ctx.textContent = ''; cancel.hidden = true; });
+    });
+  }
   function start() {
     // the whisper's live region in the page from the start, so that the first "Exempel: leder ingenstans" is read
-    if (window.GkGui && window.GkGui.whisperRegion) window.GkGui.whisperRegion();
+    window.GkGui.whisperRegion();
     scheme();
     followPage();
     follow();
@@ -735,6 +775,8 @@
     pinBar();
     relayOnTop();
     window.requestAnimationFrame(fromHash);
+    saveRails();
+    composeDemo();
     document.querySelectorAll('[data-gk-gui-sg-cm]').forEach(function (w) {
       var f = w.querySelector('form[data-cm-url]');
       if (f) f.setAttribute('data-cm-url', w.getAttribute('data-gk-gui-sg-cm'));

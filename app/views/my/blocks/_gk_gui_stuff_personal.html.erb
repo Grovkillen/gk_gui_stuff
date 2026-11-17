@@ -1,6 +1,6 @@
 <%# The block Mina sidor on Min sida: in every version the person's own pages from the same register, with their
     counts, the ones that wait first %>
-<% if defined?(GkGuiStuff::Personal) && GkGuiStuff::Personal.any? %>
+<% if GkGuiStuff::Personal.any? %>
 <% s = GkGuiStuff::Personal.summary(User.current) %>
 <% rows = s[:rows].each_with_index.sort_by { |r, i| [r[:waits] && r[:n].to_i.positive? ? 0 : 1, i] }.map(&:first) %>
 <h3><%= l(:label_gk_gui_stuff_personal) %></h3>

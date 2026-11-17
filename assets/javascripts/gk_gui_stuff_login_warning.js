@@ -75,16 +75,16 @@
     }
     function opened() {
       if (!document.documentElement.classList.contains('flyout-is-active') || dismissed()) return;
-      var fly = document.querySelector('.js-flyout-menu');
-      if (!fly || fly.querySelector('.gk-gui-stuff-lw-login')) return;
-      var login = fly.querySelector('a.login');
+      var flyout = document.querySelector('.js-flyout-menu');
+      if (!flyout || flyout.querySelector('.gk-gui-stuff-lw-login')) return;
+      var login = flyout.querySelector('a.login');
       if (login) {
         var lift = G.effect(G.node('div', 'gk-gui-stuff-lw gk-gui-stuff-lw-login'), 'login_warning');
         var arrow = G.put(G.node('span', 'gk-gui-stuff-lw-arrow-h'), 'arrow-right', '\u279C', 18);
         arrow.setAttribute('aria-hidden', 'true');
         var copy = login.cloneNode(true);
         lift.appendChild(arrow); lift.appendChild(copy);
-        fly.insertAdjacentElement('afterbegin', lift);
+        flyout.insertAdjacentElement('afterbegin', lift);
       }
     }
     // a listener on the menu opening (the class core sets), never a timer

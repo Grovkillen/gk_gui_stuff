@@ -30,6 +30,5 @@
 <p class="info"><%= l(:text_gk_gui_stuff_styleguide) %></p>
 <%= gk_gui_stuff_sg_dummy_note %>
 <% unless @dark %><p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_no_dark) %></p><% end %>
-<% unless @elements %><p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_try_off) %></p><% end %>
 <% form = @form == 'library' ? 'form_library' : 'form_sidebar' %>
 <%= render partial: "gk_gui_stuff_styleguide/#{form}", locals: { sections: sections, locals: gk_gui_stuff_sg_locals } %>

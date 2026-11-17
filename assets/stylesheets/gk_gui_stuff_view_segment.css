@@ -1,16 +1,20 @@
 /* gk_gui_stuff: the view segment (gk_gui_stuff_view_segment): the segment's measures with a dashed edge and dashed
    dividers, and the chosen part in the choice role's light tone with its text in the role and bold, never filled, so
    that it is never taken for the segment that saves at once (filled, gk_gui_stuff_primitives.css). No rail, no status.
-   (0,2,1) over core's, compat's and theme_engine's button rules; logical properties. */
-.gk-gui-stuff-view-segment { display: inline-flex; vertical-align: middle; border: 1px dashed var(--gk-role-ui-frame, var(--oc-gray-5, #adb5bd)); border-radius: 4px; overflow: hidden;
-  background: var(--gk-role-ui-surface, var(--oc-white, #ffffff)); }
-.gk-gui-stuff-view-segment > button { margin: 0; padding-block: 2px; padding-inline: 10px; border: 0; border-inline-end: 1px dashed var(--gk-role-ui-frame, var(--oc-gray-5, #adb5bd));
+   (0,2,1) over core's, compat's and theme_engine's button rules; logical properties.
+   Up to ten parts: on a narrow screen they wrap to a second row. The segment stays one box with its own rounded edge;
+   every part draws its divider at its start and its top and is pulled 1px over them, so that the segment's clipping
+   hides the dividers at the box's edge and the rows meet in one dashed line. A wrapped part grows, so that every row
+   fills the box and no empty corner is left. */
+.gk-gui-stuff-view-segment { display: inline-flex; flex-wrap: wrap; max-inline-size: 100%; vertical-align: middle; border: 1px dashed var(--gk-role-ui-frame, var(--oc-gray-5, #adb5bd));
+  border-radius: 4px; overflow: hidden; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff)); }
+.gk-gui-stuff-view-segment > button { flex: 1 0 auto; margin: 0; margin-block-start: -1px; margin-inline-start: -1px; padding-block: 2px; padding-inline: 10px; border: 0;
+  border-block-start: 1px dashed var(--gk-role-ui-frame, var(--oc-gray-5, #adb5bd)); border-inline-start: 1px dashed var(--gk-role-ui-frame, var(--oc-gray-5, #adb5bd));
   border-radius: 0; background: none; color: inherit; font: inherit; line-height: 1.5; block-size: auto; cursor: pointer; }
 /* every part is as wide as its word in bold, kept by a hidden copy of the word of no height, so that nothing moves when
    a part is chosen and the light and the dark page have the same measures */
 .gk-gui-stuff-view-segment > button { display: inline-grid; justify-items: center; }
 .gk-gui-stuff-view-segment > button::after { content: attr(data-gk-gui-view-text); block-size: 0; overflow: hidden; font-weight: bold; visibility: hidden; }
-.gk-gui-stuff-view-segment > button:last-child { border-inline-end: 0; }
 .gk-gui-stuff-view-segment > button:hover { background: color-mix(in srgb, var(--gk-role-ui-choice, #1971c2) 7%, transparent); }
 .gk-gui-stuff-view-segment > button:focus-visible { outline: 2px solid var(--gk-role-ui-choice, #1971c2); outline-offset: -2px; }
 .gk-gui-stuff-view-segment > button[aria-pressed="true"] { background: var(--gk-role-ui-choice-soft, var(--oc-blue-0, #e7f5ff)); color: var(--gk-role-ui-choice, var(--oc-blue-8, #1971c2));

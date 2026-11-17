@@ -1,6 +1,6 @@
 <%# core's pagination with its numbers and the choice per page %>
 <div class="gk-gui-stuff-sg-tiles">
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_pagination), "pagination_links_full(Redmine::Pagination::Paginator.new(240, 25, 3), 240)") do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_pagination), "pagination_links_full(Redmine::Pagination::Paginator.new(240, 25, 3), 240)", mode: :graphic) do %>
     <span class="pagination"><%= pagination_links_full(Redmine::Pagination::Paginator.new(240, 25, 3, :sg_page), 240) %></span>
   <% end %>
 </div>

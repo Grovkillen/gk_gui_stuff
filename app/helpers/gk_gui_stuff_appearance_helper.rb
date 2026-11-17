@@ -41,7 +41,9 @@ module GkGuiStuffAppearanceHelper
     parts = value.kind == 'flag' ? [field, label_tag(id, value.label), help] : [label_tag(id, value.label), field, help]
     # the quiet help text under the value, as core's forms write theirs
     info = value.info.present? ? content_tag(:em, value.info, class: 'info') : nil
-    content_tag(:div, safe_join([safe_join(parts.compact, ' '), info].compact), class: 'gk-gui-stuff-form-page-value')
+    # the value's label as its own mark: the form page's script names the value by it in the box of Spara
+    content_tag(:div, safe_join([safe_join(parts.compact, ' '), info].compact), class: 'gk-gui-stuff-form-page-value',
+                                                                               data: { gk_gui_value_label: value.label })
   end
 
   # An action value's own form: hidden, after the page's form (forms never nest), its button and reason pointing at it
@@ -60,19 +62,16 @@ module GkGuiStuffAppearanceHelper
   # Whether the instance's values put the row in its sharp state
   def gk_gui_stuff_row_sharp?(row) = @register.respond_to?(:sharp?) && @register.sharp?(row.key) ? true : false
 
-  # The bar's lowest reason on the page: Optional while some row needs a reason in its sharp state, else the place's own
-  def gk_gui_stuff_appearance_floor(groups)
-    groups.any? { |_, rows| rows.any? { |r| r.respond_to?(:reason_when_sharp) && r.reason_when_sharp } } ? 'optional' : nil
-  end
-
-  # A value of a few choices: core's radio buttons in a row, its label first
+  # A value of a few choices: core's radio buttons in a row, its label first. Each button carries its choice's word
+  # (data-gk-gui-word) and the block the value's label (data-gk-gui-value-label), for the box of Spara
   def gk_gui_stuff_value_choices(name, value, current, disabled)
     radios = value.choice_list.map do |c|
       text, v = c.is_a?(Array) ? c : [c, c]
-      content_tag(:label, safe_join([radio_button_tag(name, v, v.to_s == current.to_s, id: nil, disabled: disabled), text], ' '), class: 'inline')
+      content_tag(:label, safe_join([radio_button_tag(name, v, v.to_s == current.to_s, id: nil, disabled: disabled, data: { gk_gui_word: text.to_s }), text], ' '),
+                  class: 'inline')
     end
     content_tag(:div, safe_join([content_tag(:span, "#{value.label}:", class: 'gk-gui-stuff-form-page-value-label')] + radios, ' '),
-                class: 'gk-gui-stuff-form-page-value', role: 'radiogroup', 'aria-label': value.label)
+                class: 'gk-gui-stuff-form-page-value', role: 'radiogroup', 'aria-label': value.label, data: { gk_gui_value_label: value.label })
   end
 
   # A value that is a table: a fold with its summary, closed from the start (the script opens it when something in it
@@ -82,7 +81,9 @@ module GkGuiStuffAppearanceHelper
     body = render(partial: "gk_gui_stuff_appearance/values/#{value.choices}", locals: { name: name, value: h, row: row, disabled: disabled, person: !name.start_with?("values[#{row.key}]") })
     summary = content_tag(:summary, safe_join([value.label, content_tag(:span, gk_gui_stuff_table_summary(value.choices, h),
                                                                          class: 'gk-gui-stuff-form-page-quiet')], ' '))
-    content_tag(:details, summary + content_tag(:div, body, class: 'gk-gui-stuff-form-page-details-body'), class: 'gk-gui-stuff-form-page-details')
+    # the value's label and its kind as its own marks: the box of Spara says only that a table changed
+    content_tag(:details, summary + content_tag(:div, body, class: 'gk-gui-stuff-form-page-details-body'), class: 'gk-gui-stuff-form-page-details',
+                                                                                                      data: { gk_gui_value_label: value.label, gk_gui_value_kind: 'table' })
   end
 
   # The summary of a table value: how many of its rows are set, or for the placements how many stand out and in the menu
@@ -130,8 +131,11 @@ module GkGuiStuffAppearanceHelper
   end
 
   # A stylesheet a preview needs, put in the page's head once: a module's own sheet, which the page has only while the
-  # module is on. Its rules leave alone what stands in .gk-gui-stuff-sg-still, so that Av is drawn as Redmine's own
+  # module is on. Its rules leave alone what stands in .gk-gui-stuff-sg-still, so that Av is drawn as Redmine's own. A
+  # sheet every page has (GkGuiStuff::ALWAYS_SHEETS) is never linked a second time
   def gk_gui_stuff_preview_stylesheet(name, plugin: 'gk_gui_stuff')
+    return if plugin == 'gk_gui_stuff' && GkGuiStuff::ALWAYS_SHEETS.include?(name)
+
     @gk_gui_stuff_preview_sheets ||= {}
     return if @gk_gui_stuff_preview_sheets[name]
 

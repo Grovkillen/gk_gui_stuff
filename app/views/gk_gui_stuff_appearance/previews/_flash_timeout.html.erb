@@ -1,7 +1,6 @@
 <%# Visa for Redmine's green message: Redmine's own message, still, as the style guide draws it; with the setting, a
     still picture of a message that goes by itself, and the style guide's Prova beside it with its countdown. row: the
     setting %>
-<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_elements') %>
 <% text = l(:text_gk_gui_stuff_sg_example_flash_notice) %>
 <%= gk_gui_stuff_appearance_preview(row, off: content_tag(:div, gk_gui_stuff_sg_flash(notice: text), class: 'gk-gui-stuff-sg-still', inert: true),
                                          on: gk_gui_stuff_sg_still(:notice, level: 'notice', text: text),

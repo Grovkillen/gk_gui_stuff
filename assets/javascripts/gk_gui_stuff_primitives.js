@@ -2,11 +2,13 @@
 // stylesheet, before the kernel; the kernel keeps what this puts on window.GkGui. Events are taken at the document, so
 // content that comes later needs no pass; only the groups' remembered state is laid on in a pass (GkGui.onContent
 // when the kernel is there, else once when the page is read). Plain DOM, no jQuery.
-//   GkGui.fly.close(details)                                    the fold-out box
-//   GkGui.fly.open(anchor, content, {role, onClose, className}) a fly at a link or a form button a script has, never in
-//                                                               a menu (a role gives it gk-gui-stuff-fly-roled); its
-//                                                               reason is laid under its buttons
-//   GkGui.fly.formButton                                        true: fly.open takes a form button and className
+//   GkGui.popover.close(details)                                    the fold-out box
+//   GkGui.popover.open(anchor, content, {role, onClose, className, width}) a popover at a link or a form button a script has,
+//                                                               never in a menu (a role gives it gk-gui-stuff-popover-roled;
+//                                                               width: 'wide' gk-gui-stuff-popover-wide); its reason is laid
+//                                                               under its buttons, and the anchor keeps the mark of a button
+//                                                               that opens a popover (data-gk-gui-popover-anchor)
+//   GkGui.popover.formButton                                        true: popover.open takes a form button and className
 //   (the category picker: its button follows the chosen radio; a click, Space or Enter on one closes the box,
 //   the arrow keys only move the choice)
 //   (a button with a reason: a required reason is checked before the box's button sends; Valfritt sends what was
@@ -14,9 +16,15 @@
 //   (the mount of a switch, a round check, a segment or an icon toggle: its box, the change with the reason,
 //   Esc and a click outside)
 //   GkGui.sheet.on(box, close, addCancel) / .off(box) / .narrow()  a box as a sheet below 899 px
-//   GkGui.save.set(rail, state, word)                           a rail's state: direct, changed, saved, failed
+//   GkGui.save.set(rail, state, word, o)                        a rail's state: direct, changed, saved (Sparat whispered), failed
+//                                                               (said in the notice); word is the hidden status' words at
+//                                                               changed and failed, at saved the shared Sparat is said
 //   GkGui.save.rehearse(rail, {answer, delay, control, sweep, flip})  the rail and its sweep with a made-up answer, nothing sent
 //   GkGui.save.formRecount(box)                                 a GK form's box counts its changed fields again
+//   GkGui.save.rail(el, url, {method, fields, reason})          a rail for an element a script built: {el, send(data)
+//                                                               -> Promise of the answer ({ok} or {rows: [...]}), set}
+//   GkGui.cycle.set(el, value) / .note(el, value, text) / .value(el)  a cycle button: the mode saved elsewhere, a note
+//                                                               after a mode's words in the tooltip, the mode now
 //   (an order that waits: a moved item gets the rail changed and the note says when the order holds)
 //   GkGui.roleClass(role)                                       the class of a role: 1 to 12, an alert level, admin, muted,
 //                                                               choice, effect, band-*, line-next, line-now
@@ -34,14 +42,14 @@
   try { if (tEl) T = JSON.parse(tEl.textContent); } catch (e) { /* the defaults */ }
   function closest(n, sel) { return n && n.nodeType === 1 ? n.closest(sel) : (n && n.parentElement ? n.parentElement.closest(sel) : null); }
 
-  // ---------------------------------------------------------------- fly
-  // A <details class="gk-gui-stuff-fly"> is one: its summary is the button, the rest the box, laid in the page right
+  // ---------------------------------------------------------------- popover
+  // A <details class="gk-gui-stuff-popover"> is one: its summary is the button, the rest the box, laid in the page right
   // after the button and fastened to it like a tab, growing towards the side with room. It follows the page when
   // scrolled, takes the focus to its first field, and the tab order goes on from the button. No dark background; Esc, a
-  // [data-gk-gui-fly-cancel] button and a click outside close it, the focus goes back to the button, and what was
-  // written stays. Without the script the details simply opens in place. A fly in an inert container (the style
+  // [data-gk-gui-popover-cancel] button and a click outside close it, the focus goes back to the button, and what was
+  // written stays. Without the script the details simply opens in place. A popover in an inert container (the style
   // guide's still example, drawn open) is left alone.
-  function flyClose(d, refocus) {
+  function popoverClose(d, refocus) {
     if (!d.open || d.closest('[inert]')) return;
     // Valfritt's pen left with Avbryt or Esc: the reason stays in the box but does not go with the button beside it
     if (refocus && d.matches('.gk-gui-stuff-btn-split-pen')) d.setAttribute('data-gk-gui-reason-left', '1');
@@ -79,15 +87,26 @@
     if (here >= there) el.classList.remove(cls);
     box.style.maxInlineSize = Math.max(160, Math.floor(Math.max(here, there) - extra)) + 'px';
   }
+  // a box laid over its button instead of under it (by the page's own placement, as the Save bar's) gets
+  // gk-gui-stuff-popover-up, which mirrors the tab (the primitives' CSS): read from where the box stands, so it holds
+  // whatever put it there. A sheet at the bottom on a narrow screen is neither
+  function popoverUp(d, box) {
+    d.classList.remove('gk-gui-stuff-popover-up');
+    var s = d.querySelector(':scope > summary');
+    if (!s || narrow()) return;
+    var b = box.getBoundingClientRect(), r = s.getBoundingClientRect();
+    if (b.height && (b.top + b.bottom) / 2 < r.top) d.classList.add('gk-gui-stuff-popover-up');
+  }
   // a sheet at the bottom on a narrow screen needs no side
-  function flyPlace(d) {
-    var box = d.querySelector(':scope > .gk-gui-stuff-fly-box');
+  function popoverPlace(d) {
+    var box = d.querySelector(':scope > .gk-gui-stuff-popover-box');
     if (!box) return;
-    if (narrow()) { d.classList.remove('gk-gui-stuff-fly-end'); box.style.maxInlineSize = ''; } else place(d, box, 'gk-gui-stuff-fly-end', false);
+    if (narrow()) { d.classList.remove('gk-gui-stuff-popover-end'); box.style.maxInlineSize = ''; } else place(d, box, 'gk-gui-stuff-popover-end', false);
+    popoverUp(d, box);
   }
   document.addEventListener('toggle', function (e) {
     var d = e.target;
-    if (!d.matches || !d.matches('details.gk-gui-stuff-fly') || d.closest('[inert]')) return;
+    if (!d.matches || !d.matches('details.gk-gui-stuff-popover') || d.closest('[inert]')) return;
     // Valfritt's pen: a blank reason is not sent. What was written goes with the save also when the box has closed,
     // since a press on the button beside the pen closes the box before the click sends; only Avbryt and Esc leave it
     if (d.matches('.gk-gui-stuff-btn-split-pen')) {
@@ -95,26 +114,27 @@
       if (d.open) d.removeAttribute('data-gk-gui-reason-left');
       if (pt) pt.disabled = !d.open && (pt.value.trim() === '' || d.hasAttribute('data-gk-gui-reason-left'));
     }
-    var fb = d.querySelector(':scope > .gk-gui-stuff-fly-box');
+    var fb = d.querySelector(':scope > .gk-gui-stuff-popover-box');
     if (!d.open) { if (fb) sheetOff(fb); return; }
-    document.querySelectorAll('details.gk-gui-stuff-fly[open]').forEach(function (o) { if (o !== d && !o.contains(d)) flyClose(o, false); });
-    flyPlace(d);
-    if (fb) sheetOn(fb, function () { flyClose(d, true); });
-    if (G.selectSearch) G.selectSearch.pass(d); // a field in the box that asks for the chooser
+    document.querySelectorAll('details.gk-gui-stuff-popover[open]').forEach(function (o) { if (o !== d && !o.contains(d)) popoverClose(o, false); });
+    popoverPlace(d);
+    if (fb) sheetOn(fb, function () { popoverClose(d, true); });
+    G.selectSearch.pass(d); // a field in the box that asks for the chooser
     // a box of radios gives the focus to the chosen one, else the first field, else the first button; the reason
     // stands under the box's buttons, so a box whose only field is the reason gives it the focus. What cannot be
     // undone gives it to the reason, else to Avbryt, never to the button that does it; so does a box whose button is in
-    // the role alarm and has no field, so that Enter never does the alarm's action
-    var irr = d.matches('.gk-gui-stuff-fly-irreversible') ? ':scope > .gk-gui-stuff-fly-box ' : null;
-    var own = ':scope > .gk-gui-stuff-fly-box ';
+    // the role alarm and has no field, so that Enter never does the alarm's action; a button that always asks
+    // (gk-gui-stuff-popover-ask) does the same
+    var irr = d.matches('.gk-gui-stuff-popover-irreversible, .gk-gui-stuff-popover-ask') ?':scope > .gk-gui-stuff-popover-box ' : null;
+    var own = ':scope > .gk-gui-stuff-popover-box ';
     // only what is the box's own and seen: never a field in a closed box inside it (a part's panel in +N); a fold's
     // summary is seen when its fold is
     var seen = function (n) { return ownSeen(fb, n.tagName === 'SUMMARY' && n.parentElement && n.parentElement.parentElement ? n.parentElement.parentElement : n); };
     var pick = function (sel) { return fb ? [].filter.call(fb.querySelectorAll(sel), seen)[0] || null : null; };
-    var f = (irr && (d.querySelector(irr + '.gk-gui-stuff-reason textarea') || d.querySelector(irr + '[data-gk-gui-fly-cancel]'))) ||
+    var f = (irr && (d.querySelector(irr + '.gk-gui-stuff-reason textarea') || d.querySelector(irr + '[data-gk-gui-popover-cancel]'))) ||
             pick('input[type=radio]:checked:not([disabled])') ||
             pick('input:not([type=hidden]):not([type=submit]):not([type=button]):not([disabled]), select:not([disabled]), textarea:not([disabled])') ||
-            (d.querySelector(own + '.gk-gui-stuff-btn-alarm') && d.querySelector(own + '[data-gk-gui-fly-cancel]')) ||
+            (d.querySelector(own + '.gk-gui-stuff-btn-alarm') && d.querySelector(own + '[data-gk-gui-popover-cancel]')) ||
             pick('button, a[href], summary');
     if (f) f.focus({ preventScroll: true });
   }, true);
@@ -122,13 +142,16 @@
   // is the element itself) is outside too, and goes no further
   document.addEventListener('mousedown', function (e) {
     var t = e.target;
+    // a layer that stands over the open boxes (above: 'popover', the confirmation) and its dim belong to them: a press
+    // there (OK, Avbryt) leaves the box open, so that what it confirms is still in the page
+    if (t.closest && t.closest('.gk-gui-stuff-layer-above')) return;
     // a flag stands in its own layer outside the box: a press on one whose target is inside the box is a press inside
     var flag = t.closest && t.closest('.gk-gui-stuff-flags > .gk-gui-stuff-flag');
     var flagged = flag && flag._gkGuiTarget;
-    document.querySelectorAll('details.gk-gui-stuff-fly[open]').forEach(function (d) {
+    document.querySelectorAll('details.gk-gui-stuff-popover[open]').forEach(function (d) {
       if (t === d) e.preventDefault();
       if (flagged && d.contains(flagged)) return;
-      if (!d.contains(t) || t === d) flyClose(d, false);
+      if (!d.contains(t) || t === d) popoverClose(d, false);
     });
     document.querySelectorAll('.gk-gui-stuff-mount > .gk-gui-stuff-mount-box:not([hidden])').forEach(function (b) {
       var m = b.parentElement;
@@ -138,43 +161,43 @@
   }, true);
 
   // ---------------------------------------------------------------- sheet
-  // Below 899 px every fly, mount box, rail reason box, box of edit in place and layer is a sheet at the bottom of the
+  // Below 899 px every popover, mount box, rail reason box, box of edit in place and layer is a sheet at the bottom of the
   // window (the stylesheet draws it, with the grip that is only drawn). While one is open: aria-modal true,
   // the page behind kept from scrolling (a class on the root), the focus kept in the sheet (Tab and Shift Tab go
   // round), and Avbryt added at the end when the box has none of its own (taken away again when it closes; its click
   // runs close). A window turned wide forgets the state; the box stays open as a box.
   // lockAt: where the page behind stood when the first sheet opened
-  var NARROW = window.matchMedia('(max-width: 899px)'), sheets = [], lockAt = null, flyNames = 0;
+  var NARROW = window.matchMedia('(max-width: 899px)'), sheets = [], lockAt = null, popoverNames = 0;
   function narrow() { return NARROW.matches; }
   function sheetOf(n) { return sheets.filter(function (s) { return s.box.contains(n); }).pop() || null; }
   // a part of the box's own, and seen: not in a box inside it, nor in a hidden part or a closed fold of it
   function ownSeen(box, n) {
     var h = n.closest('[hidden], details:not([open])');
-    return n.closest('.gk-gui-stuff-fly-box, .gk-gui-stuff-layer') === box && !(h && box.contains(h));
+    return n.closest('.gk-gui-stuff-popover-box, .gk-gui-stuff-layer') === box && !(h && box.contains(h));
   }
   function sheetOn(box, close, addCancel) {
     if (!narrow() || sheets.some(function (s) { return s.box === box; })) return;
     var s = { box: box, close: close, modal: box.getAttribute('aria-modal'), role: box.hasAttribute('role'), added: null, named: false };
-    var own = [].some.call(box.querySelectorAll('[data-gk-gui-fly-cancel]'), function (c) { return ownSeen(box, c); });
+    var own = [].some.call(box.querySelectorAll('[data-gk-gui-popover-cancel]'), function (c) { return ownSeen(box, c); });
     if (addCancel !== false && !own) {
       // beside the box's own first button (Klar) when it has a row of buttons, else in a row of its own at the end
       var b = document.createElement('button');
-      b.type = 'button'; b.textContent = T.cancel || ''; b.setAttribute('data-gk-gui-fly-cancel', '1');
-      var row = [].filter.call(box.querySelectorAll('.gk-gui-stuff-fly-buttons'), function (r) { return ownSeen(box, r); }).pop();
+      b.type = 'button'; b.textContent = T.cancel || ''; b.setAttribute('data-gk-gui-popover-cancel', '1');
+      var row = [].filter.call(box.querySelectorAll('.gk-gui-stuff-popover-buttons'), function (r) { return ownSeen(box, r); }).pop();
       if (row && row.firstElementChild) { row.firstElementChild.after(b); s.added = b; } else {
         s.added = document.createElement('div');
-        s.added.className = 'gk-gui-stuff-fly-buttons';
+        s.added.className = 'gk-gui-stuff-popover-buttons';
         s.added.appendChild(b);
         box.appendChild(s.added);
       }
     }
     if (!s.role) box.setAttribute('role', 'dialog');
     box.setAttribute('aria-modal', 'true');
-    // a fly's box without a name is named by its button (aria-labelledby on the summary of the fly's own details),
+    // a popover's box without a name is named by its button (aria-labelledby on the summary of the popover's own details),
     // so that the dialog is never read unnamed; its words are never copied
     var sum = box.parentElement && box.parentElement.tagName === 'DETAILS' ? box.parentElement.querySelector('summary') : null;
     if (sum && sum.parentElement === box.parentElement && !box.hasAttribute('aria-label') && !box.hasAttribute('aria-labelledby')) {
-      if (!sum.id) sum.id = 'gk-gui-stuff-fly-name-' + (++flyNames);
+      if (!sum.id) sum.id = 'gk-gui-stuff-popover-name-' + (++popoverNames);
       box.setAttribute('aria-labelledby', sum.id); s.named = true;
     }
     if (!sheets.length) lockAt = { x: window.scrollX, y: window.scrollY };
@@ -183,7 +206,7 @@
     // the page behind stays where it was
     if (lockAt && (window.scrollX !== lockAt.x || window.scrollY !== lockAt.y)) window.scrollTo(lockAt.x, lockAt.y);
   }
-  // a closing box also ends the sheets inside it (a fly open in a layer), and a sheet whose box has left the page
+  // a closing box also ends the sheets inside it (a popover open in a layer), and a sheet whose box has left the page
   // ends too, since its toggle may never be seen; else the page would stay kept from scrolling
   function sheetOff(box) {
     sheets = sheets.filter(function (s) {
@@ -216,40 +239,46 @@
   });
   G.sheet = { on: sheetOn, off: sheetOff, narrow: narrow };
 
-  // A fly from a script at a link it drew outside a menu: the button copies the link (its classes, icon and text) and
+  // A popover from a script at a link it drew outside a menu: the button copies the link (its classes, icon and text) and
   // stands in its place while the box is open. Closing it takes it away, shows the link again and gives it the focus.
-  // An entry in a menu (the row menu, the three-dot menu) never opens a fly: it opens GkGui.layer and ends with "…".
+  // An entry in a menu (the row menu, the three-dot menu) never opens a popover: it opens GkGui.layer and ends with "…".
   // The box keeps the order of every box with a reason: the question or the warning first, then the buttons
-  // (.gk-gui-stuff-fly-buttons), and a reason (.gk-gui-stuff-reason) the content drew before them is laid under them.
-  // A role gives the box its edge in the role and the class gk-gui-stuff-fly-roled, as gk_gui_stuff_fly on the server.
+  // (.gk-gui-stuff-popover-buttons), and a reason (.gk-gui-stuff-reason) the content drew before them is laid under them.
+  // A role gives the box its edge in the role and the class gk-gui-stuff-popover-roled, as gk_gui_stuff_popover on the server.
   // The anchor may also be a form's button (an input of type submit or button, or a button element): the summary then
   // takes the input's word from its value and is a button, not a plain link (core's Submit keeps its own word).
-  // o.className: classes of the caller's own on the box (its details), for its own CSS or to know its fly again.
-  function flyOpen(anchor, content, o) {
+  // o.className: classes of the caller's own on the box (its details), for its own CSS or to know its popover again.
+  // o.width: 'wide', a box of at least 22 characters on a wide screen, as width: :wide on the server.
+  // The anchor gets the mark of a button that opens a popover (data-gk-gui-popover-anchor) and keeps it when the box has
+  // closed, as the server's own buttons carry it at rest; the button that stands in its place carries it too.
+  function popoverOpen(anchor, content, o) {
     o = o || {};
-    if (anchor._gkGuiFly && anchor._gkGuiFly.isConnected) { flyClose(anchor._gkGuiFly, false); return anchor._gkGuiFly; }
+    if (anchor._gkGuiPopover && anchor._gkGuiPopover.isConnected) { popoverClose(anchor._gkGuiPopover, false); return anchor._gkGuiPopover; }
     var d = document.createElement('details'), rc = roleClass(o.role);
-    d.className = 'gk-gui-stuff-fly' + (rc ? ' ' + rc + ' gk-gui-stuff-fly-roled' : '') + (o.className ? ' ' + o.className : '');
+    d.className = 'gk-gui-stuff-popover' + (o.width === 'wide' ? ' gk-gui-stuff-popover-wide' : '') + (rc ? ' ' + rc + ' gk-gui-stuff-popover-roled' : '') +
+                  (o.className ? ' ' + o.className : '');
     var input = anchor.matches('input[type=submit], input[type=button]');
     var formButton = input || anchor.matches('button');
     var s = document.createElement('summary');
-    s.className = (anchor.className ? anchor.className + ' ' : '') + 'gk-gui-stuff-fly-button' + (formButton ? '' : ' gk-gui-stuff-fly-plain');
+    s.className = (anchor.className ? anchor.className + ' ' : '') + 'gk-gui-stuff-popover-button' + (formButton ? '' : ' gk-gui-stuff-popover-text');
     ['title', 'aria-label'].forEach(function (k) { if (anchor.hasAttribute(k)) s.setAttribute(k, anchor.getAttribute(k)); });
+    anchor.setAttribute('data-gk-gui-popover-anchor', '1');
+    s.setAttribute('data-gk-gui-popover-anchor', '1');
     if (input) s.textContent = anchor.value;
     else Array.prototype.forEach.call(anchor.childNodes, function (n) { s.appendChild(n.cloneNode(true)); });
     var box = document.createElement('div');
-    box.className = 'gk-gui-stuff-fly-box';
+    box.className = 'gk-gui-stuff-popover-box';
     if (content) box.appendChild(content);
     reasonUnder(box);
     d.appendChild(s);
     d.appendChild(box);
     anchor.parentNode.insertBefore(d, anchor.nextSibling);
     anchor.style.display = 'none';
-    anchor._gkGuiFly = d;
+    anchor._gkGuiPopover = d;
     d.addEventListener('toggle', function () {
       if (d.open) return;
       d.remove();
-      anchor._gkGuiFly = null;
+      anchor._gkGuiPopover = null;
       anchor.style.display = '';
       anchor.focus({ preventScroll: true });
       if (o.onClose) o.onClose();
@@ -258,10 +287,10 @@
     return d;
   }
   // a reason of the box's own that stands before its buttons is moved to the line under them, within the same form
-  // (a nested fly's reason and buttons are its own)
+  // (a nested popover's reason and buttons are its own)
   function reasonUnder(box) {
-    var own = function (el) { return el.closest('.gk-gui-stuff-fly-box') === box; };
-    var row = [].filter.call(box.querySelectorAll('.gk-gui-stuff-fly-buttons'), own).pop();
+    var own = function (el) { return el.closest('.gk-gui-stuff-popover-box') === box; };
+    var row = [].filter.call(box.querySelectorAll('.gk-gui-stuff-popover-buttons'), own).pop();
     if (!row) return;
     [].filter.call(box.querySelectorAll('.gk-gui-stuff-reason'), own).reverse().forEach(function (r) {
       if (r.closest('form') !== row.closest('form')) return;
@@ -269,13 +298,13 @@
     });
   }
   // formButton: this open takes a form button (its word from the value) and className, so a caller can ask for it
-  G.fly = { close: function (d) { flyClose(d, true); }, open: flyOpen, formButton: true };
+  G.popover = { close: function (d) { popoverClose(d, true); }, open: popoverOpen, formButton: true };
 
   // A button with a reason: the box's button does not send while a required reason is blank; the box says so
   // and the focus goes to the reason. Enter in the reason sends, Shift and Enter is a new line.
   function reasonReady(submit) {
-    var box = submit.closest('.gk-gui-stuff-fly-box'), ta = box && box.querySelector('.gk-gui-stuff-reason textarea[aria-required="true"]');
-    if (!ta || ta.closest('.gk-gui-stuff-fly-box') !== box || ta.value.trim() !== '') return true;
+    var box = submit.closest('.gk-gui-stuff-popover-box'), ta = box && box.querySelector('.gk-gui-stuff-reason textarea[aria-required="true"]');
+    if (!ta || ta.closest('.gk-gui-stuff-popover-box') !== box || ta.value.trim() !== '') return true;
     reasonMissing(ta);
     return false;
   }
@@ -330,7 +359,7 @@
     var box = mountBox(m), tab = m.querySelector(':scope > .gk-gui-stuff-mount-tab');
     if (!box) return;
     document.querySelectorAll('.gk-gui-stuff-mount > .gk-gui-stuff-mount-box:not([hidden])').forEach(function (b) { if (b !== box) mountClose(b.parentElement, false); });
-    document.querySelectorAll('details.gk-gui-stuff-fly[open]').forEach(function (d) { if (!d.contains(m)) flyClose(d, false); });
+    document.querySelectorAll('details.gk-gui-stuff-popover[open]').forEach(function (d) { if (!d.contains(m)) popoverClose(d, false); });
     m._gkGuiOpener = opener || tab;
     mountWords(m);
     box.hidden = false;
@@ -386,7 +415,7 @@
     if (m.getAttribute('data-gk-gui-mount') === 'required' && text === '') { if (ta) reasonMissing(ta); return; }
     var p = mountChange(m, text);
     mountClose(m, true);
-    if (p && p.then) p.then(function (j) { if (j && ta) ta.value = ''; });
+    if (p) settle(p.then(function () { if (ta) ta.value = ''; }));
   }
   // the clicks in a mount that is not bare; true when the click was the mount's. A segment's chosen part does nothing
   function mountClick(t, e) {
@@ -408,7 +437,7 @@
       if (ctl.getAttribute('aria-pressed') === 'true') return true;
       m._gkGuiWant = ctl;
     }
-    if (m.classList.contains('gk-gui-stuff-mount-locked')) mountOpen(m, ctl); else mountChange(m, '');
+    if (m.classList.contains('gk-gui-stuff-mount-locked')) mountOpen(m, ctl); else settle(mountChange(m, ''));
     return true;
   }
 
@@ -427,13 +456,13 @@
   });
   document.addEventListener('pointerdown', function (e) {
     var d = pickerOf(e.target);
-    if (d) d._gkGuiPick = !!closest(e.target, '.gk-gui-stuff-fly-box label.gk-gui-stuff-category-choice');
+    if (d) d._gkGuiPick = !!closest(e.target, '.gk-gui-stuff-popover-box label.gk-gui-stuff-category-choice');
   }, true);
   document.addEventListener('keydown', function (e) {
     var r = e.target, d = r && r.type === 'radio' ? pickerOf(r) : null;
     if (!d) return;
     d._gkGuiPick = e.key === ' ' || e.key === 'Spacebar';
-    if (e.key === 'Enter') { e.preventDefault(); flyClose(d, true); }
+    if (e.key === 'Enter') { e.preventDefault(); popoverClose(d, true); }
   });
   // the click that a pointer or Space gives the radio closes the box once the choice is made; the arrow keys' click
   // does not
@@ -441,32 +470,55 @@
     var r = e.target, d = r && r.type === 'radio' ? pickerOf(r) : null;
     if (!d || !d._gkGuiPick) return;
     d._gkGuiPick = false;
-    setTimeout(function () { flyClose(d, true); }, 0);
+    setTimeout(function () { popoverClose(d, true); }, 0);
   });
 
   // ---------------------------------------------------------------- save
   // A rail (.gk-gui-stuff-rail) saves what its controls change, posted as form data with the page's token to its
   // address; the answer is JSON {ok, message}. Changed while saving, saved for 3 s and back over 2 s, failed until the
-  // row changes again, with a notice and the value back. The word over the row's end says it; the screen reader once.
+  // row changes again, with a notice and the value back. The bar shows the state; Sparat is whispered right under the
+  // control that was pressed (GkGui.whisper, as Kopierat: in place, never sliding, never making the page longer), never
+  // a word inside the row, where it would lie over the row's last control. The rail's own status
+  // (.gk-gui-stuff-save-status) is a hidden live region only: a screen reader hears Sparar… and a failure's words from
+  // it, and Sparat once, from the whisper. A failure is seen in the notice (the role alarm) with the same words, and in
+  // the bar's red.
   function token() { var m = document.querySelector('meta[name="csrf-token"]'); return m ? m.getAttribute('content') : ''; }
-  // the word fades in 2 s and is then emptied, so that a faded word never widens the cell or a scrolling list
+  // the status' words are emptied at once: nothing in it is seen, and a word said again is then read again
   function fadeWord(st) {
-    st.classList.remove('gk-gui-stuff-save-status-on');
     clearTimeout(st._gkGuiFade);
-    st._gkGuiFade = setTimeout(function () { if (!st.classList.contains('gk-gui-stuff-save-status-on')) st.textContent = ''; }, 2000);
+    st.textContent = '';
   }
-  function setState(rail, state, word) {
+  // where Sparat is whispered: under the control that was pressed in the rail, lifted to its whole (a segment, a mount,
+  // an edit in place), so that it stands under Meningsvy | Klassisk vy and not under one of its buttons; without a
+  // control, under the rail itself. null when the press was in another rail that is saving now: when several rails
+  // save at once, only the one that was pressed whispers, the others show their bar only
+  function saveAt(rail) {
+    var p = sweepPressed && sweepPressed.isConnected ? sweepPressed : null;
+    var other = p && !rail.contains(p) ? p.closest('.gk-gui-stuff-rail') : null;
+    if (other && other.getAttribute('data-gk-gui-save') === 'changed') return null;
+    var c = sweepControl(rail);
+    return c ? (c.closest('.gk-gui-stuff-segment, .gk-gui-stuff-mount, .gk-gui-stuff-inline-edit') || c) : rail;
+  }
+  // word: the hidden status' words at changed and failed (Sparar…, the failure's words). At saved it is not read: the
+  // whisper always says the shared Sparat (form_saved), so that every rail says it alike. At failed the notice says
+  // o.notice, else word, else Inte sparat, so that the bar's red is never alone, also for a caller that sets failed
+  // itself. o: { quiet: true } says nothing at saved or failed (the cycle button whispers its new mode itself and says
+  // only its newest failure); { at: element } whispers under that element instead (the style guide's rehearsal names
+  // its control)
+  function setState(rail, state, word, o) {
     rail.setAttribute('data-gk-gui-save', state);
     var st = rail.querySelector(':scope > .gk-gui-stuff-save-status');
     clearTimeout(rail._gkGuiTimer);
     if (st) {
-      if (word) { clearTimeout(st._gkGuiFade); st.textContent = word; st.classList.add('gk-gui-stuff-save-status-on'); } else fadeWord(st);
+      if (word && state !== 'saved') { clearTimeout(st._gkGuiFade); st.textContent = word; } else fadeWord(st);
     }
     if (state === 'saved') {
-      rail._gkGuiTimer = setTimeout(function () {
-        rail.setAttribute('data-gk-gui-save', 'direct');
-        if (st) fadeWord(st);
-      }, 3000);
+      var at = o && o.at ? o.at : saveAt(rail);
+      if (!(o && o.quiet) && at && window.GkGui.whisper) window.GkGui.whisper(T.form_saved, at);
+      rail._gkGuiTimer = setTimeout(function () { rail.setAttribute('data-gk-gui-save', 'direct'); }, 3000);
+    }
+    if (state === 'failed' && !(o && o.quiet)) {
+      window.GkGui.notice.show({ level: 'alarm', text: (o && o.notice) || word || T.failed });
     }
   }
   function fieldsOf(rail) {
@@ -483,7 +535,7 @@
   // has come it takes the rail's state, saved or failed, and only then its tail is drawn after it, so that it shrinks
   // into the rail and goes. A slow answer leaves it whole in changed. Only where it is more than 400 px from the
   // control to the rail, never with reduced motion. It is a layer of its own in the rail, absolute and taking no room,
-  // laid before the bar so that the bar and the word stand over it; its place is in logical directions, so that right
+  // laid before the bar so that the bar stands over it; its place is in logical directions, so that right
   // to left mirrors it. Every rail has its own; a new save on the same rail starts over. The times are the stylesheet's.
   var SWEEP_OVER = 400, SWEEP_GROW = 500, SWEEP_SHRINK = 650;
   var SWEEP_CONTROL = 'button, input:not([type="hidden"]), select, textarea, a[href], summary, [role="button"], [role="switch"]';
@@ -556,7 +608,8 @@
   // (1000 by default), so that a slow, a good and a failed answer can be seen on any rail: nothing is sent or saved,
   // and nothing else on the page hears of it. answer: 'saved' (the default) or 'failed'. sweep: 'always' or 'never',
   // without it the setting and the distance decide as for a real save. flip: true turns the row's switch as a press
-  // would, back again when the answer is failed. Answers a promise of the answer.
+  // would, back again when the answer is failed. A failed answer is said in the notice, Inte sparat, as a real failure
+  // is, so that the example shows what is seen. Answers a promise of the answer.
   function rehearse(rail, o) {
     o = o || {};
     var answer = o.answer === 'failed' ? 'failed' : 'saved', delay = o.delay == null ? 1000 : o.delay;
@@ -570,14 +623,32 @@
     return new Promise(function (done) {
       rail._gkGuiRehearsal = setTimeout(function () {
         if (sw && answer === 'failed') setChecked(sw, !on);
-        setState(rail, answer, answer === 'failed' ? T.failed : T.saved);
+        setState(rail, answer, answer === 'failed' ? T.failed : T.saved, { at: o.control });
         sweepAnswer(s, answer);
         done(answer);
       }, delay);
     });
   }
-  // post(rail, data, undo): data a FormData; undo puts the old value back when it fails
-  function post(rail, fd, undo) {
+  // The answer is saved when it is not {ok: false} and, when it has rows ({rows: [{ok, errors, …}, …]}), every row's
+  // ok is not false; the words at a failure are its message, else its errors and the rows' errors together
+  function answerOk(j) {
+    if (!j || j.ok === false) return false;
+    return !Array.isArray(j.rows) || j.rows.every(function (r) { return !r || r.ok !== false; });
+  }
+  function answerText(j) {
+    if (!j || j instanceof Error) return T.failed;
+    if (j.message) return j.message;
+    var errs = [].concat(j.errors || []);
+    if (Array.isArray(j.rows)) j.rows.forEach(function (r) { if (r && r.errors) errs = errs.concat(r.errors); });
+    return errs.length ? errs.join(', ') : T.failed;
+  }
+  // post(rail, data, undo): data a FormData; undo puts the old value back when it fails. Always a promise: resolved
+  // with the whole answer, rejected with it at a failure (also after a reason was asked, and with {ok: false,
+  // cancelled: true} when the reason box is left with Avbryt). The rail's word at a failure is the answer's message,
+  // else its errors and the rows' errors together, else Inte sparat; the notice (said by setState) says the rail's
+  // data-gk-gui-save-failed or the same, unless o.quiet (the caller says the notice itself, as the cycle button only
+  // for its newest press)
+  function post(rail, fd, undo, o) {
     if (rail.getAttribute('data-gk-gui-save-reason') === '1' && !fd.has('reason')) return askReason(rail, fd, undo);
     var method = rail.getAttribute('data-gk-gui-save-method') || 'PATCH';
     if (method !== 'POST') fd.append('_method', method.toLowerCase());
@@ -587,25 +658,89 @@
       method: 'POST', body: fd, credentials: 'same-origin',
       headers: { 'X-CSRF-Token': token(), 'X-Requested-With': 'XMLHttpRequest', Accept: 'application/json' }
     }).then(function (r) {
-      return r.json().catch(function () { return { ok: r.ok }; }).then(function (j) { if (!r.ok || j.ok === false) throw j; return j; });
+      return r.json().catch(function () { return { ok: r.ok }; }).then(function (j) { if (!r.ok || !answerOk(j)) throw j; return j; });
     }).then(function (j) {
-      setState(rail, 'saved', T.saved);
+      setState(rail, 'saved', T.saved, o);
       sweepAnswer(sweep, 'saved');
       rail.dispatchEvent(new CustomEvent('gk-gui-saved', { bubbles: true, detail: j }));
       return j;
     }, function (j) {
       if (undo) undo();
-      setState(rail, 'failed', T.failed);
+      setState(rail, 'failed', answerText(j), { quiet: !!(o && o.quiet), notice: rail.getAttribute('data-gk-gui-save-failed') });
       sweepAnswer(sweep, 'failed');
-      var text = (j && (j.message || (j.errors && j.errors.join(', ')))) || T.failed;
-      var K = window.GkGui;
-      if (K.notice && K.notice.show) K.notice.show({ level: 'alarm', text: text }); else if (K.notice) K.notice(text);
+      throw j;
     });
   }
-  // a reason before anything is saved, in the rail's own fly box
+  // a save whose answer nobody waits for: the rail and the notice have said it, so a failure goes no further
+  function settle(p) {
+    if (p && p.catch) p.catch(function () { /* said on the rail */ });
+    return p;
+  }
+  // A rail for an element a script built (a row of its own, as people's quick row): the same marking as
+  // gk_gui_stuff_rail draws (the class, data-gk-gui-save="direct", its address and method, the bar and the hidden status), so
+  // that its switches and fields save as in a rail the server drew. o: method ('PATCH' by default, as the server's),
+  // fields (an object or FormData sent with every send), reason (a string or a function giving the reason sent with
+  // it, or a reason box the server drew, .gk-gui-stuff-save-reason, which is moved into the rail and asked first).
+  // The handle: send(data) posts data (a FormData or an object; without it the rail's own fields) with the page's
+  // token and sets Sparar, then Sparat (whispered under the control) or Inte sparat; its promise is resolved with the whole answer, so that
+  // the caller can draw the row, or rejected with it ({ok: false} or a row with ok false). set(state, word) as
+  // GkGui.save.set (a failure set so is said in the notice). rehearse(answer, delay) plays a made-up answer the same
+  // way, nothing sent.
+  function rail(el, url, o) {
+    o = o || {};
+    el.classList.add('gk-gui-stuff-rail');
+    el.setAttribute('data-gk-gui-save', 'direct');
+    el.setAttribute('data-gk-gui-save-url', url);
+    el.setAttribute('data-gk-gui-save-method', String(o.method || 'PATCH').toUpperCase());
+    var reasonBox = o.reason && o.reason.nodeType === 1 ? o.reason : null;
+    if (reasonBox && reasonBox.parentNode !== el) { reasonBox.hidden = true; el.appendChild(reasonBox); }
+    if (reasonBox) el.setAttribute('data-gk-gui-save-reason', '1');
+    if (!el.querySelector(':scope > .gk-gui-stuff-rail-bar')) {
+      var bar = document.createElement('span');
+      bar.className = 'gk-gui-stuff-rail-bar'; bar.setAttribute('aria-hidden', 'true');
+      el.appendChild(bar);
+    }
+    if (!el.querySelector(':scope > .gk-gui-stuff-save-status')) {
+      var st = document.createElement('span');
+      st.className = 'gk-gui-stuff-save-status'; st.setAttribute('role', 'status'); st.setAttribute('aria-live', 'polite');
+      el.appendChild(st);
+    }
+    function formOf(data) {
+      var fd = new FormData();
+      var add = function (src) {
+        if (!src) return;
+        if (src instanceof FormData) src.forEach(function (v, k) { fd.append(k, v); });
+        else Object.keys(src).forEach(function (k) { [].concat(src[k]).forEach(function (v) { fd.append(k, v == null ? '' : v); }); });
+      };
+      add(o.fields);
+      add(data === undefined ? fieldsOf(el) : data);
+      if (!reasonBox && o.reason && !fd.has('reason')) fd.append('reason', typeof o.reason === 'function' ? (o.reason() || '') : String(o.reason));
+      return fd;
+    }
+    return {
+      el: el,
+      send: function (data) {
+        return post(el, formOf(data), null);
+      },
+      set: function (state, word) { setState(el, state, word); },
+      // a made-up answer after delay ms (1000 by default), read as send reads one: nothing is sent; a failed one is
+      // said in the notice as a real one is (the style guide's example, as GkGui.save.rehearse)
+      rehearse: function (answer, delay) {
+        setState(el, 'changed', T.saving);
+        return new Promise(function (resolve, reject) {
+          setTimeout(function () {
+            if (answerOk(answer)) { setState(el, 'saved', T.saved); resolve(answer); } else { setState(el, 'failed', answerText(answer)); reject(answer); }
+          }, delay == null ? 1000 : delay);
+        });
+      }
+    };
+  }
+  // a reason before anything is saved, in the rail's own popover box
+  // (a promise as post's, settled when the box is answered)
   function askReason(rail, fd, undo) {
     var box = rail.querySelector(':scope > .gk-gui-stuff-save-reason');
-    if (!box) return post(rail, (fd.append('reason', ''), fd), undo);
+    if (!box) { fd.append('reason', ''); return post(rail, fd, undo); }
+    var resolve, reject, answered = new Promise(function (y, n) { resolve = y; reject = n; });
     setState(rail, 'changed', null);
     box.hidden = false;
     // a sheet on a narrow screen, the page behind dimmed by the rail's own ::before; a press there is Avbryt
@@ -619,7 +754,11 @@
       sheetOff(box);
       okB.removeEventListener('click', onOk); noB.removeEventListener('click', onNo); box.removeEventListener('keydown', onKey);
       document.removeEventListener('mousedown', onDown, true);
-      if (ok) { fd.append('reason', ta.value); ta.value = ''; post(rail, fd, undo); } else { if (undo) undo(); setState(rail, 'direct', null); }
+      if (ok) { fd.append('reason', ta.value); ta.value = ''; post(rail, fd, undo).then(resolve, reject); } else {
+        if (undo) undo();
+        setState(rail, 'direct', null);
+        reject({ ok: false, cancelled: true });
+      }
     }
     var okB = box.querySelector('.gk-gui-stuff-save-reason-ok'), noB = box.querySelector('.gk-gui-stuff-save-reason-cancel');
     function onOk() { if (ta.value.trim() === '') { ta.focus(); return; } done(true); }
@@ -628,29 +767,29 @@
     function onDown(e) { if (e.target === rail && narrow()) { e.preventDefault(); done(false); } }
     okB.addEventListener('click', onOk); noB.addEventListener('click', onNo); box.addEventListener('keydown', onKey);
     document.addEventListener('mousedown', onDown, true);
-    return null;
+    return answered;
   }
   function one(name, value) { var fd = new FormData(); fd.append(name, value); return fd; }
 
   document.addEventListener('click', function (e) {
     var t = e.target;
-    var sub = closest(t, '.gk-gui-stuff-fly-box [type=submit]');
+    var sub = closest(t, '.gk-gui-stuff-popover-box [type=submit]');
     if (sub && !reasonReady(sub)) { e.preventDefault(); return; }
-    var cancel = closest(t, '[data-gk-gui-fly-cancel]');
+    var cancel = closest(t, '[data-gk-gui-popover-cancel]');
     if (cancel) {
       var mb = cancel.closest('.gk-gui-stuff-mount > .gk-gui-stuff-mount-box');
       if (mb) { e.preventDefault(); mountClose(mb.parentElement, true); return; }
-      var d = cancel.closest('details.gk-gui-stuff-fly');
-      if (d) { e.preventDefault(); flyClose(d, true); return; }
+      var d = cancel.closest('details.gk-gui-stuff-popover');
+      if (d) { e.preventDefault(); popoverClose(d, true); return; }
       // the Avbryt a sheet was given (a layer's)
       var sh = sheetOf(cancel);
       if (sh && sh.close) { e.preventDefault(); sh.close(); }
       return;
     }
     var lb = closest(t, '[data-gk-gui-layer]');
-    if (lb) { if (G.layer) G.layer.from(lb); return; }
+    if (lb) { G.layer.from(lb); return; }
     var g = closest(t, '.gk-gui-stuff-group-toggle');
-    if (g && G.group) return G.group.toggle(g);
+    if (g) return G.group.toggle(g);
     // a mount's tab and box work also outside a rail; its change needs one
     if (mountClick(t, e)) return;
     var rail = closest(t, '.gk-gui-stuff-rail');
@@ -659,25 +798,26 @@
     if ((b = closest(t, 'button.gk-gui-stuff-switch'))) {
       var on = b.getAttribute('aria-checked') !== 'true';
       setChecked(b, on);
-      post(rail, one(b.getAttribute('data-gk-gui-save-name'), on ? '1' : '0'), function () { setChecked(b, !on); });
+      settle(post(rail, one(b.getAttribute('data-gk-gui-save-name'), on ? '1' : '0'), function () { setChecked(b, !on); }));
     } else if ((b = closest(t, '.gk-gui-stuff-segment > button'))) {
       var seg = b.parentElement, old = seg.querySelector('[aria-pressed="true"]');
       if (old === b) return;
       var press = function (n) { seg.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', x === n ? 'true' : 'false'); }); };
       press(b);
-      post(rail, one(seg.getAttribute('data-gk-gui-save-name'), b.value), function () { press(old); });
+      settle(post(rail, one(seg.getAttribute('data-gk-gui-save-name'), b.value), function () { press(old); }));
     } else if ((b = closest(t, 'button.gk-gui-stuff-icon-toggle'))) {
       var p = b.getAttribute('aria-pressed') !== 'true';
       b.setAttribute('aria-pressed', p ? 'true' : 'false');
-      post(rail, one(b.getAttribute('data-gk-gui-save-name'), p ? '1' : '0'), function () { b.setAttribute('aria-pressed', p ? 'false' : 'true'); });
+      settle(post(rail, one(b.getAttribute('data-gk-gui-save-name'), p ? '1' : '0'), function () { b.setAttribute('aria-pressed', p ? 'false' : 'true'); }));
     } else if ((b = closest(t, 'button.gk-gui-stuff-round-check'))) {
       var c = b.getAttribute('aria-checked') !== 'true';
       setChecked(b, c);
-      post(rail, one(b.getAttribute('data-gk-gui-save-name'), c ? '1' : '0'), function () { setChecked(b, !c); });
+      settle(post(rail, one(b.getAttribute('data-gk-gui-save-name'), c ? '1' : '0'), function () { setChecked(b, !c); }));
     } else if ((b = closest(t, 'button.gk-gui-stuff-inline-value'))) {
-      if (G.inline) G.inline.open(rail, b.parentElement);
+      G.inline.open(rail, b.parentElement);
     } else if ((b = closest(t, 'button.gk-gui-stuff-row-save'))) {
-      post(rail, fieldsOf(rail), null).then(function () { b.disabled = true; });
+      // Spara sleeps again only after a save that went through; after a failure it stays awake for another try
+      settle(post(rail, fieldsOf(rail), null).then(function () { b.disabled = true; }));
     }
   });
   // A row with its own Spara: its fields wake the button and the rail says changed
@@ -704,9 +844,9 @@
     if (!rail || ids.join() === before.join()) return;
     var fd = new FormData();
     ids.forEach(function (id) { fd.append(list.getAttribute('data-gk-gui-save-name'), id); });
-    post(rail, fd, function () {
+    settle(post(rail, fd, function () {
       before.forEach(function (id) { var n = list.querySelector(':scope > [data-gk-gui-id="' + CSS.escape(id) + '"]'); if (n) list.appendChild(n); });
-    });
+    }));
   }
   function orderNow(list) {
     return Array.prototype.map.call(list.querySelectorAll(':scope > .gk-gui-stuff-order-item'), function (n) { return n.getAttribute('data-gk-gui-id'); });
@@ -746,8 +886,8 @@
     var mb = closest(e.target, '.gk-gui-stuff-mount > .gk-gui-stuff-mount-box');
     if (e.key === 'Escape') {
       if (mb) { e.preventDefault(); e.stopPropagation(); mountClose(mb.parentElement, true); return; }
-      var d = closest(e.target, 'details.gk-gui-stuff-fly[open]');
-      if (d) { e.preventDefault(); e.stopPropagation(); flyClose(d, true); }
+      var d = closest(e.target, 'details.gk-gui-stuff-popover[open]');
+      if (d) { e.preventDefault(); e.stopPropagation(); popoverClose(d, true); }
       return;
     }
     // Enter in a box's reason makes the change, Shift and Enter is a new line
@@ -758,7 +898,7 @@
     // field's change on blur, so the change is told before the send. Core's warning about unsaved text forgets every
     // text area on a send and asks them again as the page leaves (it blurs them), and a reason that still had the
     // focus would be told changed then, after the send, and stop the page with the question
-    var fb = ta.closest('.gk-gui-stuff-fly-box'), send = fb && fb.querySelector('.gk-gui-stuff-fly-buttons [type=submit]');
+    var fb = ta.closest('.gk-gui-stuff-popover-box'), send = fb && fb.querySelector('.gk-gui-stuff-popover-buttons [type=submit]');
     if (send) { e.preventDefault(); ta.blur(); send.click(); }
   });
   var drag = null;
@@ -839,8 +979,8 @@
     st.className = 'gk-gui-stuff-form-status';
     st.setAttribute('role', 'status');
     st.setAttribute('aria-live', 'polite');
-    // a Save with a reason is a fly or a button in two parts: the text after all of it
-    (save.closest('.gk-gui-stuff-btn-split, details.gk-gui-stuff-fly') || save).insertAdjacentElement('afterend', st);
+    // a Save with a reason is a popover or a button in two parts: the text after all of it
+    (save.closest('.gk-gui-stuff-btn-split, details.gk-gui-stuff-popover') || save).insertAdjacentElement('afterend', st);
     box._gkGuiStatus = st;
     return st;
   }
@@ -930,7 +1070,116 @@
     recount(box);
   }
 
-  G.save = { set: setState, post: post, rehearse: rehearse, formRecount: recount };
+  G.save = { set: setState, post: post, rehearse: rehearse, formRecount: recount, rail: rail };
+
+  // ---------------------------------------------------------------- cycle button
+  // Växlingsknapp (gk_gui_stuff_cycle_button): a press moves to the next mode in the order the server gave and saves it
+  // at once through post (the element carries the address, the method and the notice's words at a failure). The icon,
+  // the tooltip, the name and the row's word change at once, the whisper at the button says the new mode, and the
+  // element dispatches gk-gui-cycle ({ value, from, back }). The button itself is never replaced, so the focus stays on
+  // it; Enter and Space press it as any button. Only the newest press decides: when its answer is a failure, the button
+  // goes back to the mode last saved (and says gk-gui-cycle with back: true) and the notice says the save failed. An
+  // older answer that saved moves the mode last saved on and says gk-gui-cycle-saved ({ value }); an older answer that
+  // failed says nothing, and the element keeps the newest press's state.
+  var CYCLE = '.gk-gui-stuff-cycle';
+  function cycleConf(el) {
+    if (!el._gkGuiCycle) {
+      var c = {};
+      try { c = JSON.parse(el.getAttribute('data-gk-gui-cycle') || '{}') || {}; } catch (e) { c = {}; }
+      c.modes = Array.isArray(c.modes) ? c.modes : [];
+      c.notes = {};
+      c.seq = 0;
+      c.savedSeq = 0;
+      c.saved = el.getAttribute('data-gk-gui-cycle-value');
+      el._gkGuiCycle = c;
+    }
+    return el._gkGuiCycle;
+  }
+  function cycleButton(el) { return el.querySelector(':scope > button.gk-gui-stuff-cycle-button'); }
+  function cycleAt(c, value) {
+    for (var i = 0; i < c.modes.length; i++) if (String(c.modes[i].value) === String(value)) return i;
+    return -1;
+  }
+  function cycleFill(s, vars) { return String(s || '').replace(/%\{(\w+)\}/g, function (m, k) { return k in vars ? vars[k] : m; }); }
+  // the mode's sign: GK Icons' icon where it is there, else the sign, else the icon from core's sprite
+  function cycleSign(m) {
+    var K = window.GkGui;
+    if (m.icon && (window.GkIcons || !m.char) && K && K.icon) return K.icon(m.icon, m.char || '', 14);
+    return document.createTextNode(m.char || '');
+  }
+  // the button drawn for a mode: its value, sign, tooltip, name and the row's word
+  function cycleDraw(el, value) {
+    var c = cycleConf(el), i = cycleAt(c, value), b = cycleButton(el);
+    if (i < 0 || !b) return;
+    var m = c.modes[i], next = c.modes[(i + 1) % c.modes.length], note = c.notes[m.value];
+    var now = note ? cycleFill(c.note, { now: m.said, note: note }) : m.said;
+    var tip = cycleFill(c.tip, { label: c.label, now: now, next: next.word });
+    b.value = m.value;
+    b.title = tip;
+    b.setAttribute('aria-label', tip);
+    el.setAttribute('data-gk-gui-cycle-value', m.value);
+    var sign = b.querySelector(':scope > .gk-gui-stuff-cycle-sign'), word = b.querySelector(':scope > .gk-gui-stuff-cycle-word');
+    if (sign) { sign.textContent = ''; sign.appendChild(cycleSign(m)); }
+    if (word) word.textContent = m.said;
+    el._gkGuiCycleDrawn = true;
+  }
+  function cycleSay(el, value, from, back) {
+    cycleDraw(el, value);
+    el.dispatchEvent(new CustomEvent('gk-gui-cycle', { bubbles: true, detail: { value: value, from: from, back: !!back } }));
+  }
+  // an answer: a save moves the mode last saved on (only a newer one); the newest failed puts it back on the button and
+  // says the notice; an older failure leaves the newest press's state (saved, or still saving) on the element
+  function cycleAnswer(el, seq, ok, value) {
+    var c = cycleConf(el);
+    if (ok && seq > c.savedSeq) {
+      c.saved = value; c.savedSeq = seq;
+      el.dispatchEvent(new CustomEvent('gk-gui-cycle-saved', { bubbles: true, detail: { value: value } }));
+    }
+    if (seq === c.seq) c.last = ok ? 'saved' : 'failed';
+    if (!ok && seq === c.seq) window.GkGui.notice.show({ level: 'alarm', text: el.getAttribute('data-gk-gui-save-failed') || T.failed });
+    else if (!ok) setState(el, c.last === 'saved' ? 'saved' : 'changed', c.last === 'saved' ? T.saved : T.saving, { quiet: true });
+    var shown = el.getAttribute('data-gk-gui-cycle-value');
+    if (c.last === 'failed' && c.saved != null && shown !== c.saved) cycleSay(el, c.saved, shown, true);
+  }
+  function cyclePress(el) {
+    var c = cycleConf(el), b = cycleButton(el);
+    if (!b || c.modes.length < 2) return;
+    var from = el.getAttribute('data-gk-gui-cycle-value'), i = cycleAt(c, from);
+    var to = c.modes[(i + 1) % c.modes.length];
+    var seq = ++c.seq;
+    c.last = null;
+    cycleSay(el, to.value, from, false);
+    window.GkGui.whisper(to.said, b);
+    var fd = new FormData();
+    fd.append(b.getAttribute('data-gk-gui-save-name') || 'value', to.value);
+    post(el, fd, null, { quiet: true }).then(function () { cycleAnswer(el, seq, true, to.value); }, function () { cycleAnswer(el, seq, false, to.value); });
+  }
+  document.addEventListener('click', function (e) {
+    var b = closest(e.target, CYCLE + ' > button.gk-gui-stuff-cycle-button');
+    if (!b || b.disabled) return;
+    e.preventDefault();
+    cyclePress(b.parentElement);
+  });
+  G.cycle = {
+    // a mode saved elsewhere (the same choice saved by another control): drawn, and the mode last saved
+    set: function (el, value) {
+      var c = cycleConf(el);
+      if (cycleAt(c, value) < 0) return;
+      c.saved = String(value);
+      cycleDraw(el, value);
+    },
+    // a note after a mode's words in the tooltip and the name ("following the device (dark right now)"); null takes it away
+    note: function (el, value, text) {
+      var c = cycleConf(el);
+      if (text == null || text === '') delete c.notes[value]; else c.notes[value] = String(text);
+      cycleDraw(el, el.getAttribute('data-gk-gui-cycle-value'));
+    },
+    value: function (el) { return el.getAttribute('data-gk-gui-cycle-value'); }
+  };
+  // the cycle buttons the server drew get their icon (GK Icons' where it is there) and their words once
+  function cyclesFirst(root) {
+    root.querySelectorAll(CYCLE).forEach(function (el) { if (!el._gkGuiCycleDrawn) cycleDraw(el, el.getAttribute('data-gk-gui-cycle-value')); });
+  }
 
   // ---------------------------------------------------------------- roles
   // The class of a role, as primitives.rb's role_class: a category 1 to 12, an alert level, admin, muted, choice, a
@@ -941,17 +1190,17 @@
     if (/^(?:[1-9]|1[0-2])$/.test(r)) return 'gk-gui-stuff-cat-' + r;
     if (/^(?:tip|info|notice|warning|alarm|critical)$/.test(r)) return 'gk-gui-stuff-alert-' + r;
     r = r.replace(/_/g, '-');
-    if (/^(?:admin|muted|choice|effect|line-next|line-now|band-(?:incoming|active|settled|closed|archived))$/.test(r)) return 'gk-gui-stuff-role-' + r;
+    if (/^(?:admin|muted|choice|effect|saved|line-next|line-now|band-(?:incoming|active|settled|closed|archived))$/.test(r)) return 'gk-gui-stuff-role-' + r;
     return '';
   }
   G.roleClass = roleClass;
 
   // ---------------------------------------------------------------- the pass
-  function pass(root) { if (G.group) G.group.first(root || document); formsFirst(root || document); }
+  function pass(root) { G.group.first(root || document); formsFirst(root || document); cyclesFirst(root || document); }
   function start() {
     pass(document);
     formsAfterSave();
-    if (window.GkGui.onContent) window.GkGui.onContent(pass);
+    window.GkGui.onContent(pass);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else setTimeout(start, 0);
 })();

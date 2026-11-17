@@ -1,0 +1,10 @@
+<%# The scroll box (gk_gui_stuff_pre): a made-up manifest long enough to scroll, with a checksum that breaks instead of
+    widening the page. The box scrolls in the page and saves nothing %>
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<% lines = [l(:text_gk_gui_stuff_sg_pre_head)] + (1..28).flat_map { |n| [l(:text_gk_gui_stuff_sg_pre_row, n: n, size: 40 + n * 17), "sha256: #{format('%02x', n * 7 % 256) * 32}"] } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_pre_box), "gk_gui_stuff_pre(text, label:)") do %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_pre_example) %></p>
+    <%= gk_gui_stuff_pre(lines.join("\n"), label: l(:label_gk_gui_stuff_sg_pre_label)) %>
+  <% end %>
+</div>

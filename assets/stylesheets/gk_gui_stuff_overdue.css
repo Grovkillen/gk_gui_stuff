@@ -2,12 +2,12 @@
    module is on for the person, so the class alone never draws anything. The stripe stands on the row's selection
    cell (td.checkbox, the class core gives the cell of the row's check box in its issue lists), never on whichever
    cell happens to come first: a list without that cell gets no stripe rather than one on another column. */
-tr.issue.overdue td.checkbox { box-shadow: inset 4px 0 0 var(--gk-gui-stuff-overdue, var(--oc-red-8)); }
-tr.issue.gk-gui-stuff-due-soon td.checkbox { box-shadow: inset 4px 0 0 var(--gk-gui-stuff-due-soon, var(--oc-yellow-8)); }
-[dir="rtl"] tr.issue.overdue td.checkbox { box-shadow: inset -4px 0 0 var(--gk-gui-stuff-overdue, var(--oc-red-8)); }
-[dir="rtl"] tr.issue.gk-gui-stuff-due-soon td.checkbox { box-shadow: inset -4px 0 0 var(--gk-gui-stuff-due-soon, var(--oc-yellow-8)); }
-tr.issue.overdue > td.due_date { color: var(--gk-gui-stuff-overdue-text, var(--oc-red-9)); font-weight: bold; }
-tr.issue.gk-gui-stuff-due-soon > td.due_date { color: var(--gk-gui-stuff-due-soon-text, var(--oc-orange-9)); }
-div.issue.overdue .due-date .value { color: var(--gk-gui-stuff-overdue-text, var(--oc-red-9)); font-weight: bold; }
-div.issue.gk-gui-stuff-due-soon .due-date .value { color: var(--gk-gui-stuff-due-soon-text, var(--oc-orange-9)); font-weight: bold; }
+tr.issue.overdue td.checkbox { box-shadow: inset 4px 0 0 var(--gk-gui-stuff-overdue, var(--gk-role-alert-alarm, var(--oc-red-8, #e03131))); } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
+tr.issue.gk-gui-stuff-due-soon td.checkbox { box-shadow: inset 4px 0 0 var(--gk-gui-stuff-due-soon, var(--gk-role-alert-warning, var(--oc-yellow-8, #f59f00))); } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
+[dir="rtl"] tr.issue.overdue td.checkbox { box-shadow: inset -4px 0 0 var(--gk-gui-stuff-overdue, var(--gk-role-alert-alarm, var(--oc-red-8, #e03131))); } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
+[dir="rtl"] tr.issue.gk-gui-stuff-due-soon td.checkbox { box-shadow: inset -4px 0 0 var(--gk-gui-stuff-due-soon, var(--gk-role-alert-warning, var(--oc-yellow-8, #f59f00))); } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
+tr.issue.overdue > td.due_date { color: var(--gk-gui-stuff-overdue-text, var(--gk-role-alert-alarm, var(--oc-red-9, #c92a2a))); font-weight: bold; } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
+tr.issue.gk-gui-stuff-due-soon > td.due_date { color: var(--gk-gui-stuff-due-soon-text, var(--gk-role-alert-warning, var(--oc-orange-9, #d9480f))); } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
+div.issue.overdue .due-date .value { color: var(--gk-gui-stuff-overdue-text, var(--gk-role-alert-alarm, var(--oc-red-9, #c92a2a))); font-weight: bold; } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
+div.issue.gk-gui-stuff-due-soon .due-date .value { color: var(--gk-gui-stuff-due-soon-text, var(--gk-role-alert-warning, var(--oc-orange-9, #d9480f))); font-weight: bold; } /* gk-u U4: an installation may set its own overdue colour here, the role stands under it */
 @media print { tr.issue td.checkbox { box-shadow: none !important; } }

@@ -1,0 +1,11 @@
+<%# The only choice (gk_gui_stuff_only_choice): where a list has one choice only, the choice is text where the list's
+    text would have stood, never a pill. The field and the word are made up; a picture only %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_only_choice_form), "gk_gui_stuff_only_choice(text, name:, value:)") do %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_only_choice_example) %></p>
+    <div class="tabular">
+      <p><label><%= l(:label_gk_gui_stuff_sg_only_choice_field) %></label><%= gk_gui_stuff_only_choice(l(:text_gk_gui_stuff_sg_only_choice_word), name: 'sg_kind', value: 'relates') %></p>
+    </div>
+  <% end %>
+</div>

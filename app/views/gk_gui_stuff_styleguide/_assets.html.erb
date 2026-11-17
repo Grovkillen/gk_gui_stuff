@@ -1,18 +1,23 @@
-<%# the guide's script and stylesheet, the modules' stylesheet for the fold and the whisper shown still, and the shared
-    elements' stylesheet for the note box at the top and the notices shown still, also when no module with them is on; the kernel's
-    script (GkGui.copy and the whisper for the copy button under each tile) when no module on has loaded it; the
-    library's stylesheet and script (the chequered ground, the chips and the copy button of both forms, and the
+<%# the guide's script and stylesheet (the kernel's script, GkGui.copy and the whisper for the copy button under each
+    tile, and the shared elements with the modules' and the elements' stylesheets, for the fold, the whisper, the note
+    box at the top and the notices shown still, are in every page's head: core.rb ALWAYS_SCRIPTS and ALWAYS_SHEETS);
+    the library's stylesheet and script (the chequered ground, the chips and the copy button of both forms, and the
     library form itself); Redmine's own script and stylesheet for its context menu, through Redmine's own helper, for the
     guide's issue lists; the opener's script, which needs the shared elements and so comes after them (they are in the
-    page's head before this, with a module that uses them), unless its module has loaded it. Drawn once per page: by
-    the guide and by the frame page %>
+    page's head before this), unless its module has loaded it; GK Core Stuff's dark mode stylesheets for the guide's
+    Light and Dark choice, linked here only where the look has not linked them for the viewer already (never twice).
+    Drawn once per page: by the guide and by the frame page %>
 <% gk_gui_stuff_library_assets %>
 <% context_menu %>
 <% content_for :header_tags do %>
-  <% unless @kernel %><%= javascript_include_tag 'gk_gui_stuff_core', plugin: 'gk_gui_stuff' %><% end %>
-  <% if @elements && !@on.include?('openers') %><%= javascript_include_tag 'gk_gui_stuff_openers', plugin: 'gk_gui_stuff' %><% end %>
+  <%= GkCoreStuff::DarkMode.stylesheet_tags(self) if @dark && !GkCoreStuff::DarkMode.on?(User.current) %>
+  <% unless Array(@on).include?('openers') %><%= javascript_include_tag 'gk_gui_stuff_openers', plugin: 'gk_gui_stuff' %><% end %>
+  <%# the list filter's script and stylesheet for its example, where neither of its modules has loaded them %>
+  <%= gk_gui_stuff_sg_example_assets %>
   <%= javascript_include_tag 'gk_gui_stuff_styleguide', plugin: 'gk_gui_stuff' %>
-  <%= stylesheet_link_tag 'gk_gui_stuff_modules', plugin: 'gk_gui_stuff' %>
-  <%= stylesheet_link_tag 'gk_gui_stuff_elements', plugin: 'gk_gui_stuff' %>
   <%= stylesheet_link_tag 'gk_gui_stuff_styleguide', plugin: 'gk_gui_stuff' %>
+  <%# the form page's own arrangement and script, for its parts under Formulär: the script is at work only in the
+      example that is a form page's form, marked as an example, so nothing of it is sent %>
+  <%= stylesheet_link_tag 'gk_gui_stuff_form_page', plugin: 'gk_gui_stuff' %>
+  <%= javascript_include_tag 'gk_gui_stuff_form_page', plugin: 'gk_gui_stuff' %>
 <% end %>

@@ -14,7 +14,7 @@
       <% (@gk_gui_stuff_actions ||= []) << [form_id, url] %>
       <% question = nil
          info = value.confirm.presence
-         if row.key == GkGuiStuffExternalPreviewController::ROW_KEY && value.name == 'clear' && defined?(GkGuiStuff::External::Storage)
+         if row.key == GkGuiStuffExternalPreviewController::ROW_KEY && value.name == 'clear'
            begin
              rows = ::GkGuiStuffLinkPreview.count
              bytes = GkGuiStuff::External::Storage.ours.sum { |p| File.file?(p) ? File.size(p) : 0 }

@@ -4,13 +4,15 @@
    that the line runs with the text direction and the narrow form can leave them. Every colour that means something is a
    role; text is the page's own or ui-muted. The neutral surface, its dividers and the shadow take the ui roles
    (surface, divider, shadow); the dot's frame takes the role frame, as the boxes' frames do.
-   A band's colour comes from data-gk-gui-band on the step, the strip's band and the bar's segment, the only way. */
+   A band's colour comes from data-gk-gui-band on the step, the strip's band and the bar's segment, the only way: the
+   band's role as the ground under its word (--gk-gui-band), and the band's line role as a step's edge, which carries no
+   text (--gk-gui-band-line). */
 .gk-gui-stuff-line { position: relative; font-size: 11.5px; padding-inline-end: 14px; }
-[data-gk-gui-band="incoming"] { --gk-gui-band: var(--gk-role-band-incoming); }
-[data-gk-gui-band="active"] { --gk-gui-band: var(--gk-role-band-active); }
-[data-gk-gui-band="settled"] { --gk-gui-band: var(--gk-role-band-settled); }
-[data-gk-gui-band="closed"] { --gk-gui-band: var(--gk-role-band-closed); }
-[data-gk-gui-band="archived"] { --gk-gui-band: var(--gk-role-band-archived); }
+[data-gk-gui-band="incoming"] { --gk-gui-band: var(--gk-role-band-incoming); --gk-gui-band-line: var(--gk-role-band-incoming-line); }
+[data-gk-gui-band="active"] { --gk-gui-band: var(--gk-role-band-active); --gk-gui-band-line: var(--gk-role-band-active-line); }
+[data-gk-gui-band="settled"] { --gk-gui-band: var(--gk-role-band-settled); --gk-gui-band-line: var(--gk-role-band-settled-line); }
+[data-gk-gui-band="closed"] { --gk-gui-band: var(--gk-role-band-closed); --gk-gui-band-line: var(--gk-role-band-closed-line); }
+[data-gk-gui-band="archived"] { --gk-gui-band: var(--gk-role-band-archived); --gk-gui-band-line: var(--gk-role-band-archived-line); }
 
 /* the strip of bands on top, and the halves weighted from the data */
 .gk-gui-stuff-line-strip { display: flex; block-size: 18px; font-size: 10.5px; }
@@ -22,12 +24,12 @@
 .gk-gui-stuff-line-strip-half, .gk-gui-stuff-line:not(.gk-gui-stuff-line-vertical) .gk-gui-stuff-line-half { min-inline-size: max(12em, var(--gk-gui-half-min, 0px)); }
 /* a line wider than its box scrolls sideways in it rather than clip; the script sets -scrolls only when the line
    does not fit, so that a step's box opens over the page as long as it fits. While a step's box is open in a line that
-   scrolls, the script trades the scrolling for -flying: the line is cut at the box's two sides only (clip on the inline
+   scrolls, the script trades the scrolling for -popover-open: the line is cut at the box's two sides only (clip on the inline
    axis leaves the block axis visible) and stays where it was scrolled to (--gk-gui-scrolled), so that the step's box
    opens over the page below it instead of in a scroll of its own */
 .gk-gui-stuff-line-scroll.gk-gui-stuff-line-scrolls { overflow-x: auto; }
-.gk-gui-stuff-line-scroll.gk-gui-stuff-line-flying { overflow-x: clip; overflow-y: visible; }
-.gk-gui-stuff-line-flying > :is(.gk-gui-stuff-line-strip, .gk-gui-stuff-line-body) { translate: var(--gk-gui-scrolled, 0px) 0; }
+.gk-gui-stuff-line-scroll.gk-gui-stuff-line-popover-open { overflow-x: clip; overflow-y: visible; }
+.gk-gui-stuff-line-popover-open > :is(.gk-gui-stuff-line-strip, .gk-gui-stuff-line-body) { translate: var(--gk-gui-scrolled, 0px) 0; }
 .gk-gui-stuff-line-strip-gap { flex: none; inline-size: 18px; }
 .gk-gui-stuff-line-body { display: flex; }
 /* room at the line's two ends inside the box that scrolls, so that a step at 1 or at the scale's end keeps its face
@@ -48,7 +50,7 @@
 .gk-gui-stuff-line-lane { position: relative; }
 .gk-gui-stuff-line-lane-name { display: block; font-size: 10px; color: var(--gk-role-ui-muted); }
 .gk-gui-stuff-line-row { position: relative; block-size: 48px; }
-.gk-gui-stuff-line-base { position: absolute; inset-inline: 0; inset-block-start: 9px; block-size: 2px; background: var(--gk-role-ui-divider); }
+.gk-gui-stuff-line-base { position: absolute; inset-inline: 0; inset-block-start: 9px; block-size: 2px; background: var(--gk-role-ui-frame); }
 .gk-gui-stuff-line-track { position: absolute; inset-block-start: 9px; block-size: 2px; inset-inline-start: var(--gk-gui-from);
   inline-size: calc(var(--gk-gui-to) - var(--gk-gui-from)); background: var(--gk-role-line-track); }
 .gk-gui-stuff-line-expected { position: absolute; inset-block-start: -13px; inset-inline-start: var(--gk-gui-at); inline-size: 0; display: flex; justify-content: center;
@@ -83,7 +85,7 @@ button.gk-gui-stuff-line-face, summary.gk-gui-stuff-line-face { cursor: pointer;
 .gk-gui-stuff-line-when { font-size: 10px; }
 /* the meaning in the form, not only the colour: a tick in what has been, an arrow in what can be chosen */
 .gk-gui-stuff-line-step-done { color: inherit; }
-.gk-gui-stuff-line-step-done .gk-gui-stuff-line-dot { background: var(--gk-role-line-done); border-color: var(--gk-role-line-done); color: var(--oc-white, #fff); }
+.gk-gui-stuff-line-step-done .gk-gui-stuff-line-dot { background: var(--gk-role-line-done); border-color: var(--gk-role-line-done); color: var(--gk-role-ui-on-fill, var(--oc-white, #fff)); }
 .gk-gui-stuff-line-step-now { color: inherit; font-weight: bold; }
 .gk-gui-stuff-line-step-now .gk-gui-stuff-line-dot { background: var(--gk-role-line-now); border-color: var(--gk-role-line-now);
   box-shadow: 0 0 0 3px var(--gk-role-line-now-soft); }
@@ -92,11 +94,11 @@ button.gk-gui-stuff-line-face, summary.gk-gui-stuff-line-face { cursor: pointer;
 [dir="rtl"] .gk-gui-stuff-line-step-next .gk-gui-stuff-line-dot svg { transform: scaleX(-1); }
 .gk-gui-stuff-line-step-next .gk-gui-stuff-line-face:is(:hover, :focus-visible) .gk-gui-stuff-line-dot,
 .gk-gui-stuff-line-step-next .gk-gui-stuff-line-face[aria-pressed="true"] .gk-gui-stuff-line-dot { background: var(--gk-role-line-next-soft); }
-.gk-gui-stuff-line-step-next .gk-gui-stuff-line-face[aria-pressed="true"] .gk-gui-stuff-line-dot { background: var(--gk-role-line-next); color: var(--oc-white, #fff); }
+.gk-gui-stuff-line-step-next .gk-gui-stuff-line-face[aria-pressed="true"] .gk-gui-stuff-line-dot { background: var(--gk-role-line-next); color: var(--gk-role-ui-on-fill, var(--oc-white, #fff)); }
 .gk-gui-stuff-line-step-reason .gk-gui-stuff-line-label::after { content: "…"; }
 .gk-gui-stuff-line-lock { position: absolute; inset-block-start: -4px; inset-inline-start: 8px; color: var(--gk-role-ui-muted); }
-/* a drawn step's fly and lock: the face is their button, the box under the step */
-.gk-gui-stuff-line-step > details.gk-gui-stuff-fly { display: block; }
+/* a drawn step's popover and lock: the face is their button, the box under the step */
+.gk-gui-stuff-line-step > details.gk-gui-stuff-popover { display: block; }
 
 /* the editable form: the steps are dragged; the number under the label, the scale, the reopening marks
    in the role alarm, the system's suggestion dashed in the role info */
@@ -127,14 +129,14 @@ tr.gk-gui-stuff-line-step-taken > td:first-child { box-shadow: inset 3px 0 0 var
 /* the compact form: the band bar, the current segment in the role now and the stroke before the
    closing; the summary; the row of actions with the fold button last, the rest hidden while the panel is open */
 .gk-gui-stuff-line-bar { display: flex; inline-size: 100%; min-inline-size: max-content; block-size: 22px; box-sizing: border-box; border-radius: 11px; overflow: hidden;
-  border: 1px solid var(--gk-role-ui-divider); font-size: 11px; cursor: pointer; }
+  border: 1px solid var(--gk-role-ui-frame); font-size: 11px; cursor: pointer; }
 /* a segment is never narrower than its word ("Arkiverad" whole): the bar is at least as wide as its words and
    scrolls sideways in its box rather than clip */
 .gk-gui-stuff-line-scroll-bar { overflow-x: auto; }
 .gk-gui-stuff-line-seg { display: block; flex: var(--gk-gui-w, 1) 1 0; min-inline-size: max-content; padding-inline: 4px; line-height: 20px; text-align: center;
   white-space: nowrap; background: var(--gk-gui-band);
   border-inline-end: 1px solid var(--gk-role-ui-surface); }
-.gk-gui-stuff-line-bar > .gk-gui-stuff-line-seg.gk-gui-stuff-line-seg-now { background: var(--gk-role-line-now); color: var(--oc-white, #fff); }
+.gk-gui-stuff-line-bar > .gk-gui-stuff-line-seg.gk-gui-stuff-line-seg-now { background: var(--gk-role-line-now); color: var(--gk-role-ui-on-fill, var(--oc-white, #fff)); }
 .gk-gui-stuff-line-bar > .gk-gui-stuff-line-seg.gk-gui-stuff-line-seg-stroke { border-inline-start: 2px solid var(--gk-role-line-stroke); }
 .gk-gui-stuff-line-summary { margin-block: 4px 0; color: var(--gk-role-ui-muted); }
 .gk-gui-stuff-line-actions { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-block-start: 5px; }
@@ -159,7 +161,7 @@ tr.gk-gui-stuff-line-step-taken > td:first-child { box-shadow: inset 3px 0 0 var
 
 /* below 899 px, and the style guide's vertical row: vertical, one heading per half, or per lane in a half with
    more than one lane with steps ("Arbete Huvudspår", the lane's name quiet); the steps of a lane in their order on a
-   vertical line, which is the band's colour as the step's edge (the band stays), the same dots and roles on it, the
+   vertical line, which is the band's line role as the step's edge (the band stays), the same dots and roles on it, the
    label and the date at the end; the stroke a row with its words "Här stängs ärendet"; no strip, row, track, mark,
    scale or lifted label; nothing dragged */
 @media (max-width: 899px) {
@@ -175,7 +177,7 @@ tr.gk-gui-stuff-line-step-taken > td:first-child { box-shadow: inset 3px 0 0 var
   .gk-gui-stuff-line-row, .gk-gui-stuff-line-row.gk-gui-stuff-line-row-up { display: flex; flex-direction: column; block-size: auto; margin: 0; }
   .gk-gui-stuff-line-step, .gk-gui-stuff-line-step.gk-gui-stuff-line-step-up { position: relative; inset: auto; order: var(--gk-gui-order); inline-size: auto;
     margin-block: 0; margin-inline: 8px 0; align-items: stretch; padding-block: 3px; padding-inline: 10px 0;
-    border-inline-start: 3px solid var(--gk-gui-band, var(--gk-role-ui-divider)); }
+    border-inline-start: 3px solid var(--gk-gui-band-line, var(--gk-role-ui-divider)); } /* gk-u U4: the line of the band its step was given */
   .gk-gui-stuff-line-face, .gk-gui-stuff-line-step-up > .gk-gui-stuff-line-face, .gk-gui-stuff-line-step-up > details > .gk-gui-stuff-line-face {
     flex-direction: row; gap: 8px; align-items: center; text-align: start; }
   .gk-gui-stuff-line-step .gk-gui-stuff-line-dot { position: absolute; inset-inline-start: -8.5px; inline-size: 14px; block-size: 14px; }
@@ -200,7 +202,7 @@ tr.gk-gui-stuff-line-step-taken > td:first-child { box-shadow: inset 3px 0 0 var
 .gk-gui-stuff-line.gk-gui-stuff-line-vertical .gk-gui-stuff-line-row { display: flex; flex-direction: column; block-size: auto; margin: 0; }
 .gk-gui-stuff-line.gk-gui-stuff-line-vertical .gk-gui-stuff-line-step { position: relative; inset: auto; order: var(--gk-gui-order); inline-size: auto;
   margin-block: 0; margin-inline: 8px 0; align-items: stretch; padding-block: 3px; padding-inline: 10px 0;
-  border-inline-start: 3px solid var(--gk-gui-band, var(--gk-role-ui-divider)); }
+  border-inline-start: 3px solid var(--gk-gui-band-line, var(--gk-role-ui-divider)); } /* gk-u U4: the line of the band its step was given */
 .gk-gui-stuff-line.gk-gui-stuff-line-vertical .gk-gui-stuff-line-face { flex-direction: row; gap: 8px; align-items: center; text-align: start; }
 .gk-gui-stuff-line.gk-gui-stuff-line-vertical .gk-gui-stuff-line-step .gk-gui-stuff-line-dot { position: absolute; inset-inline-start: -8.5px; inline-size: 14px; block-size: 14px; }
 .gk-gui-stuff-line.gk-gui-stuff-line-vertical .gk-gui-stuff-line-label { max-inline-size: none; }

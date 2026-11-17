@@ -8,14 +8,14 @@
 .gk-gui-stuff-lf > input.gk-gui-stuff-lf-input { flex: 1 1 auto; inline-size: 100%; min-inline-size: 0; max-inline-size: none; margin: 0; }
 .gk-gui-stuff-lf.gk-gui-stuff-has-icon input.gk-gui-stuff-lf-input { padding-inline-start: 26px; }
 .gk-gui-stuff-lf-end { position: absolute; inset-inline-end: 4px; inset-block-start: 50%; transform: translateY(-50%); display: inline-flex; align-items: center; gap: 4px; }
-.gk-gui-stuff-lf-count { color: var(--oc-gray-6, #868e96); font-size: 0.85em; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.gk-gui-stuff-lf-count { color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); font-size: 0.85em; white-space: nowrap; font-variant-numeric: tabular-nums; }
 .gk-gui-stuff-lf-count:empty { display: none; }
 button.gk-gui-stuff-lf-clear {
   display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; margin: 0; padding: 0;
-  border: 0; border-radius: 50%; background: transparent; color: var(--oc-gray-6, #868e96); cursor: pointer; line-height: 1;
+  border: 0; border-radius: 50%; background: transparent; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); cursor: pointer; line-height: 1;
 }
 button.gk-gui-stuff-lf-clear { inline-size: 18px; block-size: 18px; }
-button.gk-gui-stuff-lf-clear:hover, button.gk-gui-stuff-lf-clear:focus-visible { background-color: var(--oc-gray-2, #e9ecef); color: var(--oc-gray-9, #212529); outline: none; }
+button.gk-gui-stuff-lf-clear:hover, button.gk-gui-stuff-lf-clear:focus-visible { background-color: var(--gk-role-ui-raised, var(--oc-gray-2, #e9ecef)); color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); outline: none; }
 button.gk-gui-stuff-lf-clear[hidden] { display: none; }
 .gk-gui-stuff-lf-line { margin-block-end: 4px; }
 /* what does not match: every filtered list stands in #content, so (1,1,0) outranks core's and a theme's display rules

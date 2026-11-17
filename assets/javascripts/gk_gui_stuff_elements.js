@@ -132,7 +132,7 @@
     if (o.closeLabel) { x = N('button', 'gk-gui-stuff-btn', o.closeLabel); x.type = 'button'; }
     x.addEventListener('click', function () { drop(); if (o.onClose) o.onClose(); });
     tray.appendChild(n); shown.push(n);
-    if (o.effect && G.effect) G.effect(n, o.effect);
+    if (o.effect) G.effect(n, o.effect);
     n.gkGuiStuffStays = sticky;
     // The shared value says how many at a time. The oldest that goes by itself makes room; one that is to stay is never
     // taken away, nor the one just shown, so the tray may hold more than the value and then scrolls.
@@ -201,7 +201,7 @@
       waveEl = document.getElementById('gk-gui-stuff-wave');
       if (!waveEl) {
         waveEl = N('div', 'gk-gui-stuff-wave'); waveEl.id = 'gk-gui-stuff-wave';
-        if (G.effect) G.effect(waveEl, 'wave');
+        G.effect(waveEl, 'wave');
         waveEl.appendChild(N('div', 'gk-gui-stuff-wave-backdrop'));
         waveEl.appendChild(N('div', 'gk-gui-stuff-wave-motion')); // empty until a theme fills it
         var t = N('div', 'gk-gui-stuff-wave-text');
@@ -274,7 +274,7 @@
       b.appendChild(x);
     }
     host.insertAdjacentElement('afterbegin', b);
-    if (G.showWhere && o.where !== false) G.showWhere({ key: 'banner.' + (o.key || o.text), target: b, word: o.where || G.showWhere.word('banner') });
+    if (o.where !== false) G.showWhere({ key: 'banner.' + (o.key || o.text), target: b, word: o.where || G.showWhere.word('banner') });
     return b;
   }
 
@@ -393,7 +393,7 @@
     ribbonNow = r;
     ribbonPlace();
     ribbonHear();
-    if (G.showWhere) G.showWhere({ key: 'ribbon', target: frame, word: G.showWhere.word('ribbon') });
+    G.showWhere({ key: 'ribbon', target: frame, word: G.showWhere.word('ribbon') });
     return frame;
   }
 
@@ -437,8 +437,10 @@
       // wait as every hover card (the instance's setting), so that passing over it shows nothing
       var wait = (G.cfg.preview && G.cfg.preview.delay != null) ? G.cfg.preview.delay : 500;
       cornerEl.addEventListener('mouseenter', function () { clearTimeout(leave); clearTimeout(enter); if (card.hidden) enter = setTimeout(function () { open(true); }, wait); });
-      cornerEl.addEventListener('mouseleave', function () { clearTimeout(enter); clearTimeout(leave); leave = setTimeout(function () { open(false); }, 250); });
-      cornerEl.addEventListener('keydown', function (e) { if (e.key === 'Escape') { open(false); fold.focus(); } });
+      // a popover open in the card (the question before Ladda om) keeps the card open until it closes; its Esc is its own
+      var asking = function () { return !!card.querySelector('details.gk-gui-stuff-popover[open]'); };
+      cornerEl.addEventListener('mouseleave', function () { clearTimeout(enter); clearTimeout(leave); leave = setTimeout(function () { if (!asking()) open(false); }, 250); });
+      cornerEl.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !e.target.closest('details.gk-gui-stuff-popover')) { open(false); fold.focus(); } });
       host.classList.add('gk-gui-stuff-corner-host', 'gk-gui-stuff-corner-room');
       host.insertAdjacentElement('afterbegin', cornerEl);
     }
@@ -450,24 +452,35 @@
     count.textContent = o.count; count.setAttribute('aria-live', 'polite');
     cornerEl.querySelector('.gk-gui-stuff-corner-fold').setAttribute('aria-label', G.t('corner_title') + ' (' + o.count + ')');
     var card2 = cornerEl.querySelector('.gk-gui-stuff-corner-card');
+    var ul = N('ul');
+    ul.setAttribute('data-gk-gui-corner-list', '');
+    var max = G.opt('elements').corner_max || 20;
+    (o.entries || []).slice(0, max).forEach(function (e) { ul.appendChild(N('li', null, e)); });
+    if ((o.entries || []).length > max) ul.appendChild(N('li', 'gk-gui-stuff-corner-more', G.t('and_more', { count: o.entries.length - max })));
+    cornerCount = o.count;
+    cornerLevel = o.level === 'notice' ? 'notice' : 'info';
+    if (!cornerStop) cornerStop = G.showWhere.watch(foldEl, cornerTell);
+    // a question open in the card (the popover before Ladda om) stays with its button and its focus: only the list is
+    // new, so that the card is not drawn again under the person who is answering and the sheet's lock is let go by
+    // the popover itself when it closes
+    var oldList = card2.querySelector('[data-gk-gui-corner-list]');
+    if (oldList && card2.querySelector('details.gk-gui-stuff-popover[open]')) {
+      card2.replaceChild(ul, oldList);
+      cornerTell();
+      return;
+    }
     card2.textContent = '';
     // the title with reload and the cross at its end, top right as in the notices (no "Ladda om" and "Avfärda"
     // as words at the foot)
     var head = N('div', 'gk-gui-stuff-corner-head');
     head.appendChild(N('strong', null, G.t('corner_title')));
     var row = N('span', 'gk-gui-stuff-corner-buttons');
-    row.appendChild(G.iconButton({ icon: 'reload', label: G.t('reload'), fallback: '↻', onClick: function () { if (o.onReload) o.onReload(); else location.reload(); } }));
+    // onReload(button): the caller may ask first, in a popover at the button
+    row.appendChild(G.iconButton({ icon: 'reload', label: G.t('reload'), fallback: '↻', onClick: function (e) { if (o.onReload) o.onReload(e.currentTarget); else location.reload(); } }));
     row.appendChild(G.iconButton({ icon: 'close', label: G.t('dismiss'), fallback: '×', onClick: function () { cornerEl.remove(); cornerEl = null; cornerGone(); if (o.onDismiss) o.onDismiss(); } }));
     head.appendChild(row);
     card2.appendChild(head);
-    var ul = N('ul');
-    var max = G.opt('elements').corner_max || 20;
-    (o.entries || []).slice(0, max).forEach(function (e) { ul.appendChild(N('li', null, e)); });
-    if ((o.entries || []).length > max) ul.appendChild(N('li', 'gk-gui-stuff-corner-more', G.t('and_more', { count: o.entries.length - max })));
     card2.appendChild(ul);
-    cornerCount = o.count;
-    cornerLevel = o.level === 'notice' ? 'notice' : 'info';
-    if (G.showWhere && !cornerStop) cornerStop = G.showWhere.watch(foldEl, cornerTell);
     cornerTell();
   }
 

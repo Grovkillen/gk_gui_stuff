@@ -3,12 +3,12 @@
    Stuff marks current-status (transitions) or field-name (field permissions); the script sets the box's class only
    where the marks are. */
 .gk-gui-stuff-sticky-clone { position: fixed; inset-block-start: 0; z-index: 30; overflow: hidden; pointer-events: none; display: none;
-  box-shadow: 0 2px 4px rgba(var(--oc-black-rgb), 0.12); }
+  box-shadow: 0 2px 4px color-mix(in srgb, var(--gk-role-ui-shadow, var(--oc-black, #000)) 12%, transparent); }
 .gk-gui-stuff-sticky-clone.gk-gui-stuff-sticky-on { display: block; }
 .gk-gui-stuff-sticky-clone table { table-layout: fixed; margin: 0; }
 .gk-gui-stuff-sticky-clone th, .gk-gui-stuff-sticky-clone td, .gk-gui-stuff-sticky-clone a, .gk-gui-stuff-sticky-clone input { pointer-events: auto; }
-.gk-gui-stuff-sticky-clone thead td { background: var(--oc-white, #ffffff); }
+.gk-gui-stuff-sticky-clone thead td { background: var(--gk-role-ui-surface, var(--oc-white, #ffffff)); }
 .gk-gui-stuff-sticky-first table.workflows tbody td.name, .gk-gui-stuff-sticky-first table.workflows thead :is(.current-status, .field-name) {
-  position: sticky; inset-inline-start: 0; z-index: 1; background: var(--oc-white, #ffffff); }
-.gk-gui-stuff-sticky-first table.workflows thead :is(th.current-status, th.field-name) { background: var(--oc-gray-2, #e9ecef); }
+  position: sticky; inset-inline-start: 0; z-index: 1; background: var(--gk-role-ui-surface, var(--oc-white, #ffffff)); }
+.gk-gui-stuff-sticky-first table.workflows thead :is(th.current-status, th.field-name) { background: var(--gk-role-ui-raised, var(--oc-gray-2, #e9ecef)); }
 @media print { .gk-gui-stuff-sticky-clone { display: none !important; } }

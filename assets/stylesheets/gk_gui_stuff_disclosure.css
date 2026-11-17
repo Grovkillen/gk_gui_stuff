@@ -1,0 +1,28 @@
+/* gk_gui_stuff: the disclosure (fällningen), drawn by gk_gui_stuff_disclosure (disclosure.rb) and GkGui.disclosure.make
+   (gk_gui_stuff_disclosure.js). A details the browser folds by itself: its summary is the button, with the arrow of
+   core's icon-collapsed and icon-expanded drawn here in the summary's colour, the words that turn with the state (the
+   one that does not hold is not drawn, so a screen reader reads one) and the count after them, all in the middle of the
+   row. Every colour is a role with its Open Color fallback, which also gives the dark mode; logical properties only. */
+details.gk-gui-stuff-disclosure { margin-block: 0.25em; }
+details.gk-gui-stuff-disclosure > summary.gk-gui-stuff-disclosure-toggle {
+  display: inline-flex; align-items: center; gap: 0.35em; min-block-size: 1.5em; cursor: pointer; list-style: none;
+  color: var(--gk-role-ui-link, var(--oc-blue-8, #1971c2)); }
+details.gk-gui-stuff-disclosure > summary.gk-gui-stuff-disclosure-toggle::-webkit-details-marker { display: none; }
+/* the arrow: two edges of a small square turned, pointing to the text's end when closed and down when open */
+details.gk-gui-stuff-disclosure > summary.gk-gui-stuff-disclosure-toggle::before {
+  content: ''; flex: none; inline-size: 0.4em; block-size: 0.4em; margin-inline: 0.15em 0.1em;
+  border-block-end: 2px solid currentColor; border-inline-end: 2px solid currentColor; transform: rotate(-45deg); transition: transform 0.15s; }
+details.gk-gui-stuff-disclosure[open] > summary.gk-gui-stuff-disclosure-toggle::before { transform: rotate(45deg); }
+[dir="rtl"] details.gk-gui-stuff-disclosure > summary.gk-gui-stuff-disclosure-toggle::before { transform: rotate(45deg); }
+[dir="rtl"] details.gk-gui-stuff-disclosure[open] > summary.gk-gui-stuff-disclosure-toggle::before { transform: rotate(-45deg); }
+details.gk-gui-stuff-disclosure > summary.gk-gui-stuff-disclosure-toggle:hover > span:not(.gk-gui-stuff-count) { text-decoration: underline; }
+details.gk-gui-stuff-disclosure > summary.gk-gui-stuff-disclosure-toggle:focus-visible {
+  outline: 2px solid var(--gk-role-ui-link, var(--oc-blue-8, #1971c2)); outline-offset: 2px; border-radius: 2px; }
+/* the words that turn: the closed one while closed, the open one while open */
+details.gk-gui-stuff-disclosure[open] > summary > .gk-gui-stuff-disclosure-closed,
+details.gk-gui-stuff-disclosure:not([open]) > summary > .gk-gui-stuff-disclosure-open { display: none; }
+details.gk-gui-stuff-disclosure > summary > .gk-gui-stuff-count { margin-inline-start: 0.1em; }
+.gk-gui-stuff-disclosure-body { margin-block-start: 0.35em; color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); }
+@media (prefers-reduced-motion: reduce) {
+  details.gk-gui-stuff-disclosure > summary.gk-gui-stuff-disclosure-toggle::before { transition: none; }
+}

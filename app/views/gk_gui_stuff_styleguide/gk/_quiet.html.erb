@@ -1,0 +1,34 @@
+<%# Quiet text (gk_gui_stuff_quiet): small and muted, soft, after a field on its row, as a line of help with a link in
+    it, in full size, and a point in time that never breaks inside, shown in a narrow box beside one that does. The
+    persons, the times and the texts are made up, and the link leads nowhere; the tiles with the field and the link can be hovered over and tabbed to (Bara grafiskt), the rest are pictures only %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_quiet_example), class: 'gk-gui-stuff-direct-note') %>
+<% at = l(:text_gk_gui_stuff_sg_quiet_at) %>
+<% who = "#{l(:label_gk_gui_stuff_sg_example_person_5_first)} #{l(:label_gk_gui_stuff_sg_example_person_5_last)}" %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_quiet_muted), "gk_gui_stuff_quiet(text)") do %>
+    <%= note %>
+    <%= who %> <%= gk_gui_stuff_quiet(at) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_quiet_soft), "gk_gui_stuff_quiet(text, soft: true)") do %>
+    <%= note %>
+    <%= who %> <%= gk_gui_stuff_quiet(l(:text_gk_gui_stuff_sg_entry_corrects, number: '#39'), soft: true) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_quiet_inline), "gk_gui_stuff_quiet(text, inline: true)", mode: :graphic) do %>
+    <%= note %>
+    <%= text_field_tag(nil, l(:text_gk_gui_stuff_sg_quiet_field), id: nil, readonly: true, size: 14, 'aria-label': l(:label_gk_gui_stuff_sg_quiet_field)) %><%= gk_gui_stuff_quiet(l(:text_gk_gui_stuff_sg_quiet_origin), inline: true) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_quiet_help), "gk_gui_stuff_quiet(tag: :p) { text_with_a_link }", mode: :graphic) do %>
+    <%= note %>
+    <%= gk_gui_stuff_quiet(tag: :p) do %><%= l(:text_gk_gui_stuff_sg_quiet_help) %> <%= link_to(l(:label_gk_gui_stuff_sg_quiet_help_link), '#') %><% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_quiet_full), "gk_gui_stuff_quiet(text, soft: true, full: true)") do %>
+    <%= note %>
+    <%= l(:label_gk_gui_stuff_sg_thing_example_lead) %> <%= gk_gui_stuff_quiet(l(:text_gk_gui_stuff_sg_quiet_hidden), soft: true, full: true) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_quiet_nowrap), "gk_gui_stuff_quiet(time, nowrap: true)") do %>
+    <%= note %>
+    <div class="gk-gui-stuff-sg-narrow"><%= l(:text_gk_gui_stuff_sg_quiet_changed_by, name: who) %> <%= gk_gui_stuff_quiet(at, nowrap: true) %></div>
+    <div class="gk-gui-stuff-sg-narrow"><%= l(:text_gk_gui_stuff_sg_quiet_changed_by, name: who) %> <%= gk_gui_stuff_quiet(at) %></div>
+  <% end %>
+</div>

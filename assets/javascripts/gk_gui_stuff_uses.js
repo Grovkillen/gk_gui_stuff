@@ -6,9 +6,13 @@
 //   fullscreen      a view state: only the content, remembered per user on the server
 //   branch_jump     the separator in the project breadcrumb opens the branch of the project tree
 (function () {
+  // the primitives, the kernel and the shared elements are on every page before this module (instance_head)
   var G = window.GkGui;
-  if (!G || !G.surface) return;
   var N = G.node, root = G.cfg.urlRoot || '', page = G.cfg.page || {};
+  // core's Avbryt, from the primitives' words
+  function cancelWord() {
+    try { return JSON.parse(document.getElementById('gk-gui-stuff-primitives-texts').textContent).cancel || ''; } catch (e) { return ''; }
+  }
   function typing(e) { var t = e.target; return /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable; }
   function token() { var m = document.querySelector('meta[name="csrf-token"]'); return m ? m.content : ''; }
   function ss(k, v) { try { if (v === undefined) return window.sessionStorage.getItem('gkguistuff.' + k); if (v === null) window.sessionStorage.removeItem('gkguistuff.' + k); else window.sessionStorage.setItem('gkguistuff.' + k, v); } catch (e) { return null; } }
@@ -50,7 +54,6 @@
       return r && r.tab === tabId() && r.url === location.href && r.until > Date.now() && nav.type === 'reload' ? r : null;
     }
     function asNotice(word, level, text) {
-      if (!G.notice || !G.notice.show) return;
       G.notice.show({ level: level === 'error' ? 'alarm' : 'info', text: String(word).toUpperCase() + (text ? ': ' + text : ''), life: level === 'error' ? 'sticky' : undefined });
     }
     // a wave born with the page that nothing takes over (no outcome to show) just fades
@@ -140,7 +143,7 @@
   // With its own setting on and the wave off for the person, a form that was sent says its outcome in the corner: the
   // done word (SPARAT, KLART) briefly, FEL (alarm) until it is closed. The words come from the form
   // (data-gk-gui-stuff-wave-done, -failed) as for the wave. Redmine's own message stands either way.
-  if (G.on('outcome_notice') && !G.on('wave') && G.notice && G.notice.show) {
+  if (G.on('outcome_notice') && !G.on('wave')) {
     document.addEventListener('submit', function (e) {
       var f = e.target;
       if (!f || f.id === 'sudo-form' || (f.method || '').toLowerCase() !== 'post' || f.dataset.remote === 'true' || e.defaultPrevented) return;
@@ -182,14 +185,22 @@
       G.corner.show({
         count: seen.length, entries: seen, level: d.mine ? 'notice' : 'info',
         onDismiss: function () { seen = []; gone = true; },
-        onReload: function () {
+        onReload: function (button) {
           // only text the person has written since the page came (the description is in the form from the start)
           var changed = Array.prototype.some.call(document.querySelectorAll('#issue-form textarea, #issue-form input[type=text]'), function (t) { return t.value !== t.defaultValue; });
-          if (changed && !window.confirm(G.t('reload_unsaved'))) return;
-          location.reload();
+          if (!changed) { location.reload(); return; }
+          // the question in a popover at the corner's button: Ladda om (the written text is lost) and Avbryt, the focus on Avbryt
+          var ask = N('div', 'gk-gui-stuff-corner-ask');
+          ask.appendChild(N('p', null, G.t('reload_unsaved')));
+          var row = N('div', 'gk-gui-stuff-popover-buttons');
+          var go = N('button', 'gk-gui-stuff-btn-alarm', G.t('reload')); go.type = 'button';
+          go.addEventListener('click', function () { location.reload(); });
+          var stay = N('button', null, cancelWord()); stay.type = 'button'; stay.setAttribute('data-gk-gui-popover-cancel', '1');
+          row.appendChild(go); row.appendChild(stay); ask.appendChild(row);
+          G.popover.open(button, ask, { role: 'warning', className: 'gk-gui-stuff-popover-irreversible' });
         }
       });
-      if (G.effect) G.effect(document.querySelector('.gk-gui-stuff-corner'), 'corner');
+      G.effect(document.querySelector('.gk-gui-stuff-corner'), 'corner');
     }
     function beat() {
       if (document.hidden) return; // a page nobody looks at asks nothing
@@ -239,14 +250,29 @@
       // a jump unfolds the note one lands in
       var folded = item.el.querySelector('.gk-gui-stuff-fold'), btn = item.el.querySelector('.gk-gui-stuff-fold-btn');
       if (folded && btn) btn.click();
-      item.el.scrollIntoView({ block: 'start', behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+      // one scroll to the landing line (landing() below), which also counts a held header the scroll margin leaves out
+      var top = window.scrollY + item.el.getBoundingClientRect().top - landing(item.el);
+      window.scrollTo({ top: Math.max(0, top), behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
       item.el.classList.add('gk-gui-stuff-hn-at');
       setTimeout(function () { item.el.classList.remove('gk-gui-stuff-hn-at'); }, 1800);
       if (item.anchor && item.anchor.indexOf('#') >= 0) history.replaceState(null, '', item.anchor.slice(item.anchor.indexOf('#')));
     }
+    // Where a jump lands: the note's own scroll margin (core's room for its header and the sticky issue header, from
+    // 6.1; none in 6.0) and the page's scroll padding (GK's band and login warning above them, gk_gui_stuff_elements.css).
+    // Read as computed values, so no series is named. Core's header (its id header), where core holds it over the page
+    // (fixed or sticky, as on a phone), is counted by its lower edge: where the scroll margin leaves no room for it
+    // (6.0 on a phone), the jump still lands below it, and where it does the sum is the larger and wins.
+    function landing(el) {
+      var r = getComputedStyle(document.documentElement), s = getComputedStyle(el);
+      var line = (parseFloat(s.scrollMarginBlockStart || s.scrollMarginTop) || 0) + (parseFloat(r.scrollPaddingBlockStart || r.scrollPaddingTop) || 0);
+      var h = document.getElementById('header'), hs = h && getComputedStyle(h);
+      if (hs && (hs.position === 'fixed' || hs.position === 'sticky') && shown(h)) line = Math.max(line, h.getBoundingClientRect().bottom);
+      return line;
+    }
+    // the note one is at: the last whose top has reached the landing line
     function current(list) {
       var best = -1;
-      list.forEach(function (n, i) { if (shown(n.el) && n.el.getBoundingClientRect().top < 120) best = i; });
+      list.forEach(function (n, i) { if (shown(n.el) && n.el.getBoundingClientRect().top <= landing(n.el) + 8) best = i; });
       return best;
     }
     actions.history = function () {
@@ -262,7 +288,8 @@
         // step from the note the last jump landed on; scrolled away from it (or no jump yet), start from where the page is
         list = notes().filter(function (n) { return n.note; });
         var i = -1, r = at && at.getBoundingClientRect();
-        if (r && r.bottom > 0 && r.top < window.innerHeight) list.forEach(function (n, x) { if (n.el === at) i = x; });
+        // still on screen: some of it below the landing line (a note wholly under the header counts as left)
+        if (r && r.bottom > landing(at) && r.top < window.innerHeight) list.forEach(function (n, x) { if (n.el === at) i = x; });
         if (i < 0) i = current(list);
         var to = (e.key === 'j' || e.key === 'n') ? list[i + 1] : (i > 0 ? list[i - 1] : null);
         if (to) { e.preventDefault(); go(to); }
@@ -273,7 +300,7 @@
   // ------------------------------------------------------------------ fullscreen (view_state)
   if (G.on('fullscreen')) {
     var view = G.cfg.view || {};
-    function apply(v) { document.documentElement.classList.toggle('gk-gui-stuff-fullscreen', v === 'on'); if (v === 'on') G.effect(document.documentElement, 'fullscreen'); else if (G.uneffect) G.uneffect(document.documentElement, 'fullscreen'); }
+    function apply(v) { document.documentElement.classList.toggle('gk-gui-stuff-fullscreen', v === 'on'); if (v === 'on') G.effect(document.documentElement, 'fullscreen'); else G.uneffect(document.documentElement, 'fullscreen'); }
     apply(view.fullscreen);
     actions.fullscreen = function () {
       var next = document.documentElement.classList.contains('gk-gui-stuff-fullscreen') ? 'off' : 'on';
@@ -290,7 +317,7 @@
   (G.cfg.layout || []).forEach(function (k) {
     document.documentElement.classList.add(k);
     var part = /^gk-gui-stuff-(sidebar|header)-/.exec(k);
-    if (part && G.effect) G.effect(document.documentElement, 'layout_' + part[1]);
+    if (part) G.effect(document.documentElement, 'layout_' + part[1]);
   });
 
   // ------------------------------------------------------------------ the project menu as icons
@@ -427,10 +454,17 @@
         if (r.kind === 'action') a.addEventListener('click', function (e) { e.preventDefault(); var d = a.closest('.drdn'); if (d) d.classList.remove('expanded'); actions[r.action](a); });
         if (r.kind === 'post') a.addEventListener('click', function (e) {
           e.preventDefault();
-          if (r.confirm && !window.confirm(r.confirm)) return;
-          var f = N('form'); f.method = 'post'; f.action = r.href; f.style.display = 'none';
-          var tk = N('input'); tk.type = 'hidden'; tk.name = 'authenticity_token'; tk.value = token(); f.appendChild(tk);
-          document.body.appendChild(f); f.submit();
+          var send = function () {
+            var f = N('form'); f.method = 'post'; f.action = r.href; f.style.display = 'none';
+            var tk = N('input'); tk.type = 'hidden'; tk.name = 'authenticity_token'; tk.value = token(); f.appendChild(tk);
+            document.body.appendChild(f); f.submit();
+          };
+          if (!r.confirm) { send(); return; }
+          // an entry in a menu never opens a popover: the confirmation in the upper layer, named after the entry, and the
+          // focus back on the menu's button
+          var d = a.closest('.drdn'); if (d) d.classList.remove('expanded');
+          var trig = d ? d.querySelector('.drdn-trigger') : null;
+          G.confirm.open({ text: r.confirm, ok: r.label, opener: trig || a, onOk: send });
         });
         if (out) { bar.insertBefore(a, firstOwn); return; }
         // a line only between rows: never first in the menu, never after another line

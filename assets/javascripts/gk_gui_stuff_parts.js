@@ -1,14 +1,16 @@
 // gk_gui_stuff: the small primitives a script draws as the server's helpers draw them (primitives.rb, pill.rb), the
-// pill, the icon button and the count, the foldable group's button, and the form of a mark's note in its fly. Loaded on every page right after
+// pill, the icon button and the count, the foldable group's button, and the form of a mark's note in its popover. Loaded on every page right after
 // gk_gui_stuff_primitives.js (whose GkGui.roleClass it uses and whose click and pass call GkGui.group), before the
 // kernel, which keeps what this puts on GkGui. Plain DOM, no jQuery.
 //   GkGui.group.set(button, open)                               a fold button's state and words (event gk-gui-group-toggle)
 //   GkGui.pill({text, role, typeIcon, typeLabel, count, note, removeLabel, onRemove, disabled, reason, reasonLabel, button, choice,
-//               pressed, check, parts, open, dashed, className})
+//               pressed, check, parts, open, dashed, className, dot, iconAfter, iconAfterLabel, current, expected, muted,
+//               chosen, as, aria})
 //                                                               a pill as gk_gui_stuff_pill draws it
 //   GkGui.choose(buttons, on)                                   a row of choice pills: the one pressed, its check moved
 //   GkGui.iconButton({icon, label, fallback, href, onClick, className})  the icon button as gk_gui_stuff_icon_button
 //   GkGui.count({n, shared, role, title})                       the count as gk_gui_stuff_count
+//   GkGui.values(rows, mode)                                    the values as gk_gui_stuff_values (the same markup)
 //   GkGui.effect(element, name)                                 a module's effect mark (data-gk-gui-stuff-effect)
 //   GkGui.uneffect(element, name)                               the name taken out of the mark when the effect is gone
 (function () {
@@ -62,15 +64,34 @@
     s.appendChild(ic);
     return s;
   }
+  // The variants, as the helper's: dot (a dot in the role before the text), iconAfter and
+  // iconAfterLabel (an icon in the role after the text, its words for the screen reader and the tooltip), current
+  // (a ring outside, nothing moves), expected (a dashed edge in its own role), muted (toned, the edge 3:1; never with
+  // chosen or a pressed choice), chosen (filled in its role, as the helper's chosen:), as: 'button' (the whole pill one
+  // button; no parts, no x, no button of its own; aria from button.aria)
   function pill(o) {
-    var p = document.createElement('span'), rc = roleClass(o.role), buttons = !!(o.button || (o.parts && o.parts.length));
+    var asButton = o.as === 'button';
+    if (asButton && (o.button || (o.parts && o.parts.length) || o.onRemove)) throw new Error('a pill that is a button holds no button of its own and no x');
+    var p = document.createElement(asButton ? 'button' : 'span'), rc = roleClass(o.role), buttons = !asButton && !!(o.button || (o.parts && o.parts.length));
     var choice = !!o.choice && !!o.button && !(o.parts && o.parts.length), pressed = choice && o.pressed === true, off = choice && !!o.disabled;
+    if (o.muted && (o.chosen || pressed)) throw new Error('a chosen pill is never muted');
+    if (asButton) p.type = 'button';
     p.className = 'gk-gui-stuff-pill' + (rc ? ' ' + rc : '') + (buttons ? ' gk-gui-stuff-pill-buttons' : '') + (choice ? ' gk-gui-stuff-pill-choice' : '') +
-                  (pressed ? ' gk-gui-stuff-pill-chosen' : '') + (o.open ? ' gk-gui-stuff-pill-open' : '') + (o.dashed ? ' gk-gui-stuff-pill-dashed' : '') +
-                  (off ? ' gk-gui-stuff-pill-off' : '') + (o.className ? ' ' + o.className : '');
+                  (pressed || o.chosen ? ' gk-gui-stuff-pill-chosen' : '') + (o.open ? ' gk-gui-stuff-pill-open' : '') + (o.dashed ? ' gk-gui-stuff-pill-dashed' : '') +
+                  (off ? ' gk-gui-stuff-pill-off' : '') + (o.dot ? ' gk-gui-stuff-pill-has-dot' : '') + (o.current ? ' gk-gui-stuff-pill-current' : '') +
+                  (o.expected ? ' gk-gui-stuff-pill-expected' : '') + (o.muted ? ' gk-gui-stuff-pill-muted' : '') +
+                  (asButton ? ' gk-gui-stuff-pill-as-button' : '') + (o.className ? ' ' + o.className : '');
     if (!buttons) p.title = o.text;
+    if (asButton && o.button) attrs(p, o.button);
+    if (asButton && o.aria) Object.keys(o.aria).forEach(function (k) { p.setAttribute('aria-' + k, o.aria[k]); });
     var inner = document.createDocumentFragment();
     if (pressed && o.check !== false) { var ck = check(); if (ck) inner.appendChild(ck); }
+    if (o.dot) {
+      var d = document.createElement('span');
+      d.className = 'gk-gui-stuff-pill-dot';
+      d.setAttribute('aria-hidden', 'true');
+      inner.appendChild(d);
+    }
     if (o.typeIcon) {
       var ti = icon(o.typeIcon, 12);
       if (ti && ti.nodeType === 1) {
@@ -96,6 +117,23 @@
       inner.appendChild(words);
     } else {
       inner.appendChild(t);
+    }
+    if (o.iconAfter) {
+      var ia = icon(o.iconAfter, 12);
+      if (ia && ia.nodeType === 1) {
+        var is = document.createElement('span');
+        is.className = 'gk-gui-stuff-pill-icon-after';
+        is.setAttribute('aria-hidden', 'true');
+        if (o.iconAfterLabel) is.title = o.iconAfterLabel;
+        is.appendChild(ia);
+        inner.appendChild(is);
+        if (o.iconAfterLabel) {
+          var il = document.createElement('span');
+          il.className = 'gk-gui-stuff-sr-only';
+          il.textContent = o.iconAfterLabel;
+          inner.appendChild(il);
+        }
+      }
     }
     if (off && o.reason) {
       var why = document.createElement('span');
@@ -146,19 +184,19 @@
   G.choose = choose;
 
   // ---------------------------------------------------------------- a mark's note
-  // "Ändra lappen" is a fold in the note's fly (details.gk-gui-stuff-pill-note-change): opened, its field gets the
+  // "Ändra lappen" is a fold in the note's popover (details.gk-gui-stuff-pill-note-change): opened, its field gets the
   // focus, and on a sheet the Avbryt the sheet added steps aside for the form's own. Spara or Enter in the field sends
-  // the note as PATCH to data-gk-gui-note-url; an answer that is not ok shows its error in the fly ({error},
+  // the note as PATCH to data-gk-gui-note-url; an answer that is not ok shows its error in the popover ({error},
   // {errors: []} or {message} as JSON, else the general words), an ok one loads the page again.
   document.addEventListener('toggle', function (e) {
     var c = e.target;
     if (!c.matches || !c.matches('details.gk-gui-stuff-pill-note-change')) return;
-    var box = c.closest('.gk-gui-stuff-fly-box'), f = c.querySelector('.gk-gui-stuff-fly-field');
-    if (box) box.querySelectorAll('[data-gk-gui-fly-cancel]').forEach(function (b) { if (!c.contains(b)) b.hidden = c.open; });
+    var box = c.closest('.gk-gui-stuff-popover-box'), f = c.querySelector('.gk-gui-stuff-popover-field');
+    if (box) box.querySelectorAll('[data-gk-gui-popover-cancel]').forEach(function (b) { if (!c.contains(b)) b.hidden = c.open; });
     if (c.open && f) { f.focus({ preventScroll: true }); f.select(); }
   }, true);
   function noteSend(form) {
-    var f = form.querySelector('.gk-gui-stuff-fly-field'), err = form.querySelector('.gk-gui-stuff-pill-note-error');
+    var f = form.querySelector('.gk-gui-stuff-popover-field'), err = form.querySelector('.gk-gui-stuff-pill-note-error');
     var tok = document.querySelector('meta[name="csrf-token"]'), fd = new FormData();
     function fail(text) { if (err) { err.textContent = text || T.failed || ''; err.hidden = false; } if (f) f.focus(); }
     fd.append('note', f ? f.value : '');
@@ -177,7 +215,7 @@
   });
   document.addEventListener('keydown', function (e) {
     var form = e.key === 'Enter' && e.target && e.target.closest ? e.target.closest('.gk-gui-stuff-pill-note-form') : null;
-    if (form && e.target.classList.contains('gk-gui-stuff-fly-field')) { e.preventDefault(); noteSend(form); }
+    if (form && e.target.classList.contains('gk-gui-stuff-popover-field')) { e.preventDefault(); noteSend(form); }
   });
 
   // ---------------------------------------------------------------- icon button
@@ -210,6 +248,41 @@
     return s;
   }
   G.count = count;
+
+  // ---------------------------------------------------------------- values
+  // Värden from a script, the same markup as gk_gui_stuff_values (entry.rb), so that a list a script draws (the box of
+  // a form page's Spara) looks as the one the server draws (an event's changes). mode 'now' or 'changes'.
+  //   'now':     rows [{label, value, was}]; with the key was the earlier value struck through after it, an empty one "-"
+  //   'changes': rows [{label, from, to}]; only to the new value alone, only from the old one alone, value a value that
+  //              is neither; from and to with the arrow between them, so that the direction shows without colour
+  // A row may be {html: Node}, the whole row as the caller drew it; unmarked: true draws it without the mode's dot. The
+  // label gets its colon here. Every text goes in as text, never as markup.
+  function values(rows, mode) {
+    var m = mode === 'changes' ? 'changes' : 'now', ul = document.createElement('ul');
+    ul.className = 'gk-gui-stuff-values gk-gui-stuff-values-' + m;
+    function has(v) { return v !== undefined && v !== null && String(v) !== ''; }
+    function el(tag, text, cls) { var n = document.createElement(tag); if (cls) n.className = cls; n.textContent = String(text); return n; }
+    (rows || []).forEach(function (r) {
+      var li = document.createElement('li'), parts = [];
+      if (r.unmarked) li.className = 'gk-gui-stuff-values-unmarked';
+      if ('html' in r) { if (r.html) li.appendChild(r.html); ul.appendChild(li); return; }
+      if (has(r.label)) parts.push(el('span', r.label + ':', 'gk-gui-stuff-values-label'));
+      if (m === 'now') {
+        if (has(r.value)) parts.push(document.createTextNode(String(r.value)));
+        if ('was' in r) { var d = el('del', has(r.was) ? r.was : '-'); if (T.values_before) d.title = T.values_before; parts.push(d); }
+      } else {
+        var change = document.createDocumentFragment(), any = false;
+        if (has(r.from)) { change.appendChild(el('del', r.from)); any = true; }
+        if (has(r.from) && has(r.to)) { var a = el('span', '→', 'gk-gui-stuff-values-arrow'); a.setAttribute('aria-hidden', 'true'); change.appendChild(a); }
+        if (has(r.to)) { change.appendChild(el('ins', r.to)); any = true; }
+        if (any) parts.push(change); else if (has(r.value)) parts.push(document.createTextNode(String(r.value)));
+      }
+      parts.forEach(function (p, i) { if (i) li.appendChild(document.createTextNode(' ')); li.appendChild(p); });
+      ul.appendChild(li);
+    });
+    return ul;
+  }
+  G.values = values;
 
   // ---------------------------------------------------------------- group
   function groupKey(sec) { var k = sec.getAttribute('data-gk-gui-group'); return k ? 'group.' + k : null; }

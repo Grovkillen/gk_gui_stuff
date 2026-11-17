@@ -130,7 +130,7 @@
   function box(o) {
     var body = document.createDocumentFragment(), how = 'outside';
     if (o.content) body.appendChild(typeof o.content === 'string' ? N('p', null, o.content) : o.content);
-    var bar = N('div', 'gk-gui-stuff-fly-buttons'), ok = N('button', null, t('sentence_done'));
+    var bar = N('div', 'gk-gui-stuff-popover-buttons'), ok = N('button', null, t('sentence_done'));
     ok.type = 'button';
     bar.appendChild(ok);
     var rm = null;
@@ -161,11 +161,11 @@
     ok.addEventListener('click', function () { how = 'done'; L.close(true); });
     if (rm) rm.addEventListener('click', function (e) { e.preventDefault(); how = 'remove'; L.close(true); });
     // Enter in an input is Klar, heard after the fields (bubble): an Enter a field took for itself (the chooser's
-    // search, a fly in the box) is left to it, and a select keeps its own Enter. Esc is the layer's own (why escape),
-    // and an Esc the chooser or a fly takes never reaches it
+    // search, a popover in the box) is left to it, and a select keeps its own Enter. Esc is the layer's own (why escape),
+    // and an Esc the chooser or a popover takes never reaches it
     L.el.addEventListener('keydown', function (e) {
       if (e.key !== 'Enter' || e.defaultPrevented || e.target.tagName !== 'INPUT') return;
-      if (e.target.closest('.gk-gui-stuff-ss, details.gk-gui-stuff-fly[open]') || e.target.getAttribute('aria-expanded') === 'true') return;
+      if (e.target.closest('.gk-gui-stuff-ss, details.gk-gui-stuff-popover[open]') || e.target.getAttribute('aria-expanded') === 'true') return;
       e.preventDefault(); how = 'done'; L.close(true);
     });
     return L;

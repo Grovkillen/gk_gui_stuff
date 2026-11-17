@@ -3,11 +3,14 @@
 # Administration > Utseende: every appearance setting the plugins have declared in gk_records' register, ordered by
 # where it shows, as one form. Each setting's level is a radio button under Av, Valfritt and Tvingat, its values stand
 # under it while it is not off, and the shared values come last. Nothing applies before Spara; one reason, by the place
-# gui_stuff.appearance, goes with every change, and each changed setting is an event in records. Without gk_records
+# gui_stuff.appearance, goes with every change (none is offered and none is kept while that place is off, except
+# for a row that always asks in its sharp state: its reason is offered, required and kept for that row alone), and each
+# changed setting is an event in records. Without gk_records
 # there is no register: the page lists nothing and every setting is off. Also as JSON through the API. The preview of
 # external links is checked against the shared value of a closed network before the save, and after it the cards its
 # new state no longer allows are removed.
 class GkGuiStuffAppearanceController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   layout 'admin'
   self.main_menu = false
   before_action :require_admin
@@ -54,13 +57,20 @@ class GkGuiStuffAppearanceController < ApplicationController
     closed = closed_refusal(ext, modes, values)
     return refuse(closed) if closed
 
-    text = GkGuiStuff::Primitives.written_reason(params[:reason])
+    # Off is off everywhere: the place's own check answers no text while the place gui_stuff.appearance is off,
+    # whatever was sent, so no reason is kept then; in the other modes it answers what was written
+    text = check.text
+    # A sharp row always asks: while the place is off, a row this save leaves on and sharp is saved with what was
+    # written, which the register requires of it; every other row of the same save keeps no reason
+    sharp = GkRecords::Reasons.off?(PLACE) ? sharp_asking(modes, values) : []
+    sharp_text = sharp.any? ? GkGuiStuff::Primitives.written_reason(params[:reason]) : nil
     before =(modes.keys | values.keys).to_h { |k| [k, on_now?(k)] }
-    changed = @register.save!(modes: modes, values: values, reason: text, reason_key: PLACE)
+    changed = save_with(modes, values, text, sharp, sharp_text)
     # the next page this administrator sees marks where the saved settings show (the marker, marker.rb)
     GkGuiStuff::Marker.note(session, User.current, from: 'appearance', changes: changed.to_h { |k| [k, [before[k], on_now?(k)]] }) unless api_request?
     if ext && changed.include?(EXTERNAL) && defined?(GkGuiStuff::External)
-      GkGuiStuff::External.settings_saved!(before_mode: before_mode, before_domains: before_domains, reason: text, user: User.current)
+      GkGuiStuff::External.settings_saved!(before_mode: before_mode, before_domains: before_domains,
+                                           reason: sharp.include?(EXTERNAL) ? sharp_text : text, user: User.current)
     end
     respond_to do |format|
       format.html { flash[:notice] = l(:notice_successful_update); redirect_to gk_gui_stuff_appearance_path }
@@ -79,6 +89,28 @@ class GkGuiStuffAppearanceController < ApplicationController
   def reason_needed
     r = GkRecords::AppearanceSettings
     r.const_defined?(:ReasonNeeded) ? [r::ReasonNeeded] : []
+  end
+
+  # The rows of this save that always ask: declared with a reason in their sharp state, changed here, and left on and
+  # sharp by it (the register's own rule, GkRecords::AppearanceSettings#check_sharp_reason!, which still decides)
+  def sharp_asking(modes, values)
+    (modes.keys | values.keys).select do |key|
+      row = @register.find(key)
+      next false unless row.respond_to?(:reason_when_sharp) && row.reason_when_sharp && row.respond_to?(:sharp?)
+
+      final_mode(row, modes) != 'off' && row.sharp?(final_values(row, values))
+    end
+  end
+
+  # The save. While the place is off and a sharp row asks, the sharp rows go first with what was written (a blank
+  # reason is refused by the register and nothing is saved), then the rest with no reason, all or nothing
+  def save_with(modes, values, text, sharp, sharp_text)
+    return @register.save!(modes: modes, values: values, reason: text, reason_key: PLACE) if sharp.empty?
+
+    ActiveRecord::Base.transaction do
+      first = @register.save!(modes: modes.slice(*sharp), values: values.slice(*sharp), reason: sharp_text, reason_key: PLACE)
+      first | @register.save!(modes: modes.except(*sharp), values: values.except(*sharp), reason: nil, reason_key: PLACE)
+    end
   end
 
   # A row's values as they will stand after the save: the stored ones with the form's changes on top

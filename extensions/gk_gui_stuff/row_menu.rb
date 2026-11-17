@@ -19,5 +19,14 @@ module GkGuiStuff
                  content_tag(:template, safe_join([button, del]), id: 'gk-gui-stuff-rowmenu-kit'),
                  javascript_include_tag('gk_gui_stuff_row_menu', plugin: 'gk_gui_stuff')], "\n")
     end
+
+    # The confirmation in the upper layer (GkGui.confirm, gk_gui_stuff_layer.js) for a row action or any link, button
+    # or form: merged into its data:, in place of Rails' confirm:. text: the question, else core's "Are you sure?".
+    #   link_to l(:button_delete), path, method: :delete, class: 'icon icon-del',
+    #           data: gk_gui_stuff_confirm_data.merge(gk_gui_row_action: true)
+    #   button_to l(:button_x), path, form: { data: gk_gui_stuff_confirm_data(l(:text_x)).merge(gk_gui_row_action: true) }
+    def gk_gui_stuff_confirm_data(text = nil)
+      { gk_gui_confirm: text || l(:text_are_you_sure) }
+    end
   end
 end

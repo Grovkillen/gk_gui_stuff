@@ -1,0 +1,12 @@
+<%# The change log's box (gk_gui_stuff_changelog) as a still picture: a made-up log (versions that never were, in
+    English as every change log), drawn open by the same helper, with the line about English where the page is not in
+    English. The note says it is an example and that nothing in it comes from a plugin. On a plugin's settings page the
+    frame folds the same log per version instead of the box's own fold %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_open), "gk_gui_stuff_changelog(plugin, open: true); gk_gui_stuff_changelog(plugin)") do %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_changelog_example) %></p>
+    <%= content_tag(:div, gk_gui_stuff_changelog_box('gk_example', l(:text_gk_gui_stuff_sg_example_changelog), note: !current_language.to_s.start_with?('en'), open: true),
+                    inert: true) %>
+  <% end %>
+</div>

@@ -12,6 +12,9 @@ module GkGuiStuff
     module Cleanup
       FORGET_KEY = 'gk_gui_stuff.link_preview_forget'
       DAY = 86_400
+      # The sentence a run ends with while the setting cannot be read, by why (unreadable)
+      UNREADABLE = { closed: :text_gk_gui_stuff_job_link_preview_closed,
+                     undeclared: :text_gk_gui_stuff_job_link_preview_unread }.freeze
       @daily_lock = Mutex.new
 
       module_function
@@ -56,22 +59,44 @@ module GkGuiStuff
         0
       end
 
-      # The forget job's body; -> the text of the run
+      # The forget job's body; -> the text of the run. It runs whatever the gate says (gate.rb): what was fetched is
+      # never kept past its limits because the interface is closed. While the setting cannot be read (unreadable) its
+      # level and its list of domains say nothing: nothing is emptied as switched off, and no domain counts as taken
+      # out of the list. The limits alone hold, at the values that can be read (the standard ones), and the run's text
+      # says so and why.
       def forget!(_ops_run = nil)
         @last_forget = Time.current
-        if External.on?
+        why = unreadable
+        if why
+          n, pictures = thin_out!(domains: false)
+        elsif External.on?
           n, pictures = thin_out!
         else
           n = model.exists? ? clear!(cause: 'off', reason: nil, user: nil) : 0
           pictures = 0
         end
         text = ::I18n.t(:text_gk_gui_stuff_job_link_preview_forget_done, count: n)
-        pictures.positive? ? "#{text}, #{::I18n.t(:text_gk_gui_stuff_job_link_preview_pictures_done, count: pictures)}" : text
+        text = "#{text}, #{::I18n.t(:text_gk_gui_stuff_job_link_preview_pictures_done, count: pictures)}" if pictures.positive?
+        why ? "#{text}. #{::I18n.t(UNREADABLE.fetch(why))}" : text
       end
 
-      # The cards nobody has shown for forget_days, the cards of domains no longer allowed, the pictures over the cap,
-      # the pictures no row names; -> [cards removed, pictures removed at the cap]
-      def thin_out!
+      # Why the setting cannot be read, nil when it can: :closed with this plugin's gate closed, :undeclared when the
+      # register of appearance settings is there but does not hold the setting's row (the register took no row, or the
+      # declaration failed). A row that is not declared reads as off, which is not the administrator's choice. Without
+      # the register at all the preview is off, as every setting is, and that can be read.
+      def unreadable
+        return :closed unless GkGuiStuff.open?
+
+        r = Appearance.register
+        return nil unless r
+
+        r.respond_to?(:find) && r.find(Appearance.key(External::ROW)) ? nil : :undeclared
+      end
+
+      # The cards nobody has shown for forget_days, the cards of domains no longer allowed (domains: false leaves
+      # them, for a run that cannot read the list), the pictures over the cap, the pictures no row names; -> [cards
+      # removed, pictures removed at the cap]
+      def thin_out!(domains: true)
         now = Time.current
         days = External.setting('forget_days').to_i
         days = External::VALUES.dig('forget_days', :default) unless days.positive?
@@ -81,7 +106,7 @@ module GkGuiStuff
           remove_pictures(slice.map(&:last).compact)
           n += model.where(id: slice.map(&:first)).delete_all
         end
-        n += forget_unallowed!(removed: [], reason: nil, user: nil)
+        n += forget_unallowed!(removed: [], reason: nil, user: nil) if domains
         pictures = over_cap!
         Storage.sweep_orphans!(model.where.not(image_path: nil).pluck(:image_path))
         [n, pictures]

@@ -1,5 +1,6 @@
 // gk_gui_stuff copy: one click copies, and the same notice says so. mailto_copy: a small button after every
-// mail link copies the address (the link still opens the mail program). inline_copy: a click on inline code in
+// mail link copies the address (the link still opens the mail program). mailto_issue: on an issue page an envelope
+// before it opens a mail with the issue's subject filled in. inline_copy: a click on inline code in
 // rendered text copies it; with the keyboard, Enter on the focused code.
 (function () {
   var G = window.GkGui;
@@ -53,18 +54,47 @@
     };
   }
   G.onContent(function () {
-    if (G.on('mailto_copy')) {
+    // The tools after a mail link, in one piece that never breaks away from the address (.gk-gui-stuff-mail-tools):
+    // mailto_issue's envelope first, then mailto_copy's copy button, both icon buttons. The address itself stays core's
+    // plain mailto and says so in its tooltip; each tool says what it does in its own. mailto_issue: only where the
+    // page's data gives the issue's mail subject (window.gkGuiStuffPage.data.issue_mail, PageFacts: the issue page,
+    // the subject as Redmine's own notifications write it), never in a link's preview card, which is another page's text.
+    var mail = ((window.gkGuiStuffPage || {}).data || {}).issue_mail;
+    var withIssue = G.on('mailto_issue') && mail && mail.subject, withCopy = G.on('mailto_copy');
+    if (withIssue || withCopy) {
+      // never the tools' own envelope (itself a mailto link): marked as done when made, and left out by its place, so
+      // that a later pass (onContent runs again on every change in #content) never gives it tools of its own
       document.querySelectorAll('#content a[href^="mailto:"]:not([data-gk-gui-stuff-copy])').forEach(function (a) {
+        if (a.closest('.gk-gui-stuff-mail-tools')) return;
         a.dataset.gkGuiStuffCopy = '1';
-        var address = decodeURIComponent(a.getAttribute('href').slice(7).split('?')[0]);
+        var href = a.getAttribute('href'), raw = href.slice(7).split('?')[0], address;
+        try { address = decodeURIComponent(raw); } catch (e) { address = raw; }
         if (!address) return;
-        var b = G.put(G.node('button', 'gk-gui-stuff-copy-btn'), 'copy', '\u29C9', 14);
-        b.type = 'button';
-        G.effect(b, 'mailto_copy');
-        b.title = G.t('copy_address');
-        b.setAttribute('aria-label', G.t('copy_address') + ': ' + address);
-        b.addEventListener('click', function (e) { e.preventDefault(); G.copy(address, G.t('copied_mail'), b); });
-        a.insertAdjacentElement('afterend', b);
+        var tools = G.node('span', 'gk-gui-stuff-mail-tools');
+        if (withIssue && !a.closest('.gk-gui-stuff-preview')) {
+          // the link's own fields (cc, body) are kept; only the subject is the issue's
+          var query = (href.split('?')[1] || '').split('&').filter(function (p) { return p && !/^subject=/i.test(p); });
+          var m = G.iconButton({ icon: 'email', fallback: '\u2709', className: 'gk-gui-stuff-mail-issue',
+                                 href: 'mailto:' + raw + '?' + ['subject=' + encodeURIComponent(mail.subject)].concat(query).join('&'),
+                                 label: G.t('mail_issue', { address: address, subject: mail.subject }) });
+          m.dataset.gkGuiStuffCopy = '1';
+          G.effect(m, 'mailto_issue');
+          a.classList.add('gk-gui-stuff-mail-issue-on');
+          tools.appendChild(m);
+        }
+        if (withCopy) {
+          var b = G.iconButton({ icon: 'copy', fallback: '\u29C9', className: 'gk-gui-stuff-copy-btn', label: G.t('copy_address_of', { address: address }),
+                                 onClick: function (e) { e.preventDefault(); G.copy(address, G.t('copied_mail'), b); } });
+          G.effect(b, 'mailto_copy');
+          tools.appendChild(b);
+        }
+        if (!tools.firstChild) return;
+        // the address's own words: "without a subject" only where that is so and an envelope with one stands beside it;
+        // a link that brings its own subject, or stands with the copy button alone, just writes to the address
+        var ownSubject = /(^|&)subject=/i.test(href.split('?')[1] || '');
+        if (!a.title) a.title = G.t(!ownSubject && tools.querySelector('.gk-gui-stuff-mail-issue') ? 'mail_write' : 'mail_write_plain', { address: address });
+        a.classList.add('gk-gui-stuff-mail-tools-on');
+        a.insertAdjacentElement('afterend', tools);
       });
     }
     // code_copy: core already has a copy button on code blocks, shown only while the pointer is over the block

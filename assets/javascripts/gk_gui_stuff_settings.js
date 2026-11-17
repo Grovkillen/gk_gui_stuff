@@ -105,7 +105,9 @@
   // the box .box.tabular.settings it draws the plugin's partial in; ids and classes core sets on purpose), and every
   // thing inside is the GK plugin's own partial. In it a section is a fieldset with its caption (the fieldset's own
   // legend), a row is a table row of a tbody, a list item, a form row (p) or anything marked data-gk-gui-settings-row,
-  // and the change log is GK's details.gk-changelog with its .wiki. They are found at any depth, by what they are and
+  // and the change log is the box gk_gui_stuff_changelog draws (data-gk-gui-stuff-changelog, the log's .wiki in its
+  // disclosure; a plugin not yet drawing its log with the helper has its own details with the .wiki, or a .wiki
+  // alone). They are found at any depth, by what they are and
   // never by how deep they stand or what stands before them, so a wrapper or another order in a partial changes
   // nothing. A partial may mark a row (data-gk-gui-settings-row) or a part to leave out (gk-gui-stuff-sf-skip).
   function frameRoots(root) {
@@ -194,26 +196,42 @@
   // The general rule against double folding: a section folds by itself when it is core's fieldset.collapsible (its
   // legend toggles it), when its legend has a toggle of its own (an onclick, aria-expanded, core's
   // icon-expanded/icon-collapsed, or a button or toggle inside it), when it is marked data-gk-gui-own-fold, or when all
-  // it holds is details elements (a details folds by itself; the change log's details.gk-changelog is not counted, the
-  // frame takes it apart and folds it per version). Such a section is never folded again by the frame.
+  // it holds is details elements (a details folds by itself; the change log's fold is not counted, the frame takes it
+  // apart and folds it per version). Such a section is never folded again by the frame.
+  // The change log's own fold: the disclosure in the box gk_gui_stuff_changelog draws, or, while a plugin has not gone
+  // over to the helper, its details.gk-changelog
+  var LOG_MARK = '[data-gk-gui-stuff-changelog]';
+  function isLogFold(d) {
+    if (d.matches('details.gk-gui-stuff-disclosure') && d.closest(LOG_MARK)) return true;
+    return d.matches('details.gk-changelog'); // gk-u U11: plugins that still draw their own change log fold until they move to the helper
+  }
   function foldsItself(f, legend) {
     if (f.matches('.collapsible, [data-gk-gui-own-fold]')) return true;
     if (legend.hasAttribute('onclick') || legend.matches('[aria-expanded], .icon-expanded, .icon-collapsed') ||
         legend.querySelector('button, [aria-expanded], [onclick]')) return true;
     // every row it has stands in a details of its own (not the change log's)
-    function inOwnDetails(n) { var d = n.closest('details'); return !!d && f.contains(d) && !d.classList.contains('gk-changelog'); }
+    function inOwnDetails(n) { var d = n.closest('details'); return !!d && f.contains(d) && !isLogFold(d); }
     var rs = rowsOf(f, []);
     return rs.length > 0 && rs.every(inOwnDetails);
   }
+  // the log's .wiki out of the fold it stands in, the fold taken away, so that the frame alone folds the log
+  function unfold(d) {
+    var dw = d && d.querySelector('.wiki');
+    if (dw) { d.parentNode.insertBefore(dw, d); d.remove(); }
+    return dw || null;
+  }
+  // the log a section holds, f being the part under its heading: first the helper's box (gk_gui_stuff_changelog, the
+  // section itself or a box inside it), then a plugin's own details.gk-changelog, last a .wiki with version headings
+  // ("## " lines, h2) the plugin draws open (compat)
   function changelogOf(f) {
-    // a plugin's page folds its change log by itself (details.gk-changelog, also without this module): the frame takes
-    // the log out of it and folds it per version as before
-    var d = f.querySelector('details.gk-changelog');
-    if (d) {
-      var dw = d.querySelector('.wiki');
-      if (dw) { d.parentNode.insertBefore(dw, d); d.remove(); }
+    var box = f.closest(LOG_MARK) || f.querySelector(LOG_MARK);
+    if (box) {
+      // the helper's own fold is the box's first disclosure (one inside the log comes after it)
+      var w = unfold(box.querySelector('details.gk-gui-stuff-disclosure'));
+      if (w) return w;
     }
-    // the log: the .wiki the plugin draws its CHANGELOG in, whose version headings are its "## " lines (h2)
+    var old = f.querySelector('details.gk-changelog'); // gk-u U11: plugins that still draw their own change log fold until they move to the helper
+    if (old) unfold(old);
     return Array.prototype.filter.call(f.querySelectorAll('.wiki'), function (w) { return w.querySelector('h2'); })[0] || null;
   }
   function version(h) {

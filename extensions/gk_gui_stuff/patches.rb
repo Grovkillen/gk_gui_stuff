@@ -1,8 +1,15 @@
 # frozen_string_literal: true
 
 module GkGuiStuff
-  # Core patches, all applied from here; the modules stay beside the code they serve. Each says what it assumes of
-  # core:
+  # Core patches, all applied from here, in two layers (gate.rb); the modules stay beside the code they serve:
+  # * protect!, whatever the gate says: rel on links to another host (ExternalText::Links as this plugin's link
+  #   processor in GK Core Stuff's pass, ExternalRel::HelperPatch on link_to) and the wiki syntax help's header
+  #   (ExternalRel::HelpPatch). With a closed gate the two that write on a link write rel and nothing else: they ask
+  #   the gate themselves before the look, the new tab and the hidden text. None of it asks GK Compat itself or reads
+  #   an appearance setting (only the instance's host name).
+  # * apply!, only with the gate open: everything else, and the link processor registered again together with the
+  #   arrows' text processor (register_processors!).
+  # Each says what it assumes of core:
   # * Issue#css_classes (Overdue::IssuePatch, overdue.rb): core's css_classes(user = User.current) returns a string of
   #   classes; the mark gk-gui-stuff-due-soon is added, and then the classes other plugins register with
   #   Overdue.register_classes. The one patch on the method among the GK plugins.
@@ -32,29 +39,54 @@ module GkGuiStuff
   #   line.rb; gk_gui_stuff_sentence, sentence.rb; gk_gui_stuff_meaning_switch, meaning.rb) answer in every view; every
   #   name in the modules carries the gk_gui_stuff_ prefix.
   # Applied directly from init.rb, which Redmine runs inside to_prepare at start and again after every reload in
-  # development mode; every prepend and include is guarded, so a reload never adds a module twice.
+  # development mode: protect! before the gate is asked, apply! inside it. Every prepend and include is guarded, so a
+  # reload never adds a module twice.
   module Patches
     module_function
+
+    # Whatever the gate says: rel on links to other websites. The arrows are a look and are not registered here
+    def protect!
+      # links to other websites outside formatted text (ExternalRel); first, so that they hold whatever the pass says
+      ::ApplicationHelper.prepend(ExternalRel::HelperPatch) unless ::ApplicationHelper < ExternalRel::HelperPatch
+      ::HelpController.include(ExternalRel::HelpPatch) unless ::HelpController < ExternalRel::HelpPatch
+      register_link_processor!
+    end
+
+    # Links to other websites in formatted text and in custom values (ExternalText), through GK Core Stuff's pass. A
+    # registration that is there is left as it is: after a reload with the gate open the arrows' text processor keeps
+    # its place among the other plugins' (registering the link alone would take it away, and apply! would put it back
+    # last). A register that cannot answer (GK Core Stuff asks GK Compat, which may be missing or too old here) costs
+    # only rel in formatted text, never the start: it is written to the log
+    def register_link_processor!
+      return unless defined?(::GkCoreStuff::FormattingProcessors)
+
+      fp = ::GkCoreStuff::FormattingProcessors
+      fp.register(:gk_gui_stuff, link: ExternalText::Links) unless fp.link_processors.include?(ExternalText::Links)
+    rescue StandardError => e
+      ::Rails.logger&.warn("[gk_gui_stuff] link processor not registered: #{e.class}: #{e.message}") if defined?(::Rails) && ::Rails.respond_to?(:logger)
+    end
 
     def apply!
       ::Issue.prepend(Overdue::IssuePatch) unless ::Issue < Overdue::IssuePatch
       ::ApplicationController.prepend(Personal::ForgetAfterChange) unless ::ApplicationController < Personal::ForgetAfterChange
       ::ApplicationHelper.prepend(PageData::PrincipalLinkPatch) unless ::ApplicationHelper < PageData::PrincipalLinkPatch
-      # links to other websites in formatted text and in custom values (ExternalText), and the module arrows in the
-      # runs of text (Arrows), through GK Core Stuff's pass; again on a reload replaces
-      if defined?(::GkCoreStuff::FormattingProcessors)
-        processors = { link: ExternalText::Links }
-        processors[:text] = Arrows::Processor if Arrows.available?
-        ::GkCoreStuff::FormattingProcessors.register(:gk_gui_stuff, **processors)
-      end
+      register_processors!
       # the heading and the window's title of a renamed administration row's page (AdminGroups::RetitleHelperPatch)
       ::ApplicationHelper.prepend(AdminGroups::RetitleHelperPatch) unless ::ApplicationHelper < AdminGroups::RetitleHelperPatch
-      # links to other websites outside formatted text (ExternalRel)
-      ::ApplicationHelper.prepend(ExternalRel::HelperPatch) unless ::ApplicationHelper < ExternalRel::HelperPatch
-      ::HelpController.include(ExternalRel::HelpPatch) unless ::HelpController < ExternalRel::HelpPatch
       # the GK plugins' top menu entries under the installation's own word (TopMenu)
       ::Redmine::MenuManager::MenuHelper.prepend(TopMenu::MenuHelperPatch) unless ::Redmine::MenuManager::MenuHelper < TopMenu::MenuHelperPatch
       [ChoicesBoxHelper, RowEditorHelper, RowMenuHelper, PrimitivesHelper, LineHelper, SentenceHelper, MeaningHelper].each { |m| ActionView::Base.include(m) unless ActionView::Base.include?(m) }
+    end
+
+    # Only with the gate open (apply!): the link processor of protect! registered again together with the module
+    # arrows in the runs of text (Arrows), through GK Core Stuff's pass; a registration replaces the one before it
+    # where it stands, so the order among the plugins is kept
+    def register_processors!
+      return unless defined?(::GkCoreStuff::FormattingProcessors)
+
+      processors = { link: ExternalText::Links }
+      processors[:text] = Arrows::Processor if Arrows.available?
+      ::GkCoreStuff::FormattingProcessors.register(:gk_gui_stuff, **processors)
     end
   end
 end

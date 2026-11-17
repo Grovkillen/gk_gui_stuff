@@ -45,6 +45,7 @@ color_roles:            # theme_engine and the palette give the colour (--gk-rol
   - {key: alarm, group: alert, label: label_gk_gui_stuff_role_alert_alarm}
   - {key: critical, group: alert, label: label_gk_gui_stuff_role_alert_critical}   # the alarm filled, white text on it
   - {key: alarm-on-dark, group: alert, label: label_gk_gui_stuff_role_alert_alarm_on_dark}   # the alarm mixed lighter for core's dark menus; no -soft
+  - {key: alarm-row, group: alert, label: label_gk_gui_stuff_role_alert_alarm_row}   # the ground of a table row with an error, a step lighter than the alarm's soft tone; no -soft
   - {key: admin, group: ui, label: label_gk_gui_stuff_role_admin}         # what only administrators see
   - {key: admin-on-dark, group: ui, label: label_gk_gui_stuff_role_admin_on_dark}   # the admin role mixed lighter for core's dark menus; no -soft
   - {key: muted, group: ui, label: label_gk_gui_stuff_role_muted}
@@ -57,9 +58,18 @@ color_roles:            # theme_engine and the palette give the colour (--gk-rol
   - {key: code, group: ui, label: label_gk_gui_stuff_role_code}
   - {key: possible, group: ui, label: label_gk_gui_stuff_role_possible}      # the dashed pill: possible, not chosen
   - {key: effect, group: ui, label: label_gk_gui_stuff_role_effect}          # where a change shows (the marker, the flags new, changed, gone); with -soft, info by default
+  - {key: text, group: ui, label: label_gk_gui_stuff_role_text}              # the body text; its -soft is the secondary text (a hint, a sub-line), a tone of text and never a background
+  - {key: raised, group: ui, label: label_gk_gui_stuff_role_raised}          # a ground a step off the surface (a quiet row, a button under the pointer); no -soft
+  - {key: link, group: ui, label: label_gk_gui_stuff_role_link}              # a link inside the instance; no -soft
+  - {key: on-fill, group: ui, label: label_gk_gui_stuff_role_on_fill}        # text and marks on a filled role, white by default; no -soft
+  - {key: canvas, group: ui, label: label_gk_gui_stuff_role_canvas}          # the squares of the chequered ground under an example; no -soft
+  - {key: neutral, group: ui, label: label_gk_gui_stuff_role_neutral}            # a primitive that has no role or category (a chosen pill's fill, the dot, the ring, a bar); with -soft, the ground under it
+  - {key: added, group: diff, label: label_gk_gui_stuff_role_diff_added}     # what a diff added, as text on its -soft ground
+  - {key: removed, group: diff, label: label_gk_gui_stuff_role_diff_removed} # what a diff took away, as text on its -soft ground
   - {key: direct, group: save, label: label_gk_gui_stuff_role_save_direct}
   - {key: changed, group: save, label: label_gk_gui_stuff_role_save_changed}
   - {key: saved, group: save, label: label_gk_gui_stuff_role_save_saved}
+  - {key: saved-strong, group: save, label: label_gk_gui_stuff_role_save_saved_strong}   # the saved green as text and as a fill under white (the pill role saved); no -soft
   - {key: failed, group: save, label: label_gk_gui_stuff_role_save_failed}
   # the line's bands and the line, the chosen and the logic; gk_gui_stuff_primitives.css. No -soft,
   # except ui choice; the line's now-soft and next-soft are keys of their own
@@ -68,6 +78,13 @@ color_roles:            # theme_engine and the palette give the colour (--gk-rol
   - {key: settled, group: band, label: label_gk_gui_stuff_role_band_settled}
   - {key: closed, group: band, label: label_gk_gui_stuff_role_band_closed}
   - {key: archived, group: band, label: label_gk_gui_stuff_role_band_archived}
+  # a band's line: the edge a step has in its band's colour, a line with no text on it; it follows its band in the
+  # light and has a clearer value of its own where the tone is dark. No -soft
+  - {key: incoming-line, group: band, label: label_gk_gui_stuff_role_band_incoming_line}
+  - {key: active-line, group: band, label: label_gk_gui_stuff_role_band_active_line}
+  - {key: settled-line, group: band, label: label_gk_gui_stuff_role_band_settled_line}
+  - {key: closed-line, group: band, label: label_gk_gui_stuff_role_band_closed_line}
+  - {key: archived-line, group: band, label: label_gk_gui_stuff_role_band_archived_line}
   - {key: done, group: line, label: label_gk_gui_stuff_role_line_done}
   - {key: now, group: line, label: label_gk_gui_stuff_role_line_now}
   - {key: now-soft, group: line, label: label_gk_gui_stuff_role_line_now_soft}
@@ -92,6 +109,7 @@ meaning: []             # GkGuiStuff::Meaning: no page types of its own; the pag
 appearance_settings:    # records AppearanceSettings (GkGuiStuff::Appearance.declare!, appearance.rb): every module but actions_menu, the settings that are not modules, the shared values and a setting per core page type of the Meaning register (none registered today); off from the start
   - {key: gui_stuff.account_menu, group: instance, modes: ["off", forced], default: "off", proposal: forced, values: [], label: label_gk_gui_stuff_mod_account_menu}
   - {key: gui_stuff.branch_jump, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_branch_jump}
+  - {key: gui_stuff.color_mode, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_color_mode}
   - {key: gui_stuff.declutter, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [declutter], label: label_gk_gui_stuff_mod_declutter}
   - {key: gui_stuff.footer_text, group: instance, modes: ["off", forced], default: "off", proposal: "off", values: [footer_text], label: label_gk_gui_stuff_mod_footer_text}
   - {key: gui_stuff.fullscreen, group: instance, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_fullscreen}
@@ -142,6 +160,7 @@ appearance_settings:    # records AppearanceSettings (GkGuiStuff::Appearance.dec
   - {key: gui_stuff.link_preview_external, group: text, modes: ["off", optional, forced], default: "off", proposal: "off", values: [domains, bare_links, max_parallel, domain_interval_seconds, page_max_kb, image_max_kb, timeout_seconds, queue_max, refresh_days, forget_days, link_previews_dir, image_folder_max_mb, clear], label: label_gk_gui_stuff_mod_link_preview_external}   # a warning on the row, a sharper one with * in domains (then a reason is needed); clear is an action
   - {key: gui_stuff.external_new_tab, group: text, modes: ["off", optional], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_external_new_tab}   # each person's own choice, off for each person until chosen; never forced
   - {key: gui_stuff.mailto_copy, group: text, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_mailto_copy}
+  - {key: gui_stuff.mailto_issue, group: text, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_mailto_issue}   # the envelope after a mail link on the issue page; the subject as Redmine's notifications write it
   # no row of its own: the places outside formatted text that get the external look are the flags place_field_link, place_url_pattern, place_project_homepage, place_people and place_icons (default true), which GK Core Stuff declares under its own row core_stuff.external_links; this plugin only reads them (ExternalRel::Places, external_rel.rb) and adds no values to another plugin's row; a flag GK Core Stuff does not declare counts as on
   - {key: gui_stuff.user_status, group: text, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_user_status}
   - {key: gui_stuff.calendar_compact, group: calendar, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_calendar_compact}
@@ -151,6 +170,7 @@ appearance_settings:    # records AppearanceSettings (GkGuiStuff::Appearance.dec
   - {key: gui_stuff.corner, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [corner_max_entries], label: label_gk_gui_stuff_mod_corner}
   - {key: gui_stuff.flash_timeout, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [flash_seconds], label: label_gk_gui_stuff_mod_flash_timeout}
   - {key: gui_stuff.flash_icon, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_flash_icon}
+  - {key: gui_stuff.warning_text, group: notices, modes: ["off", optional, forced], default: "off", proposal: optional, values: [], label: label_gk_gui_stuff_mod_warning_text}   # only in the light tone
   - {key: gui_stuff.outcome_notice, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [], label: label_gk_gui_stuff_mod_outcome_notice}
   - {key: gui_stuff.login_warning, group: notices, modes: ["off", forced], default: "off", proposal: "off", values: [login_warning_animate, login_warning_endless], label: label_gk_gui_stuff_mod_login_warning}
   - {key: gui_stuff.wave, group: notices, modes: ["off", optional, forced], default: "off", proposal: "off", values: [wave_opacity_pct, wave_first_ms, wave_ms, wave_min_ms, wave_start_delay_ms, loading_delay_ms, wave_hide_flash], label: label_gk_gui_stuff_mod_wave}
@@ -173,11 +193,13 @@ footprints:             # records AppearanceSettings and Features (footprint: an
   gui_stuff.icons_tabs: {applies: [script], footprint: {anchors: ['#main-menu']}}
   gui_stuff.layout_sidebar: {applies: [script], footprint: {anchors: ['#sidebar'], pages: [all]}}
   gui_stuff.layout_header: {applies: [script], footprint: {anchors: ['#header'], pages: [all]}}
+  gui_stuff.color_mode: {applies: [server, script], footprint: {anchors: ['#gk-gui-stuff-color-mode'], pages: [all], adds: [{anchor: '#gk-gui-stuff-color-mode', label: label_gk_gui_stuff_mod_color_mode}]}}
   gui_stuff.link_preview: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-preview']}}
   gui_stuff.link_preview_external: {applies: [script, data], footprint: {anchors: ['.gk-gui-stuff-preview']}}
   gui_stuff.user_status: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-status']}}
   gui_stuff.arrows: {applies: [server], footprint: {anchors: [.wiki]}}
-  gui_stuff.mailto_copy: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-copy-btn'], elements: [copy]}}
+  gui_stuff.mailto_copy: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-copy-btn'], elements: [copy, icon_button]}}
+  gui_stuff.mailto_issue: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-mail-issue'], elements: [icon_button], pages: [core.issue]}}
   gui_stuff.inline_copy: {applies: [script], footprint: {anchors: ['.wiki .gk-gui-stuff-copy-code'], elements: [copy]}}
   gui_stuff.code_copy: {applies: [script], footprint: {anchors: ['.pre-wrapper .gk-gui-stuff-copy-pre'], elements: [copy]}}
   gui_stuff.core_copy_whisper: {applies: [script], footprint: {anchors: ['.pre-wrapper .copy-pre-content-link'], elements: [copy]}}
@@ -215,6 +237,7 @@ footprints:             # records AppearanceSettings and Features (footprint: an
   gui_stuff.wave: {applies: [script], footprint: {anchors: ['#gk-gui-stuff-wave'], pages: [all]}}
   gui_stuff.flash_timeout: {applies: [script], footprint: {anchors: ['#content .flash.notice', '.gk-gui-stuff-flash'], elements: [core_flash]}}
   gui_stuff.flash_icon: {applies: [script], footprint: {anchors: [.flash], elements: [core_flash], pages: [all]}}
+  gui_stuff.warning_text: {applies: [script], footprint: {anchors: [div.flash.warning, .warning, .nodata], elements: [core_flash], pages: [all]}}
   gui_stuff.outcome_notice: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-notices'], elements: [messages], pages: [all]}}
   gui_stuff.corner: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-corner'], pages: [core.issue]}}
   gui_stuff.login_warning: {applies: [script], footprint: {anchors: ['.gk-gui-stuff-lw']}}
@@ -246,7 +269,7 @@ styleguide:             # GkGuiStuff::Styleguide.register_own!: gui_stuff's sect
   - {key: ss, part: gk, group: lists, label: label_gk_gui_stuff_sg_ss, order: 30}
   - {key: count, part: gk, group: pill, label: label_gk_gui_stuff_sg_count_h, order: 40}
   - {key: group, part: gk, group: pill, label: label_gk_gui_stuff_sg_group, order: 50}
-  - {key: fly, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_fly, order: 60}
+  - {key: popover, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_popover, order: 60}
   - {key: card, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_card, order: 70}
   - {key: admin, part: gk, group: admin, label: label_gk_gui_stuff_sg_admin, order: 80}
   - {key: rail, part: gk, group: save, label: label_gk_gui_stuff_sg_rail, order: 90}
@@ -266,6 +289,18 @@ styleguide:             # GkGuiStuff::Styleguide.register_own!: gui_stuff's sect
   - {key: icon_button, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_icon_button, order: 230}
   - {key: elements, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_elements, order: 240}
   - {key: ribbon, part: gk, group: surfaces, label: label_gk_gui_stuff_sg_ribbon, order: 250}
+  - {key: entry, part: gk, group: data, label: label_gk_gui_stuff_sg_entry, order: 260}
+  - {key: values, part: gk, group: data, label: label_gk_gui_stuff_sg_values, order: 270}
+  - {key: thing, part: gk, group: data, label: label_gk_gui_stuff_sg_thing, order: 280}
+  - {key: reason_shown, part: gk, group: data, label: label_gk_gui_stuff_sg_reason_shown, order: 290}
+  - {key: pre, part: gk, group: data, label: label_gk_gui_stuff_sg_pre, order: 300}
+  - {key: quiet, part: gk, group: data, label: label_gk_gui_stuff_sg_quiet_h, order: 310}
+  - {key: table, part: gk, group: data, label: label_gk_gui_stuff_sg_table, order: 320}
+  - {key: summary, part: gk, group: data, label: label_gk_gui_stuff_sg_summary, order: 330}
+  - {key: button_row, part: gk, group: buttons, label: label_gk_gui_stuff_sg_button_row, order: 340}
+  - {key: choice_list, part: gk, group: input, label: label_gk_gui_stuff_sg_choice_list, order: 350}
+  - {key: only_choice, part: gk, group: input, label: label_gk_gui_stuff_sg_only_choice, order: 360}
+  - {key: compose, part: gk, group: input, label: label_gk_gui_stuff_sg_compose, order: 370}
 records:
   targets: []             # funktionerna under Administration, Funktioner är records register (feature)
   note_kinds: []

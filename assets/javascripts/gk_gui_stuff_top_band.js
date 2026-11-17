@@ -5,7 +5,7 @@
 // 899 px every part shows its icon and count. What still does not fit goes, lightest first, into +N
 // ([data-gk-gui-band-more]), whose panel lists those parts with their full words; a part that opens still opens there.
 // The parts come back in their order when the room grows. Nothing moves while a panel is open: the band is fitted
-// again when it closes. The panels themselves are flies (gk_gui_stuff_primitives.js): one open at a time, Esc and a
+// again when it closes. The panels themselves are popovers (gk_gui_stuff_primitives.js): one open at a time, Esc and a
 // click outside close them, a sheet below 899 px. window.GkGuiTopBand: fit(band) and fitAll() for a page's own script.
 (function () {
   if (window.GkGuiTopBand) return;

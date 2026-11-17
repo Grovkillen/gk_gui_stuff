@@ -2,10 +2,11 @@
     An empty field posts "" (an empty list). %>
 <% lines = Array(current) %>
 <% info_id = value.info.present? ? "#{id}-info" : nil %>
-<div class="gk-gui-stuff-form-page-value gk-gui-stuff-form-page-list">
+<%# the value's label and its kind as its own marks: the box of Spara says the entries taken out and those put in %>
+<%= tag.div(class: 'gk-gui-stuff-form-page-value gk-gui-stuff-form-page-list', data: { gk_gui_value_label: value.label, gk_gui_value_kind: 'list' }) do %>
   <%= label_tag(id, value.label) %>
   <%= text_area_tag(name, lines.join("\n"), id: id, rows: [[lines.size + 1, 3].max, 8].min, cols: 40, disabled: disabled,
                                             spellcheck: false, autocapitalize: 'off', autocomplete: 'off', 'aria-describedby': info_id) %>
   <% if value.help.present? %><span class="gk-gui-stuff-form-page-quiet"><%= value.help %></span><% end %>
   <% if info_id %><em class="info" id="<%= info_id %>"><%= value.info %></em><% end %>
-</div>
+<% end %>

@@ -14,13 +14,16 @@
 // A table of settings rows that is the one list of a section (a fieldset) gets its field above the section. A list
 // never gets two fields. Every list or table can say no with data-gk-gui-filter="off" or data-gk-gui-select="off", or ask for a filter
 // whatever its length with data-gk-gui-filter.
+// The style guide's example of the filter (data-gk-gui-filter="example") has it whatever its length and whether the
+// module is on or not: the guide loads this script for it when neither module is on, and the example carries the
+// filter's words (data-gk-gui-filter-words, JSON), taken only where the page's configuration lacks them. With neither
+// module on nothing else is touched.
 // A select asks for the chooser whatever its length with data-gk-gui-select="on", "create" or "create-denied"; that
 // is gk_gui_stuff_select.js's pass, not this module's.
 (function () {
   var G = window.GkGui;
   if (!G) return;
   var FILTER = G.on('list_filter'), SELECT = G.on('select_search');
-  if (!FILTER && !SELECT) return;
   var N = G.node, LIST_MIN = 12, SELECT_MIN = 15;
   // the chooser's search, shared with the filter (gk_gui_stuff_select.js)
   var F = G.selectSearch.find, norm = F.norm, words = F.words, hit = F.hit, textOf = F.textOf, searchIcon = F.searchIcon;
@@ -29,8 +32,10 @@
 
   // ---------------------------------------------------------------- list_filter
   // the filter field: core's input with a magnifier at its start, and at its end how many are shown and a clear button
+  // the effect mark only with the module on: the style guide's example with the module off is not the module's effect
   function filterField(label) {
-    var wrap = G.effect(N('span', 'gk-gui-stuff-lf'), 'list_filter');
+    var wrap = N('span', 'gk-gui-stuff-lf');
+    if (FILTER) G.effect(wrap, 'list_filter');
     searchIcon(wrap, 'gk-gui-stuff-lf-icon');
     var input = N('input', 'gk-gui-stuff-lf-input');
     input.type = 'search';
@@ -95,13 +100,24 @@
   // cell is a control of its row (a row's "Lock"), never an item of a list: such a table's rows are the list. An
   // element marked data-gk-gui-filter is a list of the check boxes in it, whatever their names. A project tree is
   // core's ul.projects.root: its items are the li core draws around each check box.
-  function groups(root) {
+  // the filter's words an example carries (data-gk-gui-filter-words), for a page whose configuration lacks them (the
+  // style guide with the module off); the configuration's own words are never replaced
+  function exampleWords(box) {
+    var raw = box.getAttribute('data-gk-gui-filter-words'), w = null, t = (G.cfg.t = G.cfg.t || {});
+    if (!raw) return;
+    try { w = JSON.parse(raw); } catch (e) { return; }
+    Object.keys(w || {}).forEach(function (k) { if (!(k in t)) t[k] = w[k]; });
+  }
+  // examples: only the style guide's example (the module off), its words taken where the configuration lacks them
+  function groups(root, examples) {
     var out = [], by = {};
-    root.querySelectorAll('#content [data-gk-gui-filter]:not([data-gk-gui-filter="off"])').forEach(function (box) {
+    root.querySelectorAll(examples ? '#content [data-gk-gui-filter="example"]' : '#content [data-gk-gui-filter]:not([data-gk-gui-filter="off"])').forEach(function (box) {
       if (box.matches('table, tbody')) return;
       var boxes = Array.prototype.slice.call(box.querySelectorAll('input[type=checkbox]'));
       if (boxes.length) out.push({ box: box, inputs: boxes, asked: true });
+      exampleWords(box);
     });
+    if (examples) return out;
     // a name shared across sections (core's role form: role[permissions][] in one fieldset per module) is one list
     // per section, named by that section's legend, never one list across them all
     var sections = [];
@@ -122,8 +138,8 @@
     var l = cb.labels && cb.labels[0];
     return l && l.contains(cb) ? l : null;
   }
-  function checkboxLists(root) {
-    groups(root).forEach(function (g) {
+  function checkboxLists(root, examples) {
+    groups(root, examples).forEach(function (g) {
       var first = g.inputs[0];
       // a check box in a list table is its row's control; a list that asks for the filter is a list also when it
       // stands in one of that table's cells (the table holds the asking box, not the other way round)
@@ -251,6 +267,8 @@
 
   G.onContent(function (root) {
     if (FILTER) { checkboxLists(root); tables(root); }
+    // the style guide's example has its filter with the module off too (data-gk-gui-filter="example")
+    else checkboxLists(root, true);
     if (SELECT) selects(root);
   });
 })();

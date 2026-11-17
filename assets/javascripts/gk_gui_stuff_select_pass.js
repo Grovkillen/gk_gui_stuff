@@ -4,7 +4,7 @@
 // A field that asks for the chooser (data-gk-gui-select="on", "create" or "create-denied") gets it whether
 // select_search is on or not; the module only gives core's long lists the chooser by itself (gk_gui_stuff_lists.js).
 // The pass runs over #content when the page is read, over new content through the kernel's onContent, and over a
-// layer's or a fly's box when it opens (GkGui.layer and the fly call it), with no observer of its own. Lists in
+// layer's or a popover's box when it opens (GkGui.layer and the popover call it), with no observer of its own. Lists in
 // core's query filters and column choice, in the toolbar, one a script shows or hides itself, a box of rows (size)
 // and one that says off are left as they are.
 (function () {
@@ -14,7 +14,7 @@
   var ASKED = 'select[data-gk-gui-select="on"], select[data-gk-gui-select="create"], select[data-gk-gui-select="create-denied"]';
   function pass(root) {
     (root || document).querySelectorAll(ASKED).forEach(function (sel) {
-      if (sel.dataset.gkGuiSs || sel.closest(S.skip) || !sel.closest('#content, .gk-gui-stuff-layer, .gk-gui-stuff-fly-box')) return;
+      if (sel.dataset.gkGuiSs || sel.closest(S.skip) || !sel.closest('#content, .gk-gui-stuff-layer, .gk-gui-stuff-popover-box')) return;
       if (sel.hidden || sel.style.display === 'none' || Number(sel.getAttribute('size') || 0) > 1) return;
       S.enhance(sel);
     });

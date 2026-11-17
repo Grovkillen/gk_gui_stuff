@@ -24,7 +24,7 @@
        tools: content_tag(:p, gk_gui_stuff_sg_tools(s, dark: @dark.present?), class: 'gk-gui-stuff-sg-lib-tools', data: { gk_gui_lib_head_tools: '1' }),
        thumb_from: '.gk-gui-stuff-sg-shown', body: body }
    end %>
-<div class="gk-gui-stuff-sg-page gk-gui-stuff-sg-lib gk-gui-stuff-lib-tokens" data-gk-gui-sg-page data-gk-gui-sg-frame="<%= gk_gui_stuff_styleguide_frame_path(key: '__key__') %>" data-gk-gui-sg-nowhere="<%= l(:text_gk_gui_stuff_sg_nowhere) %>"<% if @dark %> data-gk-gui-sg-dark="<%= @dark.join(' ') %>"<% end %>>
+<div class="gk-gui-stuff-sg-page gk-gui-stuff-sg-lib gk-gui-stuff-lib-tokens" data-gk-gui-sg-page data-gk-gui-sg-frame="<%= gk_gui_stuff_styleguide_frame_path(key: '__key__') %>" data-gk-gui-sg-nowhere="<%= l(:text_gk_gui_stuff_sg_nowhere) %>" data-gk-gui-sg-phone-caption="<%= l(:label_gk_gui_stuff_sg_phone_screen) %>"<% if @dark %> data-gk-gui-sg-dark="<%= @dark %>"<% end %>>
   <%= gk_gui_stuff_sg_page_tools(dark: @dark.present?) %>
   <%= gk_gui_stuff_library('styleguide', items, groups: GkGuiStuff::Styleguide.menu(sections).map { |g| { key: g[:key], title: g[:title] } },
                            title: l(:label_gk_gui_stuff_sg_menu), search: l(:text_gk_gui_stuff_sg_search), empty: l(:text_gk_gui_stuff_sg_nothing_found)) %>

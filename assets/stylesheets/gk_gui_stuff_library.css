@@ -4,14 +4,17 @@
    grid and the panel, the items with a 4 px corner and a frame on hover, the panel 16 to 26em beside the grid, the
    large picture at least 160 px high on the chequered ground with 16 px squares in a 1 px frame with 3 px corners, the
    states as small tiles in the same frame, the code in a field with its copy button and "Kopierat" by it, Lista as
-   core's table.list and core's page numbers. Every colour is a role or core's variable, the ground and the squares
-   mixed from them, so that a theme and the dark mode carry it. The chequered ground, the chips and the code are also
+   core's table.list and core's page numbers. Every colour is a role or core's variable: the ground is the surface
+   role, the squares the role ui-canvas and the quiet tone mixed from the ground and the text. The squares are the
+   role's value and nothing else: light in the root block, dark in the roles' dark sheet (by the tone of the surface or
+   GK Core Stuff's dark mode). They do not follow the ground by themselves, so a theme that draws a dark surface
+   without saying its tone sets ui-canvas with its surface. The chequered ground, the chips and the code are also
    used by the style guide's page form. Logical properties. */
 .gk-gui-stuff-lib, .gk-gui-stuff-lib-tokens {
   --gk-gui-lib-frame: var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da));
   --gk-gui-lib-divider: var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6));
   --gk-gui-lib-ground: var(--gk-role-ui-surface, var(--oc-white, #ffffff));
-  --gk-gui-lib-square: color-mix(in srgb, var(--gk-gui-lib-ground) 91%, currentColor);
+  --gk-gui-lib-square: var(--gk-role-ui-canvas, var(--oc-gray-2, #e9ecef));
   --gk-gui-lib-quiet: color-mix(in srgb, var(--gk-gui-lib-ground) 96%, currentColor);
   --gk-gui-lib-muted: color-mix(in srgb, currentColor 62%, var(--gk-gui-lib-ground));
   --gk-gui-lib-on: var(--gk-role-ui-choice, var(--oc-blue-8, #1971c2));
@@ -28,10 +31,6 @@
 }
 .gk-gui-stuff-lib :is(.gk-gui-stuff-lib-item, .gk-gui-stuff-lib-body, .gk-gui-stuff-lib-name, [data-gk-gui-lib-row-item]) {
   scroll-margin-block-start: calc(var(--gk-gui-lib-top) + var(--gk-gui-lib-jump-more, 0px) + 4px); }
-/* in the dark the light text mixed in shows more than the dark text does on a light ground: the squares and the quiet
-   tone take less of it, so that the example reads first and the canvas is still seen */
-html[data-gk-scheme="dark"] :is(.gk-gui-stuff-lib, .gk-gui-stuff-lib-tokens) { --gk-gui-lib-square: color-mix(in srgb, var(--gk-gui-lib-ground) 95%, currentColor);
-  --gk-gui-lib-quiet: color-mix(in srgb, var(--gk-gui-lib-ground) 96%, currentColor); }
 
 /* the chequered ground under an example, so that a white or transparent part shows */
 .gk-gui-stuff-lib-canvas { background-color: var(--gk-gui-lib-ground);
@@ -43,15 +42,15 @@ html[data-gk-scheme="dark"] :is(.gk-gui-stuff-lib, .gk-gui-stuff-lib-tokens) { -
 .gk-gui-stuff-lib-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-block-end: 10px; }
 /* a chip: a choice pill shaped with 12 px corners; (0,2,0) and more over the pill's own look, so that the chip is the
    same wherever it stands */
-.gk-gui-stuff-pill.gk-gui-stuff-lib-chip { border-radius: 12px; border-color: var(--gk-gui-lib-frame, var(--oc-gray-4, #ced4da)); background: var(--gk-gui-lib-ground, var(--oc-white, #ffffff));
+.gk-gui-stuff-pill.gk-gui-stuff-lib-chip { border-radius: 12px; border-color: var(--gk-gui-lib-frame, var(--oc-gray-4, #ced4da)); background: var(--gk-gui-lib-ground, var(--oc-white, #ffffff)); /* gk-u U4: the library's own variables, set by the page that draws it */
   color: inherit; font-size: 0.9em; }
 .gk-gui-stuff-pill.gk-gui-stuff-lib-chip button.gk-gui-stuff-pill-main { padding-block: 1px; padding-inline: 10px; border-radius: 12px; }
 .gk-gui-stuff-pill.gk-gui-stuff-lib-chip:hover, .gk-gui-stuff-pill.gk-gui-stuff-lib-chip:has(> button.gk-gui-stuff-pill-main:focus-visible) {
-  border-color: var(--oc-gray-6, #868e96); background-color: var(--gk-gui-lib-square, var(--oc-gray-2, #e9ecef)); }
+  border-color: var(--oc-gray-6, #868e96); background-color: var(--gk-gui-lib-square, var(--oc-gray-2, #e9ecef)); } /* gk-u U3,U4: the hover frame stronger than ui-frame and the library's own variables, set by the page that draws it */
 .gk-gui-stuff-pill.gk-gui-stuff-lib-chip.gk-gui-stuff-pill-choice button.gk-gui-stuff-pill-main:hover { text-decoration: none; }
 /* chosen: filled in the choice role, as the choice pill; no check */
 .gk-gui-stuff-pill.gk-gui-stuff-lib-chip.gk-gui-stuff-pill-chosen, .gk-gui-stuff-pill.gk-gui-stuff-lib-chip.gk-gui-stuff-pill-chosen:hover {
-  border-color: var(--gk-gui-lib-on, var(--oc-blue-8, #1971c2)); background: var(--gk-gui-lib-on, var(--oc-blue-8, #1971c2)); color: var(--oc-white, #ffffff); font-weight: bold; }
+  border-color: var(--gk-gui-lib-on, var(--oc-blue-8, #1971c2)); background: var(--gk-gui-lib-on, var(--oc-blue-8, #1971c2)); color: var(--gk-role-ui-on-fill, var(--oc-white, #ffffff)); font-weight: bold; } /* gk-u U4: the library's own variables, set by the page that draws it */
 .gk-gui-stuff-pill.gk-gui-stuff-lib-chip .gk-gui-stuff-pill-check { display: none; }
 /* the count: a part of the pill after a solid divider over the pill's whole height */
 .gk-gui-stuff-pill.gk-gui-stuff-lib-chip .gk-gui-stuff-pill-count { display: inline-flex; align-items: center; align-self: stretch; margin-inline-start: 0.45em; padding-inline-start: 0.45em;
@@ -88,7 +87,7 @@ html[data-gk-scheme="dark"] :is(.gk-gui-stuff-lib, .gk-gui-stuff-lib-tokens) { -
 .gk-gui-stuff-lib-item:hover, .gk-gui-stuff-lib-item:focus-within { border-color: var(--gk-gui-lib-frame); background: var(--gk-gui-lib-quiet); }
 .gk-gui-stuff-lib-item.gk-gui-stuff-lib-item-checked { border-color: var(--gk-gui-lib-on); background: var(--gk-gui-lib-on-soft); }
 .gk-gui-stuff-lib-item.gk-gui-stuff-lib-item-open { border-color: var(--gk-gui-lib-on); background: var(--gk-gui-lib-on-soft); box-shadow: 0 0 0 2px color-mix(in srgb, var(--gk-gui-lib-on) 45%, transparent); }
-.gk-gui-stuff-lib .gk-gui-stuff-lib-item button.gk-gui-stuff-lib-item-name { margin: 0; padding: 0; border: 0; background: none; color: var(--gk-gui-lib-muted, inherit); font: inherit; font-size: 0.78em;
+.gk-gui-stuff-lib .gk-gui-stuff-lib-item button.gk-gui-stuff-lib-item-name { margin: 0; padding: 0; border: 0; background: none; color: var(--gk-gui-lib-muted, inherit); font: inherit; font-size: 0.78em; /* gk-u U4: the library's own variables, set by the page that draws it */
   block-size: auto; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
 .gk-gui-stuff-lib-item button.gk-gui-stuff-lib-item-name::after { content: ""; position: absolute; inset: 0; border-radius: 4px; }
 .gk-gui-stuff-lib-item button.gk-gui-stuff-lib-item-name:focus-visible { outline: 0; }
@@ -103,11 +102,11 @@ html[data-gk-scheme="dark"] :is(.gk-gui-stuff-lib, .gk-gui-stuff-lib-tokens) { -
   background: var(--gk-gui-lib-ground); pointer-events: none; user-select: none; }
 .gk-gui-stuff-lib-item-wide .gk-gui-stuff-lib-thumb { --gk-gui-lib-scale: 0.34; }
 /* a small picture the script draws as it is (an icon): no frame, its own size, in the middle */
-.gk-gui-stuff-lib-thumb.gk-gui-stuff-lib-thumb-plain { display: flex; align-items: center; justify-content: center; block-size: auto; min-block-size: 28px; overflow: visible; border: 0;
+.gk-gui-stuff-lib-thumb.gk-gui-stuff-lib-thumb-bare { display: flex; align-items: center; justify-content: center; block-size: auto; min-block-size: 28px; overflow: visible; border: 0;
   background: none; }
 /* the copy is placed and scaled from the box's physical top left corner in both directions (core sets no dir on
    <html> in every series); its content follows its own direction */
-.gk-gui-stuff-lib-thumb-inner { position: absolute; inset-block-start: 0; left: 0; display: flex; align-items: center; justify-content: center;
+.gk-gui-stuff-lib-thumb-inner { position: absolute; inset-block-start: 0; left: 0; /* gk-u U15: scaled from the physical top left corner, as its transform-origin, in either direction */ display: flex; align-items: center; justify-content: center;
   inline-size: calc(100% / var(--gk-gui-lib-scale)); block-size: calc(100% / var(--gk-gui-lib-scale)); box-sizing: border-box; padding: 8px;
   transform: scale(var(--gk-gui-lib-scale)); transform-origin: 0 0; }
 .gk-gui-stuff-lib-thumb-inner > * { max-inline-size: 100%; }
@@ -115,7 +114,7 @@ html[data-gk-scheme="dark"] :is(.gk-gui-stuff-lib, .gk-gui-stuff-lib-tokens) { -
 /* Lista: core's table.list; the name is the button that opens the panel, written as a link */
 .gk-gui-stuff-lib-list td.name, .gk-gui-stuff-lib-list th.name { position: relative; text-align: start; }
 .gk-gui-stuff-lib-list td.group, .gk-gui-stuff-lib-list th.group, .gk-gui-stuff-lib-list td.facts { text-align: start; }
-.gk-gui-stuff-lib-list button.gk-gui-stuff-lib-row-open { margin: 0; padding: 0; border: 0; background: none; color: var(--link-color, var(--oc-blue-9, #1864ab)); font: inherit;
+.gk-gui-stuff-lib-list button.gk-gui-stuff-lib-row-open { margin: 0; padding: 0; border: 0; background: none; color: var(--link-color, var(--oc-blue-9, #1864ab)); font: inherit; /* gk-u U4: core's own link colour variable */
   block-size: auto; text-align: start; cursor: pointer; }
 .gk-gui-stuff-lib-list button.gk-gui-stuff-lib-row-open:hover, .gk-gui-stuff-lib-list button.gk-gui-stuff-lib-row-open:focus-visible { text-decoration: underline; }
 .gk-gui-stuff-lib-list td.checkbox, .gk-gui-stuff-lib-list th.checkbox { inline-size: 1.5em; }
@@ -153,15 +152,15 @@ html[data-gk-scheme="dark"] :is(.gk-gui-stuff-lib, .gk-gui-stuff-lib-tokens) { -
 .gk-gui-stuff-lib-code-label { display: block; font-weight: bold; }
 .gk-gui-stuff-lib-code-body { display: flex; align-items: flex-start; gap: 6px; }
 .gk-gui-stuff-lib-code-body > input.gk-gui-stuff-lib-code-field { flex: 1; min-inline-size: 0; box-sizing: border-box; padding-block: 3px; padding-inline: 6px;
-  border: 1px solid var(--gk-role-ui-code, var(--gk-gui-lib-frame, var(--oc-gray-4, #ced4da))); border-radius: 3px;
-  background: var(--gk-role-ui-code-soft, var(--gk-gui-lib-quiet, var(--oc-gray-0, #f8f9fa))); color: inherit; font-family: ui-monospace, Consolas, monospace; font-size: 0.85em; }
+  border: 1px solid var(--gk-role-ui-code, var(--gk-gui-lib-frame, var(--oc-gray-4, #ced4da))); border-radius: 3px; /* gk-u U4: the library's own variables, set by the page that draws it */
+  background: var(--gk-role-ui-code-soft, var(--gk-gui-lib-quiet, var(--oc-gray-0, #f8f9fa))); color: inherit; font-family: ui-monospace, Consolas, monospace; font-size: 0.85em; } /* gk-u U4: the library's own variables, set by the page that draws it */
 .gk-gui-stuff-lib-code-body:has(> input.gk-gui-stuff-lib-code-field) { align-items: center; }
 .gk-gui-stuff-lib-code-body > pre.gk-gui-stuff-lib-code-block { flex: 1; min-inline-size: 0; margin: 0; padding-block: 5px; padding-inline: 7px;
-  border: 1px solid var(--gk-role-ui-code, var(--gk-gui-lib-frame, var(--oc-gray-4, #ced4da))); border-radius: 3px;
-  background: var(--gk-role-ui-code-soft, var(--gk-gui-lib-quiet, var(--oc-gray-0, #f8f9fa))); font-size: 0.85em; white-space: pre-wrap; overflow-wrap: anywhere; }
+  border: 1px solid var(--gk-role-ui-code, var(--gk-gui-lib-frame, var(--oc-gray-4, #ced4da))); border-radius: 3px; /* gk-u U4: the library's own variables, set by the page that draws it */
+  background: var(--gk-role-ui-code-soft, var(--gk-gui-lib-quiet, var(--oc-gray-0, #f8f9fa))); font-size: 0.85em; white-space: pre-wrap; overflow-wrap: anywhere; } /* gk-u U4: the library's own variables, set by the page that draws it */
 .gk-gui-stuff-lib-code-body > pre.gk-gui-stuff-lib-code-block > code { padding: 0; border: 0; background: none; }
 .gk-gui-stuff-lib-copied { flex: none; align-self: center; padding-block: 0; padding-inline: 5px; border-radius: 3px; font-size: 0.75em; white-space: nowrap;
-  background: var(--gk-role-alert-notice, color-mix(in srgb, var(--oc-green-8, #2f9e44), var(--oc-black, #000) 15%)); color: var(--oc-white, #ffffff); pointer-events: none; }
+  background: var(--gk-role-alert-notice, #28863a); color: var(--gk-role-ui-on-fill, var(--oc-white, #ffffff)); pointer-events: none; }
 /* by an item copied by a click: in its corner, over the picture */
 .gk-gui-stuff-lib-copied.gk-gui-stuff-lib-copied-over { position: absolute; inset-block-start: 2px; inset-inline-end: 2px; z-index: 2; }
 .gk-gui-stuff-lib-related-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(9em, 1fr)); gap: 4px; margin: 2px 0 0; padding: 0; list-style: none; }

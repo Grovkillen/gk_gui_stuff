@@ -1,4 +1,4 @@
-<%# The ribbon in #main and a fly put into the real top menu (gk_gui_stuff_styleguide.js), so that the box is seen
+<%# The ribbon in #main and a popover put into the real top menu (gk_gui_stuff_styleguide.js), so that the box is seen
     over the ribbon against core's own header; nothing shows while a ribbon of higher priority is there. The band
     lets the pointer through and fades while the pointer is over it; the locked band (core's word, a higher priority
     so that it also shows after the first) has the action button that leads to the live page, which here leads
@@ -11,10 +11,10 @@
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_ribbon_show), "GkGui.ribbon.show({key, word, line, role: 'admin'})") do %>
     <%= button_tag l(:label_gk_gui_stuff_sg_ribbon_show), type: 'button',
                    data: { gk_gui_sg_ribbon: { word: l(:label_gk_gui_stuff_sg_ribbon_word), line: l(:label_gk_gui_stuff_styleguide), role: 'admin' }.to_json } %>
-    <template id="gk-gui-stuff-sg-topfly">
-      <%= gk_gui_stuff_fly(l(:label_gk_gui_stuff_sg_example_admin_action), plain: true, ellipsis: false) do %>
+    <template id="gk-gui-stuff-sg-toppopover">
+      <%= gk_gui_stuff_popover(l(:label_gk_gui_stuff_sg_example_admin_action), plain: true, ellipsis: false) do %>
         <p><%= l(:text_gk_gui_stuff_sg_ribbon) %></p>
-        <div class="gk-gui-stuff-fly-buttons"><%= button_tag l(:button_cancel), type: 'button', data: { gk_gui_fly_cancel: '1' } %></div>
+        <div class="gk-gui-stuff-popover-buttons"><%= button_tag l(:button_cancel), type: 'button', data: { gk_gui_popover_cancel: '1' } %></div>
       <% end %>
     </template>
   <% end %>

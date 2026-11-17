@@ -7,6 +7,7 @@
 # (Valfritt by default) and goes with the change as an event in records; each row shows its latest change. The types
 # of core's pages are appearance settings on the page Appearance instead, and are not here.
 class GkGuiStuffMeaningAdminController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   layout 'admin'
   self.main_menu = false
   before_action :require_admin

@@ -1,0 +1,29 @@
+<%# The writing box (gk_gui_stuff_compose): the list for the kind with what one answers after it, the text field, the
+    button that adds with Avbryt beside it, and the counter, which shows first when 80 per cent of the field's longest
+    length is used. The kinds, the numbers and the texts are made up. The field can be written in and the counter
+    follows; the button asks the guide's own address, which saves nothing. What stands after the list and when Avbryt
+    shows is the caller's script's to say: here the guide's own script says it (data-gk-gui-sg-compose-context) %>
+<% @gk_gui_stuff_sg_mode = :server %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_compose_example), class: 'gk-gui-stuff-direct-note') %>
+<% kinds = (1..3).map { |n| [l(:"label_gk_gui_stuff_sg_compose_kind_#{n}"), "kind#{n}"] } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_compose_answer), "gk_gui_stuff_compose(url, kinds:, label:, kind_label:, max:)") do %>
+    <%= note %>
+    <div data-gk-gui-sg-compose-context="<%= l(:text_gk_gui_stuff_sg_compose_context) %>">
+      <%= gk_gui_stuff_compose(save, kinds: kinds, label: l(:label_gk_gui_stuff_sg_compose_field), kind_label: l(:label_gk_gui_stuff_sg_compose_kind),
+                                     max: 2000, placeholder: l(:text_gk_gui_stuff_sg_compose_placeholder), id: 'gk-gui-stuff-sg-compose-1') %>
+    </div>
+  <% end %>
+  <%# a short longest length and a text that has used more than 80 per cent of it: the counter is shown %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_compose_count), "gk_gui_stuff_compose(url, kinds:, label:, kind_label:, max: 60, value:)") do %>
+    <%= note %>
+    <%= gk_gui_stuff_compose(save, kinds: kinds, label: l(:label_gk_gui_stuff_sg_compose_field), kind_label: l(:label_gk_gui_stuff_sg_compose_kind),
+                                   max: 60, value: l(:text_gk_gui_stuff_sg_compose_written), id: 'gk-gui-stuff-sg-compose-2') %>
+  <% end %>
+  <%# one kind only: the kind is text, its value a hidden field %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_compose_one_kind), "kinds: [[word, value]]") do %>
+    <%= note %>
+    <%= gk_gui_stuff_compose(save, kinds: kinds.first(1), label: l(:label_gk_gui_stuff_sg_compose_field), kind_label: l(:label_gk_gui_stuff_sg_compose_kind),
+                                   placeholder: l(:text_gk_gui_stuff_sg_compose_placeholder), id: 'gk-gui-stuff-sg-compose-3') %>
+  <% end %>
+</div>

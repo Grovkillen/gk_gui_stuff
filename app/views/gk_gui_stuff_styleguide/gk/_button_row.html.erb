@@ -1,0 +1,19 @@
+<%# The button row (gk_gui_stuff_button_row): buttons standing free on a page, one of them the button of a popover.
+    The buttons' words are made up. The two plain buttons only show; the popover opens its real box and asks the
+    guide's own address, which saves nothing %>
+<% @gk_gui_stuff_sg_mode = :server %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_button_row_popover), "gk_gui_stuff_button_row { button + button + gk_gui_stuff_popover(label, role: :alarm) { … } }") do %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_button_row_example) %></p>
+    <%= gk_gui_stuff_button_row do %>
+      <%= button_tag(l(:label_gk_gui_stuff_sg_button_row_run), type: 'submit', data: { gk_gui_sg_noop: '' }) %>
+      <%= button_tag(l(:label_gk_gui_stuff_sg_button_row_again), type: 'button', data: { gk_gui_sg_noop: '' }) %>
+      <%= gk_gui_stuff_popover(l(:label_gk_gui_stuff_sg_button_row_discard), role: :alarm) do %>
+        <%= form_tag(save) do %>
+          <p><%= l(:text_gk_gui_stuff_sg_cannot_undo) %></p>
+          <%= gk_gui_stuff_popover_buttons(l(:label_gk_gui_stuff_sg_button_row_discard), alarm: true) %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

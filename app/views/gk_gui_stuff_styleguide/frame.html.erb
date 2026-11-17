@@ -1,8 +1,9 @@
-<%# One element's tiles alone, the page the guide shows in a frame 375 px wide (Telefon): the same partial as on
+<%# One element's tiles alone, the page the guide shows in a phone's screen 390 px wide (Telefon): the same partial as on
     the guide, so that every rule for a narrow window applies as on a phone. The guide's stylesheet hides the page's own
     parts here (core's body classes for this controller and action), and the guide's script copies the guide's light or
     dark onto this page. %>
 <%= render partial: 'gk_gui_stuff_styleguide/assets' %>
+<% gk_gui_stuff_sg_frame_mark %>
 <div class="gk-gui-stuff-sg-page gk-gui-stuff-sg-in-frame gk-gui-stuff-lib-tokens" data-gk-gui-sg-nowhere="<%= l(:text_gk_gui_stuff_sg_nowhere) %>">
   <%= render partial: 'gk_gui_stuff_styleguide/element', locals: { s: @section, sections: [@section], locals: gk_gui_stuff_sg_locals, frame: true } %>
 </div>

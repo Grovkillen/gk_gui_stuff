@@ -5,7 +5,7 @@ module GkGuiStuff
   # shared computer, a preview, an operation that runs), registered by a plugin and drawn in the same band as the
   # instance's role, which always stands first. In the band a part shows only its icon, a short word and at most one
   # count; never buttons, segments, fields or links. What can be done with it stands in its panel, which the part
-  # opens under itself (a fly fastened in the band, one at a time, Esc and a click outside close it, a sheet below
+  # opens under itself (a popover fastened in the band, one at a time, Esc and a click outside close it, a sheet below
   # 899 px). A part is drawn whenever its condition holds, also in production and when the module instance_band is off.
   #
   #   GkGuiStuff::TopBand.register('people.actor', plugin: :gk_people, weight: :shared_computer, icon: 'user',
@@ -171,8 +171,9 @@ module GkGuiStuff
     end
 
     # One part: its icon, its full and its short words (the length shown is a class the script changes), its count, and
-    # ▾ when it opens; a part that opens is a fly whose button carries the full words and whose box is its panel, a
-    # dialog named by its heading. A part without a panel is a note with the same words.
+    # ▾ when it opens; a part that opens is a popover whose button carries the full words and whose box is its panel, a
+    # dialog named by its heading. A part without a panel is a note with the same words. The button carries the mark of
+    # a button that opens a popover (Primitives::POPOVER_ANCHOR), as the button of +N does.
     def gk_gui_stuff_top_band_part(part, max, index)
       rc = GkGuiStuff::Primitives.role_class(GkGuiStuff::TopBand::ROLES[part.role])
       inner = [part.icon.present? ? sprite_icon(part.icon, nil, size: 14) : nil,
@@ -188,10 +189,11 @@ module GkGuiStuff
                                                     title: part.said, 'aria-label': part.said)
       end
 
-      summary = content_tag(:summary, safe_join(inner), class: 'gk-gui-stuff-band-button', title: part.said, 'aria-label': part.said)
+      summary = content_tag(:summary, safe_join(inner), class: 'gk-gui-stuff-band-button', title: part.said, 'aria-label': part.said,
+                                                       data: GkGuiStuff::Primitives::POPOVER_ANCHOR)
       box = content_tag(:div, safe_join([content_tag(:p, content_tag(:strong, part.title), class: 'gk-gui-stuff-band-panel-title'), part.panel]),
-                        class: 'gk-gui-stuff-fly-box gk-gui-stuff-band-panel', role: 'dialog', 'aria-label': part.title)
-      content_tag(:details, summary + box, **own.except(:class, :data), class: [*cls, 'gk-gui-stuff-fly', rc ? 'gk-gui-stuff-fly-roled' : nil].compact.join(' '),
+                        class: 'gk-gui-stuff-popover-box gk-gui-stuff-band-panel', role: 'dialog', 'aria-label': part.title)
+      content_tag(:details, summary + box, **own.except(:class, :data), class: [*cls, 'gk-gui-stuff-popover', rc ? 'gk-gui-stuff-popover-roled' : nil].compact.join(' '),
                                            data: data)
     end
 
@@ -201,10 +203,10 @@ module GkGuiStuff
       other = ::I18n.t(:text_gk_gui_stuff_band_more_other, count: '%{count}')
       summary = content_tag(:summary, safe_join([content_tag(:span, '+0', class: 'gk-gui-stuff-band-more-n'),
                                                  content_tag(:span, sprite_icon('angle-down', nil, size: 12), class: 'gk-gui-stuff-band-caret', 'aria-hidden': 'true')]),
-                            class: 'gk-gui-stuff-band-button')
+                            class: 'gk-gui-stuff-band-button', data: GkGuiStuff::Primitives::POPOVER_ANCHOR)
       box = content_tag(:div, content_tag(:div, '', class: 'gk-gui-stuff-band-more-list', data: { gk_gui_band_more_list: '1' }),
-                        class: 'gk-gui-stuff-fly-box gk-gui-stuff-band-panel', role: 'dialog', 'aria-label': ::I18n.t(:label_gk_gui_stuff_band_more))
-      content_tag(:details, summary + box, class: 'gk-gui-stuff-fly gk-gui-stuff-band-part gk-gui-stuff-band-more', hidden: true,
+                        class: 'gk-gui-stuff-popover-box gk-gui-stuff-band-panel', role: 'dialog', 'aria-label': ::I18n.t(:label_gk_gui_stuff_band_more))
+      content_tag(:details, summary + box, class: 'gk-gui-stuff-popover gk-gui-stuff-band-part gk-gui-stuff-band-more', hidden: true,
                                            data: { gk_gui_band_more: '1', one: one, other: other })
     end
 
@@ -219,11 +221,11 @@ module GkGuiStuff
                                          'after', label: t.(:label_gk_gui_stuff_band_preview_view))
       row = content_tag(:div, segment, class: 'gk-gui-stuff-band-panel-row')
       marks = gk_gui_stuff_marker_panel(places: places, **marker)
-      info = content_tag(:p, t.(:text_gk_gui_stuff_band_preview_info, from: from, to: to), class: 'gk-gui-stuff-fly-hint')
+      info = content_tag(:p, t.(:text_gk_gui_stuff_band_preview_info, from: from, to: to), class: 'gk-gui-stuff-popover-hint')
       save = gk_gui_stuff_reason_button(t.(:button_save), reason: :required, url: save_url, params: params,
                                                           question: t.(:text_gk_gui_stuff_band_preview_save, setting: setting, to: to))
       cancel = button_tag(t.(:button_gk_gui_stuff_band_preview_cancel), type: 'button', data: { gk_gui_band_preview: 'cancel' })
-      safe_join([row, marks, info, content_tag(:div, safe_join([save, cancel]), class: 'gk-gui-stuff-fly-buttons gk-gui-stuff-band-panel-buttons')])
+      safe_join([row, marks, info, content_tag(:div, safe_join([save, cancel]), class: 'gk-gui-stuff-popover-buttons gk-gui-stuff-band-panel-buttons')])
     end
 
     # The preview's part, as the preview will register it: role admin (it exists only under elevation), the heaviest
@@ -234,13 +236,14 @@ module GkGuiStuff
         panel: gk_gui_stuff_band_preview_panel(setting: setting, from: from, to: to, places: places, save_url: save_url, marker: marker) }
     end
 
-    # The band's script and the stylesheet, once per page (the real band has them from the page's head)
+    # The band's script, once per page (the real band has it from the page's head); its stylesheet, the shared
+    # elements', is in every page's head (core.rb ALWAYS_SHEETS)
     def gk_gui_stuff_top_band_assets
       return if @gk_gui_stuff_top_band_assets
 
       @gk_gui_stuff_top_band_assets = true
       content_for(:header_tags) do
-        safe_join([stylesheet_link_tag('gk_gui_stuff_elements', plugin: 'gk_gui_stuff'), javascript_include_tag('gk_gui_stuff_top_band', plugin: 'gk_gui_stuff')])
+        javascript_include_tag('gk_gui_stuff_top_band', plugin: 'gk_gui_stuff')
       end
     end
   end

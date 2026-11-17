@@ -175,7 +175,7 @@
   // a place's words: every item that shows there, each by its own words
   function placeLabel(p) { return p.items.map(label).filter(function (s, i, a) { return a.indexOf(s) === i; }).join(' · '); }
   function unflag() {
-    if (state && state.flag && G.flag) G.flag.remove(state.flag);
+    if (state && state.flag) G.flag.remove(state.flag);
     if (state) state.flag = null;
   }
 
@@ -190,7 +190,7 @@
     state.at = i;
     var p = state.places[i], words = placeLabel(p), of = w('of', { n: i + 1, total: n });
     p.el.setAttribute('data-gk-gui-mark-current', '1');
-    if (G.flag) state.flag = G.flag.put(p.el, words + ' · ' + of, { kind: p.item.kind === 'new' ? 'new' : 'changed', role: 'effect', said: false });
+    state.flag = G.flag.put(p.el, words + ' · ' + of, { kind: p.item.kind === 'new' ? 'new' : 'changed', role: 'effect', said: false });
     if (scroll && p.el.scrollIntoView) p.el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: reduced && reduced.matches ? 'auto' : 'smooth' });
     if (!quiet) say(w('at', { label: words, n: i + 1, total: n }));
     panels().forEach(drawState);
@@ -326,7 +326,7 @@
   // ---- gone: an empty dashed box where it stood
   function unghost() {
     if (!state || !state.ghost) return;
-    if (G.flag) G.flag.clear(state.ghost);
+    G.flag.clear(state.ghost);
     state.ghost.remove();
     state.ghost = null;
   }
@@ -345,7 +345,6 @@
   // bar, core's header on a phone) it is hidden, as the flag is: the flag's own test (GkGui.flag.underBar), at its two
   // upper corners and the middle, read from what the browser draws and its computed position only
   function coverGhost(g) {
-    if (!G.flag || !G.flag.underBar) return;
     var r = g.getBoundingClientRect(), y = r.top + 1;
     var under = [r.left + 1, r.left + r.width / 2, r.right - 1].some(function (x) { return G.flag.underBar(g, x, y); });
     g.classList.toggle('gk-gui-stuff-marker-ghost-off', under);
@@ -380,14 +379,14 @@
     state.ghostItem = i;
     coverGhost(g);
     var words = goneWords(it);
-    if (G.flag) G.flag.put(g, words, { kind: 'gone', role: 'effect', said: false });
+    G.flag.put(g, words, { kind: 'gone', role: 'effect', said: false });
     if (g.scrollIntoView) g.scrollIntoView({ block: 'center', behavior: reduced && reduced.matches ? 'auto' : 'smooth' });
     say(words);
   }
 
   // ---- Visa alla
   function showAll(opener) {
-    if (!state || !G.layer) return;
+    if (!state) return;
     var n = state.places.length;
     if (!n) { G.layer.open({ key: 'gk-gui-marker-all', title: w('all'), content: el('p', null, w('places_none')), anchor: opener || null, opener: opener || null }); return; }
     var list = el('ol', 'gk-gui-stuff-marker-list');
@@ -399,8 +398,8 @@
         G.layer.close('gk-gui-marker-all');
         // the band's panel Visa alla stood in closes too (a press with the mouse has closed it already), and the focus
         // goes to its part's button, never to a button inside a closed panel
-        var d = opener && opener.closest ? opener.closest('details.gk-gui-stuff-fly') : null;
-        if (d && d.open && G.fly && G.fly.close) G.fly.close(d);
+        var d = opener && opener.closest ? opener.closest('details.gk-gui-stuff-popover') : null;
+        if (d && d.open) G.popover.close(d);
         else if (d) { var s = d.querySelector(':scope > summary'); if (s) s.focus({ preventScroll: true }); }
         // the place chosen is marked, also when the marks were off
         switchOn(true);
@@ -427,7 +426,7 @@
   // The marks switched off; the places stay counted and the panel stays as it is, also in the band's part
   function switchOff(quiet) {
     if (!state.on) return;
-    if (G.layer) G.layer.close('gk-gui-marker-all');
+    G.layer.close('gk-gui-marker-all');
     unghost();
     unmark();
     state.on = false;
@@ -439,7 +438,7 @@
   // with the marks off, so that it can bring its own back
   function hide(quietly) {
     if (!state) return;
-    if (G.layer) G.layer.close('gk-gui-marker-all');
+    G.layer.close('gk-gui-marker-all');
     unghost();
     unpaint();
     watch([]);
@@ -520,7 +519,7 @@
     else if (what === 'next' || what === 'prev') {
       // switched off, it still answers: a tip alone never shows on a touch screen
       // (the whisper is the kernel's, which comes later and takes over window.GkGui)
-      if (b.getAttribute('aria-disabled') === 'true') { if (window.GkGui.whisper) window.GkGui.whisper(b.getAttribute('data-gk-gui-marker-why'), b); }
+      if (b.getAttribute('aria-disabled') === 'true') { window.GkGui.whisper(b.getAttribute('data-gk-gui-marker-why'), b); }
       else go(state.at + (what === 'next' ? 1 : -1), true);
     }
     else if (what === 'all') showAll(b);
@@ -548,8 +547,23 @@
   function bandAtTop() {
     var band = document.querySelector('body > .gk-gui-stuff-band');
     if (band) band.toggleAttribute('data-gk-gui-band-top', window.pageYOffset <= 0);
+    bandHeld();
   }
   window.addEventListener('scroll', bandAtTop, { passive: true });
+  // The band held (a part's panel open, not at the very top) is the root's own mark, data-gk-gui-stuff-band-held, which
+  // gives the root the band's height and the scroll padding that keeps a jump below it (gk_gui_stuff_elements.css); only
+  // the page's own band (the root's data-gk-gui-stuff-band, core.rb band_mark). Written only when it changes, at once
+  // after the top mark and before the page's other listeners of a toggle (caught on the window on the way down); a
+  // change is told (gk-gui-stuff-band-held on the document), so that what reads the band's height (the table of
+  // contents' pad, gk_gui_stuff_page.js) reads the new one also after a scroll it heard first.
+  function bandHeld() {
+    var root = document.documentElement, band = root.getAttribute('data-gk-gui-stuff-band') === 'band' ? document.querySelector('body > .gk-gui-stuff-band') : null;
+    var held = !!band && !band.hasAttribute('data-gk-gui-band-top') && !!band.querySelector('details[open]');
+    if (held === root.hasAttribute('data-gk-gui-stuff-band-held')) return;
+    root.toggleAttribute('data-gk-gui-stuff-band-held', held);
+    document.dispatchEvent(new CustomEvent('gk-gui-stuff-band-held'));
+  }
+  window.addEventListener('toggle', bandHeld, true);
 
   function start() {
     var src = document.getElementById('gk-gui-stuff-marks');

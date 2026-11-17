@@ -1,0 +1,71 @@
+/* gk_gui_stuff: the lists' primitives, drawn by entry.rb: quiet text (gk_gui_stuff_quiet), the entry with its thread
+   (gk_gui_stuff_entry), values in two modes (gk_gui_stuff_values), the thing (gk_gui_stuff_thing), the shown reason
+   (gk_gui_stuff_reason_shown) and the scroll box for preformatted text (gk_gui_stuff_pre). Every colour is a role
+   with its fallback, which also gives the dark mode; logical properties only. What stands in a row (a pill, a
+   button, a link, an icon) stands in the middle of the row and follows the font. */
+
+/* quiet text: small and muted; soft is italic in the soft text tone; inline stands after a field on its row; full
+   has the size of the text around it and the same tone; nowrap never breaks inside (a point in time). A link in it
+   takes the text's colour, dotted, so that it does not draw the eye from the content beside it */
+.gk-gui-stuff-quiet { font-size: 0.9em; color: var(--gk-role-ui-muted, #666c72); overflow-wrap: anywhere; }
+.gk-gui-stuff-quiet a { color: inherit; text-decoration: underline dotted; }
+.gk-gui-stuff-quiet-soft { color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); font-style: italic; }
+.gk-gui-stuff-quiet-inline { display: inline-block; margin-inline-start: 0.5em; }
+.gk-gui-stuff-quiet-full { font-size: 1em; }
+.gk-gui-stuff-quiet-nowrap { white-space: nowrap; overflow-wrap: normal; }
+
+/* the entry: a line between the entries; the head a row that wraps, the actions at its end; the answers indented
+   behind a line. A voided entry has a muted head, a corrected one its text in the soft tone */
+.gk-gui-stuff-entry { padding-block: 0.4em; border-block-end: 1px solid var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6)); }
+.gk-gui-stuff-entry-head { display: flex; flex-wrap: wrap; gap: 0.4em; align-items: center; font-size: 0.9em;
+  color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); }
+.gk-gui-stuff-entry-who { font-weight: bold; color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); }
+.gk-gui-stuff-entry-actions { margin-inline-start: auto; display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.6em; }
+/* an action that opens a popover from its icon alone (the reason button) has the icon button's measures: the same
+   round press surface, the same icon in the colour of the text around it and no margin of its own, so that the
+   actions are equally large and stand equally far apart */
+.gk-gui-stuff-entry-actions form.gk-gui-stuff-reason-form { display: flex; }
+.gk-gui-stuff-entry-actions details.gk-gui-stuff-popover-icon-only { margin-inline-start: 0; }
+.gk-gui-stuff-entry-actions details.gk-gui-stuff-popover-icon-only > summary { display: flex; align-items: center; justify-content: center;
+  box-sizing: border-box; inline-size: 26px; block-size: 26px; border-radius: 50%; }
+.gk-gui-stuff-entry-actions details.gk-gui-stuff-popover-icon-only > summary svg { inline-size: 16px; block-size: 16px; }
+.gk-gui-stuff-entry-actions details.gk-gui-stuff-popover-icon-only > summary svg.icon-svg:not(.icon-svg-filled) { stroke: currentColor; }
+.gk-gui-stuff-entry-body { margin-block: 0.2em; }
+.gk-gui-stuff-entry-body p { margin-block: 0.2em; }
+.gk-gui-stuff-entry-thread { margin-inline-start: 1.5em; padding-inline-start: 0.8em;
+  border-inline-start: 2px solid var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6)); }
+.gk-gui-stuff-entry-voided > .gk-gui-stuff-entry-head,
+.gk-gui-stuff-entry-voided > .gk-gui-stuff-entry-head .gk-gui-stuff-entry-who { color: var(--gk-role-ui-muted, #666c72); }
+.gk-gui-stuff-entry-corrected > .gk-gui-stuff-entry-body { color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); }
+
+/* values: the label in the soft text tone in both modes. now: the earlier value struck through after the one that
+   holds. changes: from and to in the diff's roles with an arrow between them, each row with its dot */
+ul.gk-gui-stuff-values { list-style: none; margin: 0; padding: 0; text-align: start; }
+.gk-gui-stuff-values-label { color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); }
+ul.gk-gui-stuff-values-now del { color: var(--gk-role-ui-muted, #666c72); margin-inline-start: 0.4em; }
+ul.gk-gui-stuff-values-changes { list-style: disc inside; font-size: 0.9em; margin-block: 0.2em; }
+/* a row without its dot (the fold that shows the rest, as the list's last row): the row alone, the list keeps its dots */
+li.gk-gui-stuff-values-unmarked { list-style: none; }
+/* a list of values inside such a row (the rest, under its fold) is the same list going on: the outer list has set the
+   text's size and the room around it, so the inner one takes neither once more */
+li.gk-gui-stuff-values-unmarked ul.gk-gui-stuff-values-changes { font-size: 1em; margin-block: 0; }
+ul.gk-gui-stuff-values-changes del { color: var(--gk-role-diff-removed, var(--oc-red-9, #c92a2a)); }
+ul.gk-gui-stuff-values-changes ins { color: var(--gk-role-diff-added, #287f39); text-decoration: none; }
+.gk-gui-stuff-values-arrow { color: var(--gk-role-ui-muted, #666c72); margin-inline: 0.3em; }
+
+/* the thing: its parts in a row that breaks between them, never inside one */
+.gk-gui-stuff-thing { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 0.4em; }
+.gk-gui-stuff-thing-part { white-space: nowrap; }
+
+/* the shown reason: the edge and the soft ground of the role notice, who (or the word for a reason) on a line of
+   its own at the top. No inline margin of its own: where it stands in core's history, core's indent holds */
+.gk-gui-stuff-reason-shown { margin-block: 0.2em; padding-inline: 0.6em; border-inline-start: 3px solid var(--gk-role-alert-notice, #28863a);
+  background: var(--gk-role-alert-notice-soft, #fafefb); text-align: start; }
+.gk-gui-stuff-reason-shown-by { display: block; font-size: 0.85em; font-weight: bold; }
+
+/* the scroll box: preformatted text as core's code, a largest height with the scrolling inside, long lines broken.
+   Under it the air a pre has in core (the browser's own 1em), so that a heading after it stands as far off as after
+   core's; none over it, where the heading it belongs to stands */
+.gk-gui-stuff-pre { max-block-size: 30em; overflow: auto; margin-block: 0 1em; margin-inline: 0; padding: 0.5em; white-space: pre-wrap; overflow-wrap: anywhere;
+  border: 1px solid var(--gk-role-ui-code, var(--oc-gray-4, #ced4da)); border-radius: 3px;
+  background: var(--gk-role-ui-code-soft, var(--oc-gray-1, #f1f3f5)); }

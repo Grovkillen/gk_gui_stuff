@@ -88,7 +88,8 @@ module GkGuiStuff
           return Result.new(state: :ready, row: row)
         end
         return Result.new(state: :queued, row: row) if %w[queued working].include?(row.state)
-        return none(:failed) unless Policy.retry_failed?(row.attempted_at, now, int('refresh_days'))
+        # a fetch that failed and is not tried again yet gives the card "Kunde inte hämtas" (failed_card)
+        return Result.new(state: :failed, row: row) unless Policy.retry_failed?(row.attempted_at, now, int('refresh_days'))
         return none(:full) unless room?
 
         requeue!(row, now)
@@ -163,6 +164,21 @@ module GkGuiStuff
           state: 'ready', url: row.url, domain: row.domain, title: row.title.presence || row.domain,
           text: row.description.to_s, image: img, icon: icon, no_picture: no_picture, fetched: fetched_text(row, user)
         }
+      end
+
+      # The card of an address whose fetch failed: the domain and "Kunde inte hämtas"; the reason
+      # (the fetcher's code in words) only for an administrator, in the card's tooltip. Only a person who has asked
+      # for the address before gets it (existing), as with a ready card.
+      FAILED_CODES = %w[bad_url no_meta not_allowed redirects network http not_html too_large timeout refused_port
+                        refused_address].freeze
+
+      def failed_card(row, user)
+        why = nil
+        if user&.admin?
+          code = row.error.to_s
+          why = ::I18n.t(FAILED_CODES.include?(code) ? :"text_gk_gui_stuff_lpe_failed_#{code}" : :text_gk_gui_stuff_lpe_failed_other)
+        end
+        { state: 'failed', url: row.url, domain: row.domain, title: row.domain, why: why }
       end
 
       def image_path(row)

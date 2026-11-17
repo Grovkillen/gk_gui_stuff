@@ -37,7 +37,8 @@ module GkGuiStuff
   #                 any expectation: it runs with those settings and functions as said, in a transaction that is rolled
   #                 back, so a scenario that leaves everything off as a new installation can still check what they do.
   def self.register_scenarios!
-    return unless defined?(::GkScenarios::Expect)
+    # nothing is registered with the gate closed (gate.rb); GK Scenarios calls this once every plugin is in
+    return unless defined?(::GkScenarios::Expect) && GkGuiStuff.open?
 
     if ::GkScenarios::Expect.respond_to?(:wrap)
       ::GkScenarios::Expect.wrap('turned_on') { |_ctx, on, run| GkGuiStuff.scenario_with_turned_on(on) { run.call } }

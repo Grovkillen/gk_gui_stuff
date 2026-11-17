@@ -1,7 +1,9 @@
 <%# My account > Appearance: the settings that are optional in the instance, in the groups of Administration >
     Utseende, Like Redmine for me first. Each row says what it affects (Påverkar) under its description, as on
     Utseende, its key quiet by its name, and the same search as there above the groups. Each row saves at once by its rail, with the control that fits it: a switch, a
-    segment (the person's choices of the value, with Av first where the setting has it), or the same table as under Administration with its own Spara. %>
+    segment (the person's choices of the value, with Av first where the setting has it; also for GK Core Stuff's dark
+    mode, whose person's value is a choice although its plugin names no control), or the same table as
+    under Administration with its own Spara. %>
 <% gk_gui_stuff_form_page_assets %>
 <h2><%= l(:label_gk_gui_stuff_my) %></h2>
 <% reg = @register %>
@@ -42,9 +44,10 @@
             <span class="gk-gui-stuff-form-page-my-control gk-gui-stuff-form-page-my-table">
               <%= gk_gui_stuff_value_field(row, v, reg.person_value(row.key, v.name, user), scope: 'values') %>
               <%= gk_gui_stuff_row_save_button %></span>
-          <% elsif v && %w[segment select].include?(row.person) %>
+          <% elsif v && (%w[segment select].include?(row.person) || (v.kind == 'choice' && GkGuiStuff::ColorMode.segment_row?(row.key))) %>
             <% list = v.choice_list.map { |c| c.is_a?(Array) ? c : [c, c] } %>
-            <% selected = row.person_off && choice[:on] == false ? 'off' : reg.person_value(row.key, v.name, user).to_s %>
+            <%# GK Core Stuff's dark mode: the person's own choice, automatic until chosen, as the page shows it %>
+            <% selected = row.person_off && choice[:on] == false ? 'off' : (GkGuiStuff::ColorMode.row_choice(row.key, user) || reg.person_value(row.key, v.name, user)).to_s %>
             <% off = row.person_off ? [[l(:label_gk_gui_stuff_col_off), 'off']] : [] %>
             <span class="gk-gui-stuff-form-page-my-control"><%= gk_gui_stuff_segment('choice', off + list.map { |t, val| [t, val.to_s] }, selected, label: row.label) %></span>
           <% else %>

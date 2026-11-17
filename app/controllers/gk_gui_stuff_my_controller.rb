@@ -4,6 +4,7 @@
 # Utseende, and Like Redmine for me first. Each row saves at once by its rail and needs no reason; every change is an
 # event on the person's own row in gk_records. Refused when the setting is not optional now.
 class GkGuiStuffMyController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   # a page of the person's own, as core's My account: no project menu (core's MyController does the same)
   self.main_menu = false
   before_action :require_login
@@ -29,13 +30,17 @@ class GkGuiStuffMyController < ApplicationController
     values = params[:values]
     values = values.to_unsafe_h if values.respond_to?(:to_unsafe_h)
     values = values.is_a?(Hash) ? values.to_h : nil
+    choice = nil
     if params.key?(:choice)
       choice = params[:choice].to_s
-      if choice == 'off'
+      if choice == 'off' && row.person_off
         on = false
       else
+        # Off only where the row offers it (person_off); elsewhere off is a value like any other, and refused unless
+        # it is one of the value's choices
         v = row.values.values.find(&:person)
         return answer(false, l(:text_gk_gui_stuff_not_optional)) unless v
+        return answer(false, l(:text_gk_gui_stuff_not_saved)) if choice == 'off' && !v.choice_values.include?('off')
 
         on = true
         values = { v.name => choice }
@@ -44,7 +49,8 @@ class GkGuiStuffMyController < ApplicationController
       on = params[:on].to_s == '1'
     end
     @register.set_person!(User.current, row.key, on: on, values: values)
-    answer(true)
+    # the saved choice in the answer, so that a script following the row knows which of its choices this answers
+    answer(true, nil, choice ? { choice: choice } : {})
   rescue GkRecords::AppearanceSettings::Invalid, ArgumentError => e
     Rails.logger.info("[gk_gui_stuff] a person's appearance choice refused: #{e.message}")
     answer(false, l(:text_gk_gui_stuff_not_saved))
@@ -62,7 +68,7 @@ class GkGuiStuffMyController < ApplicationController
 
   def find_register = (@register = GkGuiStuff.appearance_settings)
 
-  def answer(ok, message = nil)
-    render json: { ok: ok, message: message }, status: ok ? :ok : :unprocessable_entity
+  def answer(ok, message = nil, extra = {})
+    render json: { ok: ok, message: message }.merge(extra), status: ok ? :ok : :unprocessable_entity
   end
 end

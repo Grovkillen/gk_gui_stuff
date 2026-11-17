@@ -428,6 +428,8 @@ module GkGuiStuff
   # that it never guesses at a part of a class name. No such custom field, no rule.
   module CustomMark
     STYLES = %w[diamond stripe italic].freeze
+    # the mark's own colour, a violet apart from every role
+    TONE = 'var(--oc-violet-6, #7950f2)' # gk-u U3: the custom field mark has no role of the same meaning
 
     module_function
 
@@ -454,16 +456,16 @@ module GkGuiStuff
       folders = sel.map(&:first).join(', ')
       links = sel.map(&:last)
       case style
-      when 'stripe' then "#{folders} { box-shadow: inset 3px 0 0 var(--oc-violet-6); }"
+      when 'stripe' then "#{folders} { box-shadow: inset 3px 0 0 #{TONE}; }"
       when 'italic' then "#{links.join(', ')} { font-style: italic; }"
       else
         after = links.map { |s| "#{s}::after" }.join(', ')
         # the mark is an icon from icons when it is installed (drawn as a mask in the mark's colour), else the character
         if defined?(::GkIcons) && ::GkIcons.exists?('own-field')
-          "#{after} { content: \"\"; display: inline-block; inline-size: .8em; block-size: .8em; margin-inline-start: 6px; background-color: var(--oc-violet-6); " \
+          "#{after} { content: \"\"; display: inline-block; inline-size: .8em; block-size: .8em; margin-inline-start: 6px; background-color: #{TONE}; " \
             "-webkit-mask: url(#{::GkIcons.url('own-field')}) center / contain no-repeat; mask: url(#{::GkIcons.url('own-field')}) center / contain no-repeat; }"
         else
-          "#{after} { content: \"◇\"; margin-inline-start: 6px; font-size: .75em; color: var(--oc-violet-6); vertical-align: .1em; }"
+          "#{after} { content: \"◇\"; margin-inline-start: 6px; font-size: .75em; color: #{TONE}; vertical-align: .1em; }"
         end
       end
     end

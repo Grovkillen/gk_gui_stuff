@@ -36,9 +36,9 @@
     <%= gk_gui_stuff_sg_fold(:div, long + long, html_class: 'wiki') %>
   <% end %>
   <%# the fold list's slot, first on the bar: what another plugin lays there stands beside the bar's button %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fold_slot), "data-gk-gui-fold-slot-for=\"<the block's id>\" on the element; GkGui.fold.slot(block), GkGui.fold.fill(block, item), the event gk-gui-fold-bar; gk_gui_stuff_fly(text, icon:, icon_only: true, tap: true, role:); gk_gui_stuff_sg_fold(tag, content, slot:)", mode: :still) do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fold_slot), "data-gk-gui-fold-slot-for=\"<the block's id>\" on the element; GkGui.fold.slot(block), GkGui.fold.fill(block, item), the event gk-gui-fold-bar; gk_gui_stuff_popover(text, icon:, icon_only: true, tap: true, role:); gk_gui_stuff_sg_fold(tag, content, slot:)", mode: :still) do %>
     <% long = content_tag(:p, l(:text_gk_gui_stuff_sg_fold_slot)) %>
-    <% example = gk_gui_stuff_fly(l(:text_gk_gui_stuff_sg_fold_slot_item), icon: 'lock', icon_only: true, tap: true, role: :admin) { l(:text_gk_gui_stuff_sg_fold_slot_item) } %>
+    <% example = gk_gui_stuff_popover(l(:text_gk_gui_stuff_sg_fold_slot_item), icon: 'lock', icon_only: true, tap: true, role: :admin) { l(:text_gk_gui_stuff_sg_fold_slot_item) } %>
     <%= gk_gui_stuff_sg_fold(:div, long + long, html_class: 'wiki', slot: example) %>
   <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_opener), "div.gk-gui-stuff-opener[data-gk-gui-stuff-open], template.gk-gui-stuff-opener-content, button.gk-gui-stuff-opener-button[hidden]", mode: :nosave) do %>

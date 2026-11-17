@@ -60,13 +60,13 @@
     function draw() {
       ctx.clearRect(0, 0, STAGE, STAGE);
       ctx.drawImage(img, ox, oy, img.naturalWidth * scale, img.naturalHeight * scale);
-      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.fillStyle = 'rgba(0,0,0,0.45)'; // gk-u U6: the crop canvas dims outside the frame, a canvas takes no roles
       var x = ox + sel.x * scale, y = oy + sel.y * scale, s = sel.s * scale;
       ctx.beginPath();
       ctx.rect(0, 0, STAGE, STAGE);
       ctx.rect(x, y, s, s);
       ctx.fill('evenodd');
-      ctx.strokeStyle = '#fff';
+      ctx.strokeStyle = '#fff'; // gk-u U5: the crop canvas draws its frame white, a canvas takes no roles
       ctx.lineWidth = 2;
       ctx.strokeRect(x + 1, y + 1, s - 2, s - 2);
       if (rx) rx.value = (sel.x / img.naturalWidth).toFixed(5);

@@ -1,0 +1,17 @@
+/* gk_gui_stuff color mode: the light, dark or automatic button in the top menu (color_mode.rb). The button is the
+   primitives' cycle button; this sheet only holds its place. The item of core's account menu that marks the button's
+   place is never shown as a link, also not in core's phone menu, which moves the account's list there; its row shows
+   only while the button stands in it. Where the account is a dropdown the button stands before it in the top menu's row,
+   in the middle of the row's height. In a line of text (the account's list) its place is exactly one line of the
+   line's own font high (1lh) from the line's top, with the button in its middle, standing out above and below as
+   much: the line is as high and its text stands where it would without the button, so the button's middle is the
+   middle of the links beside it, however high the button and in whatever font. In a bar lower than the button the
+   button stands out of the bar, so outside a row its focus ring lies inside the button's edge and is seen whole. In
+   core's phone menu the button is a row of its own (the script sets the cycle button's row class there): as high as
+   the menu's links, with their start room, their line between rows and the text colour of a filled ground. Loaded only where the person has the button. */
+a.gk-gui-stuff-color-mode-item[hidden], li:has(> a.gk-gui-stuff-color-mode-item[hidden]):not(:has(> #gk-gui-stuff-color-mode)) { display: none; }
+#gk-gui-stuff-color-mode { align-self: center; margin-block: 0; margin-inline: 0 8px; block-size: 1lh; vertical-align: top; }
+#gk-gui-stuff-color-mode.gk-gui-stuff-cycle-row { margin-inline: 0; block-size: auto; }
+#gk-gui-stuff-color-mode:not(.gk-gui-stuff-cycle-row) > button.gk-gui-stuff-cycle-button:focus-visible { outline-offset: -2px; }
+#gk-gui-stuff-color-mode.gk-gui-stuff-cycle-row > button.gk-gui-stuff-cycle-button { min-block-size: 40px; padding-inline: 8px; border-radius: 0;
+  border-block-start: 1px solid color-mix(in srgb, currentColor 10%, transparent); color: var(--gk-role-ui-on-fill, var(--oc-white, #fff)); }

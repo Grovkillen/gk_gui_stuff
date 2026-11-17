@@ -5,6 +5,7 @@
 # the request: an address not yet fetched is put in the queue and answered 202; without GK Ops one fetch starts in a
 # thread of its own and the answer goes out at once. Everything is a 404 when the module is off for the person.
 class GkGuiStuffExternalPreviewController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   PLACE = 'gui_stuff.appearance'
   ROW_KEY = 'gui_stuff.link_preview_external'
 
@@ -28,6 +29,9 @@ class GkGuiStuffExternalPreviewController < ApplicationController
     when :queued
       kick
       render json: { state: 'queued' }, status: :accepted
+    when :failed
+      # the card says "Kunde inte hämtas"; the reason only to an administrator
+      render json: queue.failed_card(res.row, User.current)
     else
       return head(:not_found) if res.why == :off
 
@@ -48,7 +52,9 @@ class GkGuiStuffExternalPreviewController < ApplicationController
     send_file row.image_path, type: 'image/jpeg', disposition: 'inline'
   end
 
-  # POST reason -> every card and picture removed, with the form's reason
+  # POST reason -> every card and picture removed, with the form's reason. Off is off everywhere: the place's own
+  # check answers no text while the place gui_stuff.appearance is off, whatever was sent, so no reason is kept then
+  # (the box on Utseende draws no field then either); in the other modes it answers what was written
   def clear
     back = gk_gui_stuff_appearance_path(anchor: row_anchor)
     return redirect_to(back) unless defined?(GkGuiStuff::External::Cleanup)
@@ -60,7 +66,7 @@ class GkGuiStuffExternalPreviewController < ApplicationController
         flash[:error] = check.error
         return redirect_to(back)
       end
-      text = GkGuiStuff::Primitives.written_reason(params[:reason])
+      text = check.text
     end
     n = GkGuiStuff::External::Cleanup.clear!(cause: 'button', reason: text, user: User.current)
     flash[:notice] = l(:text_gk_gui_stuff_lpe_cleared, count: n.to_i)

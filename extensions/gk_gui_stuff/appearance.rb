@@ -14,15 +14,15 @@ module GkGuiStuff
     # The group on the page Appearance, by where the setting shows
     GROUPS = {
       'instance' => %w[instance_band footer_text help_link declutter recent_pages branch_jump fullscreen account_menu personal_count
-                       icons_tabs icons_other layout_sidebar layout_header],
-      'text' => %w[link_preview user_status arrows mailto_copy inline_copy code_copy core_copy_whisper filled_badges flag_icons link_preview_external external_new_tab],
+                       icons_tabs icons_other layout_sidebar layout_header color_mode],
+      'text' => %w[link_preview user_status arrows mailto_copy mailto_issue inline_copy code_copy core_copy_whisper filled_badges flag_icons link_preview_external external_new_tab],
       'lists' => %w[short_descriptions overdue_mark sticky_columns list_filter select_search scroll_shade custom_mark hide_disabled
                     members_by_group report_clarity align],
       'issue' => %w[long_fields notes_collapse private_notes_collapse code_blocks attachments_collapse quick_done parent_link
                     collapse_all history_navigator openers placements icons_issue],
       'forms' => %w[week_number key_suggest image_crop sticky_save settings_frame save_sweep],
       'calendar' => %w[calendar_compact gantt_width gantt_fill],
-      'notices' => %w[whisper_tooltip wave flash_timeout flash_icon outcome_notice corner login_warning],
+      'notices' => %w[whisper_tooltip wave flash_timeout flash_icon warning_text outcome_notice corner login_warning],
       'admin' => %w[admin_groups attachment_sizes]
     }.freeze
 
@@ -39,7 +39,8 @@ module GkGuiStuff
     # GK's proposal; every setting not named is off in it
     PROPOSAL = {
       'forced' => %w[instance_band admin_groups attachment_sizes sticky_save settings_frame account_menu align],
-      'optional' => %w[overdue_mark list_filter select_search mailto_copy inline_copy code_copy core_copy_whisper whisper_tooltip week_number external_new_tab]
+      'optional' => %w[overdue_mark list_filter select_search mailto_copy mailto_issue inline_copy code_copy core_copy_whisper whisper_tooltip warning_text week_number
+                       external_new_tab]
     }.freeze
 
     # A row's warning, the sharper one while its domain list holds "*", and the reason a save then needs
@@ -60,21 +61,22 @@ module GkGuiStuff
       'link_preview_external' => %w[link_preview external_new_tab], 'external_new_tab' => %w[link_preview_external],
       'branch_jump' => %w[link_preview], 'members_by_group' => %w[link_preview], 'sticky_columns' => %w[scroll_shade],
       'scroll_shade' => %w[sticky_columns], 'code_blocks' => %w[code_copy], 'code_copy' => %w[code_blocks inline_copy core_copy_whisper], 'core_copy_whisper' => %w[code_copy whisper_tooltip], 'whisper_tooltip' => %w[core_copy_whisper],
-      'inline_copy' => %w[code_copy mailto_copy], 'mailto_copy' => %w[inline_copy], 'placements' => %w[icons_issue icons_other],
+      'inline_copy' => %w[code_copy mailto_copy], 'mailto_copy' => %w[inline_copy mailto_issue], 'mailto_issue' => %w[mailto_copy], 'placements' => %w[icons_issue icons_other],
       'icons_issue' => %w[placements], 'icons_other' => %w[placements], 'layout_sidebar' => %w[layout_header],
       'layout_header' => %w[layout_sidebar]
     }.freeze
     # Other plugins' settings that go with gui_stuff's, by their whole key
     RELATED_ELSEWHERE = {
       'filled_badges' => %w[core_stuff.list_badge core_stuff.heading_badge], 'quick_done' => %w[core_stuff.done_ratio_text],
-      'footer_text' => %w[core_stuff.footer_version], 'mailto_copy' => %w[core_stuff.external_links], 'user_status' => %w[people.name_chat],
+      'footer_text' => %w[core_stuff.footer_version], 'mailto_copy' => %w[core_stuff.external_links], 'mailto_issue' => %w[core_stuff.external_links], 'user_status' => %w[people.name_chat],
+      'color_mode' => %w[core_stuff.dark_mode],
       'link_preview_external' => %w[core_stuff.external_links], 'external_new_tab' => %w[core_stuff.external_links]
     }.freeze
 
     # The settings that show no picture under Visa: three steps each, text_gk_gui_stuff_step_<name>_1 to _3
     STEPS = %w[key_suggest history_navigator private_notes_collapse recent_pages].freeze
     # The settings Visa shows off and on, drawn by the style guide's helpers: gk_gui_stuff_appearance/previews/_<name>
-    PREVIEWS = %w[wave corner flash_timeout flash_icon outcome_notice filled_badges flag_icons long_fields notes_collapse code_blocks save_sweep personal_count].freeze
+    PREVIEWS = %w[wave corner flash_timeout flash_icon warning_text outcome_notice filled_badges flag_icons long_fields notes_collapse code_blocks save_sweep personal_count].freeze
 
     ICON_CHOICES = %w[core both icon].freeze
 
@@ -240,6 +242,9 @@ module GkGuiStuff
       own.call('layout_header', person: :segment,
                                 values: { 'height' => { kind: :choice, default: 'compact', person: true, label: :label_gk_gui_stuff_layout_header,
                                                         choices: choices('label_gk_gui_stuff_layout_header', %w[tall compact]) } })
+      # the light, dark or automatic button in the top menu (ColorMode): the administrator's on or off, no person's
+      # level; it counts only while GK Core Stuff's dark mode (the mode, whose value is the choice) is optional
+      own.call(ColorMode::NAME, modes: %w[off forced], needs: -> { ColorMode.core_dark ? true : false }, needs_plugin: 'gk_core_stuff')
       # a new tab is each person's own choice, off for each person until chosen; never forced
       if r.const_defined?(:PERSON_MODES) && takes?(r, :person_default)
         own.call('external_new_tab', modes: r::PERSON_MODES, person: :switch, person_default: 'off')

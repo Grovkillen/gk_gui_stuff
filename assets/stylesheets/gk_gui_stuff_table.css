@@ -1,0 +1,86 @@
+/* gk_gui_stuff: the table, the summary row and the button row, drawn by table.rb: the table on top of core's
+   table.list (gk_gui_stuff_table with its groups, rows and cells), the summary row (gk_gui_stuff_summary) and the
+   row of buttons standing free on a page (gk_gui_stuff_button_row). Every colour is a role with its fallback, which
+   also gives the dark mode; logical properties only. What stands in a row (a pill, a button, a link, an icon) stands
+   in the middle of the row and follows the font. */
+
+/* the table: text from the start edge and in the middle of the row, where core centres. The two rules weigh as
+   core's own table.list td and come after it, so that core's td.buttons and td.name still win */
+table.gk-gui-stuff-table th, table.gk-gui-stuff-table td { text-align: start; vertical-align: middle; }
+table.gk-gui-stuff-table td { white-space: normal; overflow-wrap: break-word; }
+/* a width on a column: the columns keep the widths they are given */
+table.gk-gui-stuff-table-fixed { table-layout: fixed; inline-size: 100%; }
+/* a group is a row of the table with the group's fold button; its rows fold with it. A long title breaks the
+   line, where core keeps a heading cell on one line (the rule weighs as core's and comes after it) */
+tbody.gk-gui-stuff-table-group th { background: var(--gk-role-ui-raised, var(--oc-gray-1, #f1f3f5));
+  border-block-start: 2px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); padding-block: 6px; font-size: 1em;
+  white-space: normal; }
+tbody.gk-gui-stuff-table-group .gk-gui-stuff-group-toggle { color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); }
+tbody.gk-gui-stuff-table-group-rows[hidden] { display: none; }
+/* a voided row: the muted tone, and the thing (the cell of the column that grows) struck through */
+table.gk-gui-stuff-table tr.gk-gui-stuff-table-row-voided td { color: var(--gk-role-ui-muted, #666c72); }
+table.gk-gui-stuff-table tr.gk-gui-stuff-table-row-voided td.gk-gui-stuff-table-grow { text-decoration: line-through; }
+/* a row with an error: its ground is a role of its own, a step lighter than the alarm's soft tone, so that the
+   muted text and a link hold 4.5:1 on it as the page's text does; what is wrong stands under the content in the
+   alarm's colour */
+table.gk-gui-stuff-table tr.gk-gui-stuff-table-row-error td { background: var(--gk-role-alert-alarm-row, var(--oc-red-0, #fff5f5)); }
+.gk-gui-stuff-table-message { display: block; color: var(--gk-role-alert-alarm, var(--oc-red-9, #c92a2a)); }
+/* a muted cell: italic in the soft text tone; a soft cell: the same tone, upright */
+table.gk-gui-stuff-table td.gk-gui-stuff-table-muted { color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); font-style: italic; }
+table.gk-gui-stuff-table td.gk-gui-stuff-table-soft { color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); }
+/* a cell whose content is never broken over lines (a pill, a point in time), in the stacked row too */
+table.gk-gui-stuff-table td.gk-gui-stuff-table-nowrap { white-space: nowrap; overflow-wrap: normal; }
+
+/* below 899 px every row is stacked as a small card and the heading row is not shown. Each cell stands where its
+   column says: first on the first line, growing over the rest of it, at its end, on a line of its own (no height
+   when it is empty, but it still breaks the line), and after that in the columns' order. Columns that share a place
+   stand in the columns' order. The row has the air of core's heading cell at its sides, so that a ground (the
+   error's, the striping) never ends at the text. A long value without a space (a checksum) is broken where the row
+   ends: a cell may be narrower than its longest word, and what stands in it (a list of values too) inherits the
+   breaking; a cell that never breaks keeps its one line. What stands in the cell at the end of the first line (the
+   row menu's button, an icon link) stands in the middle of that cell, and so in the middle of the row. A stacked
+   cell takes no margin. A table cell never does, but a stacked cell is a block, and a class of core's on the cell
+   (.buttons, with more margin under than over) would lift it out of the middle of the row and make the row higher */
+@media (max-width: 899px) {
+  table.gk-gui-stuff-table, table.gk-gui-stuff-table > tbody:not([hidden]) { display: block; }
+  table.gk-gui-stuff-table > colgroup, table.gk-gui-stuff-table > thead { display: none; }
+  table.gk-gui-stuff-table > tbody > tr { display: flex; flex-wrap: wrap; align-items: center; gap: 0.2em 0.6em; padding-block: 0.4em; padding-inline: 4px;
+    border-block-end: 1px solid var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6)); }
+  table.gk-gui-stuff-table > tbody > tr > td { display: block; margin: 0; padding: 0; border: 0; background: transparent; inline-size: auto;
+    min-inline-size: 0; overflow-wrap: anywhere; }
+  table.gk-gui-stuff-table td.gk-gui-stuff-table-first { order: 1; }
+  table.gk-gui-stuff-table td.gk-gui-stuff-table-grow { order: 2; flex: 1 1 0; min-inline-size: 12em; }
+  table.gk-gui-stuff-table td.gk-gui-stuff-table-end { order: 3; margin-inline-start: auto; display: flex; align-items: center; }
+  table.gk-gui-stuff-table td.gk-gui-stuff-table-full { order: 4; flex-basis: 100%; }
+  table.gk-gui-stuff-table td.gk-gui-stuff-table-full:empty { block-size: 0; overflow: hidden; }
+  table.gk-gui-stuff-table td.gk-gui-stuff-table-after { order: 5; }
+  /* the group's row keeps its own ground and edge, over the whole width */
+  table.gk-gui-stuff-table > tbody.gk-gui-stuff-table-group > tr { padding: 0; border: 0; }
+  table.gk-gui-stuff-table > tbody.gk-gui-stuff-table-group > tr > th { display: block; flex: 1 1 100%; }
+  /* the error's ground on the whole stacked row. The selector weighs as the heaviest of core's rules on a row of
+     table.list (the striping in a box and the striping under the pointer) and comes after them, so the ground
+     holds on every row, in a box and under the pointer too */
+  table.list.gk-gui-stuff-table > tbody > tr.gk-gui-stuff-table-row-error:nth-child(n) { background: var(--gk-role-alert-alarm-row, var(--oc-red-0, #fff5f5)); }
+  table.gk-gui-stuff-table tr.gk-gui-stuff-table-row-error td { background: transparent; }
+  /* the action at the end of the first line is its icon alone: the word of core's icon link is kept for a screen
+     reader only, and stands as the link's tooltip */
+  table.gk-gui-stuff-table td.gk-gui-stuff-table-end .icon-label { position: absolute; inline-size: 1px; block-size: 1px; overflow: hidden;
+    clip-path: inset(50%); white-space: nowrap; }
+}
+
+/* the summary row: the count in bold, the parts with a dot between them, the flags last */
+.gk-gui-stuff-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6em; margin-block: 0.2em; }
+.gk-gui-stuff-summary-count { font-weight: bold; }
+.gk-gui-stuff-summary-part { font-size: 0.9em; color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); }
+.gk-gui-stuff-summary-part + .gk-gui-stuff-summary-part::before { content: "\00b7"; margin-inline-end: 0.6em; color: var(--gk-role-ui-muted, #666c72); }
+.gk-gui-stuff-summary-flag { display: inline-flex; align-items: center; gap: 0.3em; }
+
+/* the button row: the buttons in line and equally high. A popover in the row (alone or in the reason button's own
+   form) takes the block margin of core's buttons and the row's height, and its button fills it, so that it is as
+   high as the buttons beside it and its box hangs from its lower edge */
+.gk-gui-stuff-button-row { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.4em; margin-block: 0.6em; }
+.gk-gui-stuff-button-row > details.gk-gui-stuff-popover, .gk-gui-stuff-button-row > form.gk-gui-stuff-reason-form { margin-block: 1px; }
+.gk-gui-stuff-button-row > form.gk-gui-stuff-reason-form { display: flex; }
+.gk-gui-stuff-button-row > details.gk-gui-stuff-popover > summary.gk-gui-stuff-popover-button:not(.icon-only, .gk-gui-stuff-popover-text),
+.gk-gui-stuff-button-row > form.gk-gui-stuff-reason-form > details.gk-gui-stuff-popover > summary.gk-gui-stuff-popover-button:not(.icon-only, .gk-gui-stuff-popover-text) {
+  display: flex; align-items: center; box-sizing: border-box; block-size: 100%; }

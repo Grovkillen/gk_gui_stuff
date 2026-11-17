@@ -3,7 +3,7 @@
 module GkGuiStuff
   # What gui_stuff's own scripts read from the page's data (PageData, window.gkGuiStuffPage.data), so that no script
   # looks for it in core's rendered page. Each is given only when its module is on for the reader, and each is only
-  # what core shows that reader on the same page; so all three are given to one not logged in too (anonymous: true).
+  # what core shows that reader on the same page; so all four are given to one not logged in too (anonymous: true).
   # * page_title (recent_pages, gk_gui_stuff_history.js): the page's name as core's html_title was given it, the parts
   #   joined with " - " as core joins them, without the instance's name (Setting.app_title) at the end.
   # * issue_parent (parent_link, gk_gui_stuff_issue.js): the issue's nearest parent the reader may see, as core links
@@ -11,6 +11,10 @@ module GkGuiStuff
   #   core's classes for it (Issue#css_classes) and its subject.
   # * calendar_issues (calendar_compact, gk_gui_stuff_calendar_compact.js): the issues core drew on the calendar page,
   #   by id: tracker and subject.
+  # * issue_mail (mailto_issue, gk_gui_stuff_copy.js): on the issue page the subject a mail about the issue gets, as
+  #   Redmine's own notifications write it (Mailer#issue_add): "[<project> - <tracker> #<id>] <subject>", with
+  #   "(<status>) " after the brackets when Redmine's setting for status in the mail subject is on, so that a reply
+  #   reaching Redmine's incoming mail (MailHandler) finds the issue by its number.
   # Every value is plain text in JSON; the page package escapes it for the script (json_escape) and the scripts put it
   # in as text, never as HTML.
   module PageFacts
@@ -81,10 +85,38 @@ module GkGuiStuff
       out.empty? ? nil : out
     end
 
+    # The subject of a mail about the issue, as Redmine's notifications write it (Mailer#issue_add, the same in 6.0,
+    # 6.1 and 7.0): the project's name, the tracker's and the number in brackets, the issue's status in parentheses
+    # when status: is true, then the issue's subject. Mailer#issue_add adds the status whenever the setting is on;
+    # #issue_edit only for a change of status, which a mail the reader writes is not, so the envelope follows
+    # #issue_add: the issue as it stands. Both write the same shape, "[...] (<status>) <subject>".
+    def mail_subject(issue, status: false)
+      s = "[#{issue.project.name} - #{issue.tracker.name} ##{issue.id}] "
+      name = status && issue.respond_to?(:status) && issue.status ? issue.status.name.to_s : ''
+      s += "(#{name}) " unless name.empty?
+      s + issue.subject.to_s
+    end
+
+    # Redmine's own setting "Show status changes in issue mail notifications subject" (Administration, Settings,
+    # Email notifications; Setting.show_status_changes_in_mail_subject?, on by default, the same in 6.0, 6.1 and 7.0)
+    def status_in_mail_subject?
+      ::Setting.show_status_changes_in_mail_subject? ? true : false
+    end
+
+    def issue_mail(controller, user = ::User.current)
+      return nil unless page?(controller, 'issues', 'show') && on?('mailto_issue', user)
+
+      issue = controller.instance_variable_get(:@issue)
+      return nil unless issue.is_a?(::Issue) && issue.persisted?
+
+      { subject: mail_subject(issue, status: status_in_mail_subject?) }
+    end
+
     def register!
       PageData.register('page_title', plugin: :gk_gui_stuff, anonymous: true) { |ctx| page_title(ctx[:view], ctx[:controller]) }
       PageData.register('issue_parent', plugin: :gk_gui_stuff, anonymous: true) { |ctx| issue_parent(ctx[:view], ctx[:controller]) }
       PageData.register('calendar_issues', plugin: :gk_gui_stuff, anonymous: true) { |ctx| calendar_issues(ctx[:controller]) }
+      PageData.register('issue_mail', plugin: :gk_gui_stuff, anonymous: true) { |ctx| issue_mail(ctx[:controller]) }
     end
   end
 end

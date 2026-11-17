@@ -1,11 +1,12 @@
 <%# The guide's form with the side menu: the menu with the search and the groups at the side, following on scroll
     (a menu at the top under 899 px), and the elements one after the other. The page's bar (gk_gui_stuff_sg_page_tools):
     light or dark and computer or phone for every element, and Visa all kod, which opens every tile's code.
-    data-gk-gui-sg-frame: the address of one element's frame page, __key__ for the element's key; data-gk-gui-sg-dark:
-    theme_engine's dark classes for the page's root, when it is on; data-gk-gui-sg-nowhere: the whisper of an example
+    data-gk-gui-sg-frame: the address of one element's frame page, __key__ for the element's key, and data-gk-gui-sg-phone-caption the
+    words under its phone screen (Telefon · 390 × 844); data-gk-gui-sg-dark:
+    GK Core Stuff's dark mode class for the page's root, when its dark mode is there; data-gk-gui-sg-nowhere: the whisper of an example
     that leads nowhere. gk-gui-stuff-lib-tokens: the library's tones (the
     chequered ground, the chips), so that both forms and the icon library look the same. %>
-<div class="gk-gui-stuff-sg-page gk-gui-stuff-lib-tokens" data-gk-gui-sg-page data-gk-gui-sg-frame="<%= gk_gui_stuff_styleguide_frame_path(key: '__key__') %>" data-gk-gui-sg-nowhere="<%= l(:text_gk_gui_stuff_sg_nowhere) %>"<% if @dark %> data-gk-gui-sg-dark="<%= @dark.join(' ') %>"<% end %>>
+<div class="gk-gui-stuff-sg-page gk-gui-stuff-lib-tokens" data-gk-gui-sg-page data-gk-gui-sg-frame="<%= gk_gui_stuff_styleguide_frame_path(key: '__key__') %>" data-gk-gui-sg-nowhere="<%= l(:text_gk_gui_stuff_sg_nowhere) %>" data-gk-gui-sg-phone-caption="<%= l(:label_gk_gui_stuff_sg_phone_screen) %>"<% if @dark %> data-gk-gui-sg-dark="<%= @dark %>"<% end %>>
   <%# the menu's column: it keeps its place in the grid while the page's script holds the menu at the top %>
   <div class="gk-gui-stuff-sg-side" data-gk-gui-sg-side><%= render partial: 'gk_gui_stuff_styleguide/menu', locals: { sections: sections } %></div>
   <div class="gk-gui-stuff-sg-main">

@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'gate' # the gate to GK Compat, which the listener below asks
+
 module GkGuiStuff
   # Personliga sidor efter version. No plugin puts rows in account_menu: a page that belongs to the person
   # (Filterblock, Mina märken, Mitt tema) is declared here once, GkGuiStuff::Personal.register('signoff.waiting',
@@ -156,12 +158,15 @@ module GkGuiStuff
   # Mina sidor where the account is no dropdown: drawn in the page's foot on Mitt konto (core's sidebar has no hook) and moved to the top of
   # the sidebar by the script; without the script it stands at the foot. The script and the counter at the name on every page.
   class PersonalHooks < Redmine::Hook::ViewListener
+    include GkGuiStuff::Gate::Listener # without GK Compat no hook answers
+
     def view_layouts_base_html_head(_context = {})
       return '' unless User.current.logged? && Personal.any?
 
       javascript_include_tag('gk_gui_stuff_personal', plugin: 'gk_gui_stuff', defer: true) +
         stylesheet_link_tag('gk_gui_stuff_personal', plugin: 'gk_gui_stuff') +
-        javascript_tag("window.gkGuiStuffPersonalText = #{{ waits: ::I18n.t(:text_gk_gui_stuff_personal_waits), waits_split: ::I18n.t(:text_gk_gui_stuff_personal_waits_split) }.to_json};")
+        content_tag('script', json_escape({ waits: ::I18n.t(:text_gk_gui_stuff_personal_waits), waits_split: ::I18n.t(:text_gk_gui_stuff_personal_waits_split) }.to_json).html_safe,
+                    type: 'application/json', id: 'gk-gui-stuff-personal-texts')
     end
 
     def view_layouts_base_body_bottom(context = {})

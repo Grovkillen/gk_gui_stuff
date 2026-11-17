@@ -40,7 +40,7 @@
       }
       reasonBox.hidden = false;
       box.classList.add('gk-gui-stuff-sheet-open');
-      if (G.sheet) G.sheet.on(reasonBox, function () { boxClose(true); }, false);
+      G.sheet.on(reasonBox, function () { boxClose(true); }, false);
       var ta = reasonBox.querySelector('textarea');
       if (ta) ta.focus({ preventScroll: true });
     }
@@ -48,7 +48,7 @@
       if (!reasonBox || reasonBox.hidden) return;
       reasonBox.hidden = true;
       box.classList.remove('gk-gui-stuff-sheet-open');
-      if (G.sheet) G.sheet.off(reasonBox);
+      G.sheet.off(reasonBox);
       if (refocus) input.focus({ preventScroll: true });
     }
     function close(text) {
@@ -67,7 +67,7 @@
       var fd = new FormData();
       fd.append(box.getAttribute('data-gk-gui-save-name'), v);
       if (reason !== null) fd.append('reason', reason);
-      if (G.save) G.save.post(rail, fd, function () { box.setAttribute('data-gk-gui-value', val); paint(val); });
+      G.save.post(rail, fd, function () { box.setAttribute('data-gk-gui-value', val); paint(val); }).catch(function () { /* said on the rail */ });
     }
     function boxOk() {
       var ta = reasonBox && reasonBox.querySelector('textarea'), text = ta ? ta.value.trim() : '';
@@ -85,7 +85,7 @@
     box._gkGuiClick = function (e) {
       var t = e.target;
       if (reasonBox && reasonBox.contains(t)) {
-        if (t.closest('.gk-gui-stuff-inline-box-ok')) { e.stopPropagation(); boxOk(); } else if (t.closest('[data-gk-gui-fly-cancel]')) { e.stopPropagation(); boxClose(true); }
+        if (t.closest('.gk-gui-stuff-inline-box-ok')) { e.stopPropagation(); boxOk(); } else if (t.closest('[data-gk-gui-popover-cancel]')) { e.stopPropagation(); boxClose(true); }
         return;
       }
       if (t.closest('.gk-gui-stuff-inline-ok')) { e.stopPropagation(); first(); } else if (t.closest('.gk-gui-stuff-inline-pen')) { e.stopPropagation(); if (reasonBox && !reasonBox.hidden) boxClose(true); else boxOpen(); } else if (t.closest('.gk-gui-stuff-inline-cancel')) { e.stopPropagation(); close(val); }

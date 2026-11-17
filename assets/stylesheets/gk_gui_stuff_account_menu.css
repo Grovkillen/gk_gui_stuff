@@ -1,0 +1,8 @@
+/* gk_gui_stuff account menu: the dropdown keeps core's link colours on its light surface. A rule for the top menu's
+   links (a theme's light text on a dark bar) must not reach the items, so this one outranks such a rule by its two
+   ids. The items are found by GK Core Stuff's mark on a menu's links (data-menu), never by where they sit. Loaded only
+   while its appearance setting is on. */
+#top-menu #account .dropdown-content a[data-menu="account_menu"],
+#top-menu #account .dropdown-content a[data-menu="account_menu"]:visited { color: var(--gk-role-ui-link, var(--oc-blue-9, #1864ab)); }
+#top-menu #account .dropdown-content a[data-menu="account_menu"]:hover { color: var(--gk-role-ui-link, var(--oc-blue-9, #1864ab));
+  background-color: var(--gk-role-ui-raised, var(--oc-gray-1, #f1f3f5)); text-decoration: none; }

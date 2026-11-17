@@ -7,13 +7,13 @@ module GkGuiStuff
   # part in a light tone of the choice role instead of filled. Bound by gk_gui_stuff_view_segment.js, styled by
   # gk_gui_stuff_view_segment.css; both come with the first view segment on a page.
   module PrimitivesHelper
-    # choices: [[text, value], ...], two to five; selected: the value shown first (the one the browser remembers takes
-    # its place when the page has loaded); label: the group's name for a screen reader. name: the key the browser keeps
+    # choices: [[text, value], ...], two to ten; on a narrow screen the parts wrap to a second row. selected: the value
+    # shown first (the one the browser remembers takes its place when the page has loaded); label: the group's name for a screen reader. name: the key the browser keeps
     # the choice under (per person, in this browser only); remember: false where the page itself holds the choice (the
     # address, the page's light or dark), so that nothing is kept. The script presses the part clicked and tells the page
     # by the event gk-gui-view-segment (detail: name, value), which the page's own script listens for
     def gk_gui_stuff_view_segment(name, choices, selected, label: nil, remember: true, html: {})
-      raise ArgumentError, 'a view segment has two to five choices' unless (2..5).cover?(Array(choices).size)
+      raise ArgumentError, 'a view segment has two to ten choices' unless (2..10).cover?(Array(choices).size)
 
       gk_gui_stuff_view_segment_assets
       btns = choices.map do |text, value|

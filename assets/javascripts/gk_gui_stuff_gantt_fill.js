@@ -16,7 +16,7 @@
     var area = document.getElementById('gantt_area'), field = document.getElementById('months');
     if (!area || !field) return;
     // the page the fill went to carries the effect mark on the area it widened
-    if (stored() === window.location.href && G.effect) G.effect(area, 'gantt_fill');
+    if (stored() === window.location.href) G.effect(area, 'gantt_fill');
     // the chart's drawing area (core's id gantt_draw_area) is as wide as the months drawn, whatever header rows core has
     var hdr = document.getElementById('gantt_draw_area'), months = parseInt(field.value, 10), max = parseInt(field.max, 10) || months;
     if (!hdr || !months || months >= max) return;

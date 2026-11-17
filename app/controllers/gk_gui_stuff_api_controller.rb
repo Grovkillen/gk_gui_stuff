@@ -4,6 +4,7 @@
 # object's own page. view_state: remember a choice of view. flag_seen: the new flags the person has seen. beat: the heartbeat (what changed on the page one
 # looks at since it was loaded; one call, shared by whoever needs it). branch: a project's branch of the tree.
 class GkGuiStuffApiController < ApplicationController
+  include GkGuiStuff::Gate::Controller # core's 404 without GK Compat (gate.rb)
   before_action :require_login
   helper :issues, :custom_fields
   include IssuesHelper

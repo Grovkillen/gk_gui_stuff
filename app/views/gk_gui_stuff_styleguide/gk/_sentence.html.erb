@@ -15,6 +15,8 @@
               { kind: :text, text: ex.call(:sorted_by) }, { kind: :choice, key: 'sort', text: ex.call(:updated_newest) }] %>
 <% live = { lead: lead, items: items, add: add, empty: ex.call(:empty), op_is: ex.call(:op_is), op_is_not: ex.call(:op_is_not), operator: ex.call(:operator), value: l(:field_value),
             and: ex.call(:and), or: ex.call(:or), and_not: ex.call(:and_not), new_field: ex.call(:tag) } %>
+<%# a tile without its own mode is Bara grafiskt: what it shows can be hovered over and tabbed to, a click leads nowhere %>
+<% @gk_gui_stuff_sg_mode = :graphic %>
 <div class="gk-gui-stuff-sg-tiles">
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_sentence_framed), "gk_gui_stuff_sentence(lead, items: [{ kind: :condition, … }, { kind: :word, logic: :and }, { kind: :group, items: […] }, …], add: { label:, title: })") do %>
     <%= gk_gui_stuff_sentence(lead, items: items, add: add, key: 'sg-framed') %>
@@ -32,7 +34,7 @@
         <div class="gk-gui-stuff-layer-body">
           <p><%= select_tag 'sg_sentence_op', options_for_select([[ex.call(:op_is), 'is'], [ex.call(:op_is_not), 'not']], 'is'), id: nil, 'aria-label': ex.call(:operator) %>
             <%= text_field_tag 'sg_sentence_value', ex.call(:value_open), id: nil, 'aria-label': l(:field_value) %></p>
-          <div class="gk-gui-stuff-fly-buttons"><%= button_tag l(:gk_gui_stuff_sentence_done), type: 'button' %><a href="#" class="gk-gui-stuff-sentence-remove"><%= l(:gk_gui_stuff_sentence_remove) %></a></div>
+          <div class="gk-gui-stuff-popover-buttons"><%= button_tag l(:gk_gui_stuff_sentence_done), type: 'button' %><a href="#" class="gk-gui-stuff-sentence-remove"><%= l(:gk_gui_stuff_sentence_remove) %></a></div>
           <p class="gk-gui-stuff-sentence-keys"><%= l(:gk_gui_stuff_sentence_keys) %></p>
         </div>
       </div>

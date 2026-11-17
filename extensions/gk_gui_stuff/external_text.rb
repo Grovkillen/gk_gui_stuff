@@ -15,6 +15,8 @@ module GkGuiStuff
   # The links come from GK Core Stuff's formatting_processors (Links, registered in patches.rb): the one pass over a
   # formatted text, which hands each link with its address and what core counts it as; this plugin never reads the
   # finished HTML of a text itself. Without GK Core Stuff, links in formatted text are not marked.
+  # rel is a protection and holds whatever the gate says; everything else here is the interface and is written only
+  # with the gate open (Links).
   module ExternalText
     REL = %w[noopener noreferrer].freeze
     SCHEMES = %w[http https ftp ftps].freeze
@@ -185,6 +187,9 @@ module GkGuiStuff
     # Active for every text: whether a text holds a link to another host is decided on each link the pass hands, never
     # on the text as written, which can spell the address in a way the formatter decodes (https:\/\/host,
     # https:&#47;&#47;host, https:host) and so has neither // nor www. in it.
+    # Registered whatever the gate says (Patches.protect!). With a closed gate a link to another host gets rel and
+    # nothing else, in a text and in a custom value alike: no class, tooltip, new tab or preview mark, no mark on a
+    # link to the instance's own host, and no setting is read.
     module Links
       module_function
 
@@ -192,6 +197,7 @@ module GkGuiStuff
 
       def call(link, context)
         return if link.in_code? || link.kind != :external
+        return rel_only(link, context) if context.memo(:gk_gui_stuff_gate_closed) { !GkGuiStuff.open? }
         return ExternalRel::Values.call(link, context) if custom_value?(context)
 
         flags = context.memo(:gk_gui_stuff_external) do
@@ -199,6 +205,12 @@ module GkGuiStuff
           ExternalText.flags_for(::User.current, ExternalText.page_request?(req)).merge(own: ExternalText.own_hosts(req))
         end
         ExternalText.mark(link, flags, flags[:own])
+      end
+
+      # The closed gate's part: rel on a link to another host; true when it was written
+      def rel_only(link, context)
+        own = context.memo(:gk_gui_stuff_rel_own) { ExternalText.own_hosts(context.request) }
+        ExternalText.external?(link.url, own) ? ExternalText.add_rel(link) : false
       end
     end
   end

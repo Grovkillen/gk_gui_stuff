@@ -2,7 +2,7 @@
     chooser on any list, a fixed list with quiet pills and list_filter on a long list of check boxes %>
 <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_ss_try) %></p>
 <%= module_off.call('select_search') %>
-<%= module_off.call('list_filter') %>
+<%# list_filter: no note that the module is off, since its example has the filter whatever the module (its own note) %>
 <% tag_opts = lambda do |chosen, extra = ''|
      list = [[:p16, 1], [:p16_twin, 1], [:can, 2], [:canopen, 2]]
      safe_join(list.map { |k, r| t = sample.call(k); content_tag(:option, t, value: t.delete_prefix('#'), selected: chosen.include?(k), data: { gk_gui_role: r }) }) + extra
@@ -35,8 +35,13 @@
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fixed), "multiple: true, <option data-gk-gui-role=\"muted\">") do %>
     <%= select_tag 'sg_languages[]', lang_opts.call([current_language.to_s, 'en'], 'muted'), multiple: true, id: nil, 'aria-label': l(:label_gk_gui_stuff_sg_fixed), data: { gk_gui_select: 'on' } %>
   <% end %>
+  <%# the example has the filter whatever the list's length and whether the module is on (data-gk-gui-filter="example",
+      gk_gui_stuff_lists.js, which the guide loads for it when the module is off), and says so; a real page's list has it
+      above 12 or where it asks for it, with the module on %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_list_filter), "data-gk-gui-filter") do %>
-    <%= content_tag(:div, safe_join(langs.first(20).map { |name, code| content_tag(:label, check_box_tag('sg_filter[]', code, false, id: nil) + " #{name}") }, tag(:br)), data: { gk_gui_filter: '1' }) %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_lf_forced, name: l(:label_gk_gui_stuff_mod_list_filter)) %></p>
+    <%= content_tag(:div, safe_join(langs.first(20).map { |name, code| content_tag(:label, check_box_tag('sg_filter[]', code, false, id: nil) + " #{name}") }, tag(:br)),
+                    data: { gk_gui_filter: 'example', gk_gui_filter_words: gk_gui_stuff_sg_module_words('list_filter').to_json }) %>
   <% end %>
   <%# the person's most used fields and the rest, each once, a field in use marked; the chooser is always there
       (gk_gui_stuff_select.js), so Prova opens it from a script whether the module is on or not %>

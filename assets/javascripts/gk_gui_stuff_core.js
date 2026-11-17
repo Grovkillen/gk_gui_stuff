@@ -1,10 +1,24 @@
 // gk_gui_stuff kernel: what the small modules share. One content observer (modules register an idempotent
 // function with onContent, never their own observer), the whisper ("Kopierat"), local memory, the texts and
-// options the server sent for the modules that are on. Plain DOM, no jQuery. Loaded only when a module needs it.
+// options the server sent for the modules that are on. Plain DOM, no jQuery. Loaded on every page (core.rb
+// ALWAYS_SCRIPTS); it starts nothing that shows: without the configuration no module is on, and the observer only
+// runs what modules and primitives register with onContent.
 window.GkGui = (function () {
   var el = document.getElementById('gk-gui-stuff-stuff-config');
   var cfg = {};
-  try { cfg = JSON.parse(el.textContent); } catch (e) { cfg = { modules: [] }; }
+  // no configuration on the page (no module on, or core's password confirmation): no module is on
+  try { cfg = el ? JSON.parse(el.textContent) : { modules: [] }; } catch (e) { cfg = { modules: [] }; }
+  // the elements' and the kernel's own words and values, on every page (core.rb elements_base): they fill in only
+  // what the modules' configuration lacks, so a notice with no elements module on is still in the person's language
+  (function () {
+    var b = null, bEl = document.getElementById('gk-gui-stuff-elements-base');
+    try { b = bEl ? JSON.parse(bEl.textContent) : null; } catch (e) { b = null; }
+    if (!b) return;
+    cfg.t = cfg.t || {};
+    Object.keys(b.t || {}).forEach(function (k) { if (!(k in cfg.t)) cfg.t[k] = b.t[k]; });
+    cfg.opt = cfg.opt || {};
+    Object.keys(b.opt || {}).forEach(function (k) { if (!cfg.opt[k]) cfg.opt[k] = b.opt[k]; });
+  })();
   var fns = [], timer = null, ready = document.readyState !== 'loading';
 
   function run() {
@@ -63,7 +77,28 @@ window.GkGui = (function () {
     var focus = document.activeElement;
     return (focus && focus !== document.body && boxOf(focus)) || boxOf(at);
   }
-  var noticePlace = 'bottom';
+  var noticePlace = 'bottom', noticeAt = null;
+  // fixed, in the window's coordinates: right under the box (also one in a fixed surface), above it where there is no
+  // room under it, and, faded out, never makes the page longer
+  function whisperPlace(r) {
+    var below = r.bottom + 4, tall = noticeEl.offsetHeight;
+    if (below + tall > document.documentElement.clientHeight - 8) below = Math.max(8, r.top - 4 - tall);
+    noticeEl.style.top = below + 'px';
+    var half = noticeEl.offsetWidth / 2, x = r.left + r.width / 2;
+    x = Math.max(half + 8, Math.min(x, document.documentElement.clientWidth - half - 8));
+    noticeEl.style.left = x + 'px';
+  }
+  // the whisper under an element follows it while it shows: when the page or a box scrolls under it (a wheel, a
+  // script that brings something into view) it stays right under its element and is never left where the element
+  // was. Placed in the scroll event itself, which the browser sends once a frame before it draws, so that no frame shows
+  // it where the element was. One at the pointer or in the middle of the window stays where it is
+  function whisperFollow() {
+    if (!noticeEl || !noticeAt || !noticeEl.classList.contains('gk-gui-stuff-notice-on')) return;
+    var r = boxOf(noticeAt);
+    if (r) whisperPlace(r);
+  }
+  document.addEventListener('scroll', whisperFollow, { capture: true, passive: true });
+  window.addEventListener('resize', whisperFollow, { passive: true });
   function whisper(text, at) {
     if (whisperRegion() && window.requestAnimationFrame) {
       window.requestAnimationFrame(function () { whisper(text, at); });
@@ -80,16 +115,11 @@ window.GkGui = (function () {
     noticeEl.classList.toggle('gk-gui-stuff-notice-at', now === 'at');
     noticeEl.classList.toggle('gk-gui-stuff-notice-top', now === 'top');
     noticeEl.classList.toggle('gk-gui-stuff-notice-center', now === 'center');
-    // fixed, in the window's coordinates: it stays right under the element (also one in a fixed surface), above it
-    // where there is no room under it, and, faded out, never makes the page longer
-    var below = r ? r.bottom + 4 : 0, tall = noticeEl.offsetHeight;
-    if (r && below + tall > document.documentElement.clientHeight - 8) below = Math.max(8, r.top - 4 - tall);
-    noticeEl.style.top = r ? below + 'px' : '';
-    if (r) {
-      var half = noticeEl.offsetWidth / 2, x = r.left + r.width / 2;
-      x = Math.max(half + 8, Math.min(x, document.documentElement.clientWidth - half - 8));
-      noticeEl.style.left = x + 'px';
-    } else { noticeEl.style.left = ''; }
+    // under an element (place element) it follows that element on a scroll (whisperFollow); under the pointer or the
+    // focus it stays put
+    noticeAt = r && o.place !== 'pointer' ? o.at : null;
+    if (r) whisperPlace(r);
+    else { noticeEl.style.top = ''; noticeEl.style.left = ''; }
     if (moving) { void noticeEl.offsetWidth; noticeEl.style.transition = ''; }
     noticeEl.classList.add('gk-gui-stuff-notice-on');
     // whisper_tooltip: Redmine's tooltip goes at once, and one that comes late stays out of sight while the whisper shows.
@@ -177,8 +207,26 @@ window.GkGui = (function () {
     put: function (el, name, fallback, size) { el.textContent = ''; el.appendChild(api.icon(name, fallback, size)); return el; },
     node: function (tag, cls, text) { var n = document.createElement(tag); if (cls) n.className = cls; if (text != null) n.textContent = text; return n; }
   };
-  // what the primitives put on GkGui before the kernel came (gk_gui_stuff_primitives.js: fly, save, layer) is kept
+  // what the primitives put on GkGui before the kernel came (gk_gui_stuff_primitives.js: popover, save, layer) is kept
   var before = window.GkGui || {};
   Object.keys(before).forEach(function (k) { if (!(k in api)) api[k] = before[k]; });
   return api; // copy() says it through api.notice, so that the shared notice takes over when the elements are loaded
+})();
+
+// The page's data (core.rb page_package) is a JSON element at the end of the body, #gk-gui-stuff-page-data, never a
+// script that runs; every reader keeps window.gkGuiStuffPage, read from the element on first use (undefined until the
+// element is there)
+(function () {
+  if (Object.getOwnPropertyDescriptor(window, 'gkGuiStuffPage')) return;
+  var page = null;
+  Object.defineProperty(window, 'gkGuiStuffPage', {
+    configurable: true,
+    get: function () {
+      if (page) return page;
+      var el = document.getElementById('gk-gui-stuff-page-data');
+      if (!el) return undefined;
+      try { page = JSON.parse(el.textContent) || {}; } catch (e) { page = {}; }
+      return page;
+    }
+  });
 })();

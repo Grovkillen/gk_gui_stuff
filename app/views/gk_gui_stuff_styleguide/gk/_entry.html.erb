@@ -1,0 +1,42 @@
+<%# The entry and its thread (gk_gui_stuff_entry): one entry, answers in a thread, a correcting and a corrected entry, a
+    voided one folded under who, when and why, and one with its actions as icons. The people, the times, the numbers
+    and the texts are made up. The first three can be hovered over and tabbed to and lead nowhere (Bara grafiskt); the voided one folds in the page; in the last one
+    Reply and Correct only show, and Void is the real button with a reason, which asks the guide's own address %>
+<% @gk_gui_stuff_sg_mode = :graphic %>
+<% person = ->(n) { "#{l(:"label_gk_gui_stuff_sg_example_person_#{n}_first")} #{l(:"label_gk_gui_stuff_sg_example_person_#{n}_last")}" } %>
+<% decision = gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_entry_kind_decision), role: 1) %>
+<% comment = -> { gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_entry_kind_comment), role: :muted) } %>
+<% text = ->(n) { content_tag(:p, l(:"text_gk_gui_stuff_sg_entry_text_#{n}")) } %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_entry_example), class: 'gk-gui-stuff-direct-note') %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_entry_one), "gk_gui_stuff_entry(kind:, who:, at:, number:, number_href:) { text }") do %>
+    <%= note %>
+    <%= gk_gui_stuff_entry(kind: decision, who: person.call(1), at: '2026-11-03 09:14', number: '#41', number_href: '#') { text.call(1) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_entry_thread), "gk_gui_stuff_entry(…, thread: [gk_gui_stuff_entry(…) { answer }]) { text }") do %>
+    <%= note %>
+    <% answer = gk_gui_stuff_entry(kind: comment.call, who: person.call(2), at: '2026-11-03 10:02', number: '#42', number_href: '#') { text.call(2) } %>
+    <%= gk_gui_stuff_entry(kind: decision, who: person.call(1), at: '2026-11-03 09:14', number: '#41', number_href: '#', thread: [answer]) { text.call(1) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_entry_corrected), "gk_gui_stuff_entry(…, head: gk_gui_stuff_quiet(corrects, soft: true)) { … }; gk_gui_stuff_entry(…, state: :corrected, under: corrected_by) { … }") do %>
+    <%= note %>
+    <%= gk_gui_stuff_entry(kind: comment.call, who: person.call(3), at: '2026-11-02 16:05', number: '#43', number_href: '#',
+                           head: gk_gui_stuff_quiet(l(:text_gk_gui_stuff_sg_entry_corrects, number: '#39'), soft: true)) { text.call(3) } %>
+    <%= gk_gui_stuff_entry(kind: comment.call, who: person.call(3), at: '2026-11-02 15:40', number: '#39', number_href: '#', state: :corrected,
+                           under: l(:text_gk_gui_stuff_sg_entry_corrected_by, number: '#43')) { text.call(3) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_entry_voided), "gk_gui_stuff_entry(…, state: :voided, voided: who_when_why) { text }", mode: :nosave) do %>
+    <%= note %>
+    <%= gk_gui_stuff_entry(kind: comment.call, who: person.call(2), at: '2026-11-01 08:12', number: '#37', state: :voided,
+                           voided: l(:text_gk_gui_stuff_sg_entry_voided_by, name: person.call(2), at: '2026-11-01 08:20')) { text.call(4) } %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_entry_actions), "gk_gui_stuff_entry(…, actions: gk_gui_stuff_icon_button('comment', reply) + gk_gui_stuff_icon_button('edit', correct) + gk_gui_stuff_reason_button(void, reason:, url:, irreversible: true, icon: 'del', icon_only: true)) { text }", mode: :server) do %>
+    <%= note %>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_entry_actions_note) %></p>
+    <% actions = safe_join([gk_gui_stuff_icon_button('comment', l(:label_gk_gui_stuff_sg_entry_reply), html: { data: { gk_gui_sg_noop: '' } }),
+                            gk_gui_stuff_icon_button('edit', l(:label_gk_gui_stuff_sg_entry_correct), html: { data: { gk_gui_sg_noop: '' } }),
+                            gk_gui_stuff_reason_button(l(:label_gk_gui_stuff_sg_entry_void), reason: :optional, url: save, irreversible: true, icon: 'del', icon_only: true,
+                                                                                            info: l(:text_gk_gui_stuff_sg_entry_void_info))]) %>
+    <%= gk_gui_stuff_entry(kind: decision, who: person.call(1), at: '2026-11-03 09:14', number: '#41', number_href: '#', actions: actions) { text.call(1) } %>
+  <% end %>
+</div>

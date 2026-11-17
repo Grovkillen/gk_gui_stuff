@@ -10,7 +10,6 @@
 // type can draw in it (a map), and gk-gui-stuff:closed when the surface closes.
 (function () {
   var G = window.GkGui;
-  if (!G || !G.surface) return;
 
   function fire(el, name, opener) {
     var ev;
@@ -48,5 +47,5 @@
   }
 
   G.opener = { open: open, bind: bind };
-  if (G.onContent) G.onContent(bind); else bind(document);
+  G.onContent(bind);
 })();

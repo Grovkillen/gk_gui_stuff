@@ -9,7 +9,7 @@
 .gk-gui-stuff-shaded::after { content: ""; position: absolute; z-index: 1; pointer-events: none; box-sizing: border-box;
   inset-block-start: var(--gk-gui-stuff-shade-y, 0); inset-inline-start: var(--gk-gui-stuff-shade-x, 0);
   inline-size: var(--gk-gui-stuff-shade-w, 0); block-size: var(--gk-gui-stuff-shade-h, 0);
-  box-shadow: var(--gk-gui-stuff-shade-a, 0 0 0 transparent), var(--gk-gui-stuff-shade-b, 0 0 0 transparent),
+  box-shadow: var(--gk-gui-stuff-shade-a, 0 0 0 transparent), var(--gk-gui-stuff-shade-b, 0 0 0 transparent), /* gk-u U4: the shadows are laid per edge by the shade script */
               var(--gk-gui-stuff-shade-s, 0 0 0 transparent), var(--gk-gui-stuff-shade-e, 0 0 0 transparent); }
 .gk-gui-stuff-shade-above { --gk-gui-stuff-shade-a: inset 0 10px 8px -8px var(--gk-gui-stuff-shade-c); }
 .gk-gui-stuff-shade-below { --gk-gui-stuff-shade-b: inset 0 -10px 8px -8px var(--gk-gui-stuff-shade-c); }

@@ -1,0 +1,4 @@
+/* gk_gui_stuff align: a box (core's .warning and .nodata, centred) aligned to the start or the end by the one writing
+   the view; logical, so it follows the language's direction. Loaded only while its appearance setting is on. */
+.gk-gui-stuff-align-start, .warning.gk-gui-stuff-align-start, .nodata.gk-gui-stuff-align-start { text-align: start; }
+.gk-gui-stuff-align-end, .warning.gk-gui-stuff-align-end, .nodata.gk-gui-stuff-align-end { text-align: end; }

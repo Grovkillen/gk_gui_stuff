@@ -49,7 +49,7 @@
   }
   function build(data, href) {
     var c = node('div', 'gk-gui-stuff-preview');
-    if (window.GkGui && window.GkGui.effect) window.GkGui.effect(c, 'link_preview');
+    window.GkGui.effect(c, 'link_preview');
     c.setAttribute('role', 'tooltip');
     var h = node('a', 'gk-gui-stuff-preview-title', data.title); h.href = href; c.appendChild(h);
     if (data.subtitle) c.appendChild(node('div', 'gk-gui-stuff-preview-subtitle', data.subtitle));
@@ -70,12 +70,12 @@
   }
   function newTab(a) {
     a.target = '_blank';
-    if (window.GkGui && window.GkGui.effect) window.GkGui.effect(a, 'external_new_tab');
+    window.GkGui.effect(a, 'external_new_tab');
     a.appendChild(node('span', 'hidden-for-sighted', ext.new_tab_hidden));
   }
   function buildExternal(data) {
     var c = node('div', 'gk-gui-stuff-preview gk-gui-stuff-preview-external');
-    if (window.GkGui && window.GkGui.effect) window.GkGui.effect(c, 'link_preview_external');
+    window.GkGui.effect(c, 'link_preview_external');
     c.setAttribute('role', 'tooltip');
     var head = node('div', 'gk-gui-stuff-preview-head');
     if (ext.icon) head.insertAdjacentHTML('beforeend', ext.icon);
@@ -97,6 +97,23 @@
       if (!data.icon) c.appendChild(img);
     }
     var body = node('div', 'gk-gui-stuff-preview-body');
+    if (data.state === 'failed') {
+      // the fetch failed: the address and the plain words, no picture, no text, no date
+      c.classList.add('gk-gui-stuff-preview-failed');
+      // the whole address (the head already names the domain)
+      var a = node('a', 'gk-gui-stuff-preview-title', data.url || data.domain);
+      a.href = data.url;
+      a.rel = 'noopener noreferrer';
+      if (ext.new_tab) newTab(a);
+      body.appendChild(a);
+      var why = node('p', 'gk-gui-stuff-preview-note', ext.failed || '');
+      if (data.why) why.title = data.why;
+      body.appendChild(why);
+      c.appendChild(body);
+      c.addEventListener('mouseenter', function () { clearTimeout(hideTimer); });
+      c.addEventListener('mouseleave', scheduleHide);
+      return c;
+    }
     var t = node('a', 'gk-gui-stuff-preview-title', data.title || data.domain || data.url);
     t.href = data.url;
     t.rel = 'noopener noreferrer';
@@ -151,7 +168,8 @@
     return fetch(ext.url + '?url=' + encodeURIComponent(href) + '&sig=' + encodeURIComponent(sig), { credentials: 'same-origin', headers: { Accept: 'application/json' } })
       .then(function (r) {
         if (r.status === 202) return 'queued';
-        return r.ok ? r.json().then(function (d) { return d && d.state === 'ready' ? d : null; }) : null;
+        // failed gives the card "Kunde inte hämtas" (the reason in its tooltip only for an administrator)
+        return r.ok ? r.json().then(function (d) { return d && (d.state === 'ready' || d.state === 'failed') ? d : null; }) : null;
       });
   }
   function stillOn(href) {

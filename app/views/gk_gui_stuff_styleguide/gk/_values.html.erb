@@ -1,0 +1,24 @@
+<%# Values (gk_gui_stuff_values) in its two modes: now, the value that holds with the earlier one struck through after
+    it, and changes, from and to with the arrow between them; and changes with a last row that has no dot (unmarked:),
+    the link that would show the rest. The labels and the values are made up and the link leads nowhere; the tiles with the struck value's tooltip and the link can be hovered over (Bara grafiskt), the other is a picture only %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_values_example), class: 'gk-gui-stuff-direct-note') %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_values_now), "gk_gui_stuff_values([{ label:, value:, was: }, { label:, value: }], mode: :now)", mode: :graphic) do %>
+    <%= note %>
+    <%= gk_gui_stuff_values([{ label: l(:label_gk_gui_stuff_sg_values_probability), value: '2', was: '3' },
+                             { label: l(:label_gk_gui_stuff_sg_values_consequence), value: '4' },
+                             { label: l(:label_gk_gui_stuff_sg_values_risk), value: '8', was: '12' }], mode: :now) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_values_changes), "gk_gui_stuff_values([{ label:, from:, to: }, { label:, to: }], mode: :changes)") do %>
+    <%= note %>
+    <%= gk_gui_stuff_values([{ label: l(:label_gk_gui_stuff_sg_values_status), from: l(:label_gk_gui_stuff_sg_example_step_new), to: l(:label_gk_gui_stuff_sg_example_status) },
+                             { label: l(:label_gk_gui_stuff_sg_values_assigned),
+                               to: "#{l(:label_gk_gui_stuff_sg_example_person_1_first)} #{l(:label_gk_gui_stuff_sg_example_person_1_last)}" }], mode: :changes) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_values_unmarked), "gk_gui_stuff_values([{ label:, from:, to: }, { html:, unmarked: true }], mode: :changes)", mode: :graphic) do %>
+    <%= content_tag(:p, safe_join([l(:text_gk_gui_stuff_sg_values_example), l(:text_gk_gui_stuff_sg_values_unmarked_example)], ' '), class: 'gk-gui-stuff-direct-note') %>
+    <%= gk_gui_stuff_values([{ label: l(:label_gk_gui_stuff_sg_values_status), from: l(:label_gk_gui_stuff_sg_example_step_new), to: l(:label_gk_gui_stuff_sg_example_status) },
+                             { html: link_to(l(:label_gk_gui_stuff_sg_values_all), '#', data: { gk_gui_sg_noop: '' }), unmarked: true }], mode: :changes) %>
+  <% end %>
+</div>

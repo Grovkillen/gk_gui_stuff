@@ -1,0 +1,92 @@
+<%# The table (gk_gui_stuff_table): one with groups as rows, a voided row, a muted cell and a column in the soft
+    tone whose cells never break (the status), and one with a row that has an error. The things, the people, the times, the files and the outcomes are made up, and the links lead
+    nowhere. The groups fold in the page; the second table is a picture only. The element's own choice of width shows
+    the same tables with their rows stacked %>
+<% @gk_gui_stuff_sg_mode = :still %>
+<% person = ->(n) { "#{l(:"label_gk_gui_stuff_sg_example_person_#{n}_first")} #{l(:"label_gk_gui_stuff_sg_example_person_#{n}_last")}" } %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_table_example), class: 'gk-gui-stuff-direct-note') %>
+<% issue = -> { gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_thing_example_kind), role: 1) } %>
+<% document = -> { gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_table_kind_document), role: 6) } %>
+<% nowhere = ->(text) { link_to(text, '#', data: { gk_gui_sg_noop: '' }) } %>
+<% void = -> { link_to(sprite_icon('del', l(:label_gk_gui_stuff_sg_entry_void)), '#', class: 'icon icon-del', title: l(:label_gk_gui_stuff_sg_entry_void), data: { gk_gui_sg_noop: '' }) } %>
+<% by = ->(n, at) { safe_join([person.call(n), gk_gui_stuff_quiet(at, nowrap: true)], ' ') } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_table_groups), "gk_gui_stuff_table(columns: [{ key:, label:, width:, slot:, tone:, nowrap: }]) { gk_gui_stuff_table_group(title) { gk_gui_stuff_table_row(state: :voided) { gk_gui_stuff_table_cell(:key, content) } } }", mode: :nosave) do %>
+    <%= note %>
+    <% columns = [{ key: :kind, label: l(:label_gk_gui_stuff_sg_table_col_kind), width: '9em', slot: :first },
+                  { key: :thing, label: l(:label_gk_gui_stuff_sg_table_col_thing), width: '30%', slot: :grow },
+                  { key: :state, label: l(:label_gk_gui_stuff_sg_table_col_state), width: '10em', tone: :soft, nowrap: true },
+                  { key: :why, label: l(:label_gk_gui_stuff_sg_table_col_why), slot: :full, tone: :muted },
+                  { key: :by, label: l(:label_gk_gui_stuff_sg_table_col_by), width: '22em' },
+                  { key: :act, label: '', width: '9em', slot: :end, html: { class: 'buttons' } }] %>
+    <%= gk_gui_stuff_table(columns: columns) do %>
+      <%= gk_gui_stuff_table_group(l(:label_gk_gui_stuff_sg_table_group_refers)) do %>
+        <%= gk_gui_stuff_table_row do %>
+          <%= gk_gui_stuff_table_cell(:kind, issue.call) %>
+          <%= gk_gui_stuff_table_cell(:thing, nowhere.call(l(:label_gk_gui_stuff_sg_thing_example_issue))) %>
+          <%= gk_gui_stuff_table_cell(:state, l(:label_gk_gui_stuff_sg_table_state_open)) %>
+          <%= gk_gui_stuff_table_cell(:why, l(:label_gk_gui_stuff_sg_thing_example_place)) %>
+          <%= gk_gui_stuff_table_cell(:by, by.call(1, '2026-11-03 09:14')) %>
+          <%= gk_gui_stuff_table_cell(:act, void.call) %>
+        <% end %>
+        <%= gk_gui_stuff_table_row do %>
+          <%= gk_gui_stuff_table_cell(:kind, document.call) %>
+          <%= gk_gui_stuff_table_cell(:thing, nowhere.call(l(:label_gk_gui_stuff_sg_table_thing_document))) %>
+          <%= gk_gui_stuff_table_cell(:state, l(:label_gk_gui_stuff_sg_table_state_valid)) %>
+          <%= gk_gui_stuff_table_cell(:why) %>
+          <%= gk_gui_stuff_table_cell(:by, by.call(1, '2026-11-03 09:16')) %>
+          <%= gk_gui_stuff_table_cell(:act, void.call) %>
+        <% end %>
+        <%= gk_gui_stuff_table_row(state: :voided) do %>
+          <%= gk_gui_stuff_table_cell(:kind, issue.call) %>
+          <%= gk_gui_stuff_table_cell(:thing, nowhere.call(l(:label_gk_gui_stuff_sg_table_thing_closed))) %>
+          <%= gk_gui_stuff_table_cell(:state, l(:label_gk_gui_stuff_sg_example_marker_closed)) %>
+          <%= gk_gui_stuff_table_cell(:why, l(:label_gk_gui_stuff_sg_table_why_same)) %>
+          <%= gk_gui_stuff_table_cell(:by, by.call(2, '2026-10-28 14:02')) %>
+          <%= gk_gui_stuff_table_cell(:act, gk_gui_stuff_quiet(l(:text_gk_gui_stuff_sg_table_voided, at: '2026-10-30 10:11'))) %>
+        <% end %>
+      <% end %>
+      <%= gk_gui_stuff_table_group(l(:label_gk_gui_stuff_sg_table_group_blocks), collapsed: true) do %>
+        <%= gk_gui_stuff_table_row do %>
+          <%= gk_gui_stuff_table_cell(:kind, issue.call) %>
+          <%= gk_gui_stuff_table_cell(:thing, nowhere.call(l(:label_gk_gui_stuff_sg_table_thing_next))) %>
+          <%= gk_gui_stuff_table_cell(:state, l(:label_gk_gui_stuff_sg_table_state_new)) %>
+          <%= gk_gui_stuff_table_cell(:why, l(:label_gk_gui_stuff_sg_table_why_before)) %>
+          <%= gk_gui_stuff_table_cell(:by, by.call(1, '2026-11-04 08:30')) %>
+          <%= gk_gui_stuff_table_cell(:act, void.call) %>
+        <% end %>
+      <% end %>
+    <% end %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_table_error), "gk_gui_stuff_table(columns:) { gk_gui_stuff_table_row(state: :error) { gk_gui_stuff_table_cell(:key, content, message: text) } }") do %>
+    <%= note %>
+    <% columns = [{ key: :line, label: l(:label_gk_gui_stuff_sg_table_col_line), width: '4em', slot: :first },
+                  { key: :file, label: l(:label_gk_gui_stuff_sg_table_col_file), slot: :grow },
+                  { key: :size, label: l(:label_gk_gui_stuff_sg_table_col_size), width: '7em', slot: :end },
+                  { key: :title, label: l(:label_gk_gui_stuff_sg_table_col_title), slot: :full },
+                  { key: :outcome, label: l(:label_gk_gui_stuff_sg_table_col_outcome), width: '16em', slot: :full }] %>
+    <%= gk_gui_stuff_table(columns: columns) do %>
+      <%= gk_gui_stuff_table_row do %>
+        <%= gk_gui_stuff_table_cell(:line, 1) %>
+        <%= gk_gui_stuff_table_cell(:file, 'instruktion_kran3_C.pdf') %>
+        <%= gk_gui_stuff_table_cell(:size, '412 kB') %>
+        <%= gk_gui_stuff_table_cell(:title, l(:label_gk_gui_stuff_sg_table_title_1)) %>
+        <%= gk_gui_stuff_table_cell(:outcome, gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_table_outcome_added), role: :info)) %>
+      <% end %>
+      <%= gk_gui_stuff_table_row(state: :error) do %>
+        <%= gk_gui_stuff_table_cell(:line, 2) %>
+        <%= gk_gui_stuff_table_cell(:file, 'ritning_ventil.pdf') %>
+        <%= gk_gui_stuff_table_cell(:size) %>
+        <%= gk_gui_stuff_table_cell(:title, l(:label_gk_gui_stuff_sg_table_title_2)) %>
+        <%= gk_gui_stuff_table_cell(:outcome, gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_table_outcome_error), role: :alarm), message: l(:text_gk_gui_stuff_sg_table_message)) %>
+      <% end %>
+      <%= gk_gui_stuff_table_row do %>
+        <%= gk_gui_stuff_table_cell(:line, 3) %>
+        <%= gk_gui_stuff_table_cell(:file, 'checklista_start.pdf') %>
+        <%= gk_gui_stuff_table_cell(:size, '88 kB') %>
+        <%= gk_gui_stuff_table_cell(:title, l(:label_gk_gui_stuff_sg_table_title_3)) %>
+        <%= gk_gui_stuff_table_cell(:outcome, gk_gui_stuff_pill(l(:label_gk_gui_stuff_sg_table_outcome_there), role: :muted)) %>
+      <% end %>
+    <% end %>
+  <% end %>
+</div>

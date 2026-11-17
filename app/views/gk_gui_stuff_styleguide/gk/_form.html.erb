@@ -2,7 +2,7 @@
 <%# a form with two boxes, each with its own Save and its text by it; the same form posting to the address that
     fails (the page comes back with the error notice, the written values, the rails and the text) %>
 <% two_boxes = lambda do |url, n|
-     form_tag(url, data: gk_gui_stuff_form_changes, id: "gk-gui-stuff-sg-form-#{n}") do
+     form_tag(url, autocomplete: 'off', data: gk_gui_stuff_form_changes, id: "gk-gui-stuff-sg-form-#{n}") do
        safe_join([
          content_tag(:fieldset, safe_join([content_tag(:legend, l(:label_gk_gui_stuff_sg_box_tag)),
                                            content_tag(:p, label_tag("gk_gui_stuff_sg_name_#{n}", l(:field_name)) +
@@ -23,7 +23,7 @@
    end %>
 <% @gk_gui_stuff_sg_mode = :server %>
 <div class="gk-gui-stuff-sg-tiles">
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_form_boxes), "form_tag(url, data: gk_gui_stuff_form_changes) { fieldset.box … submit_tag }") do %><%= two_boxes.call(save, 1) %><% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_form_boxes), "form_tag(url, autocomplete: 'off', data: gk_gui_stuff_form_changes) { fieldset.box … submit_tag }") do %><%= two_boxes.call(save, 1) %><% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_form_fail), "url: …?fail=1") do %><%= two_boxes.call(fail, 2) %><% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_form_direct), "gk_gui_stuff_direct_note, gk_gui_stuff_rail(url:) { … }") do %>
     <div class="box">
@@ -38,5 +38,67 @@
     <table class="list" data-gk-gui-filter="off"><thead><tr><th><%= l(:field_name) %></th><% modes.each do |text, _| %><th class="gk-gui-stuff-choice-col"><%= text %></th><% end %></tr></thead>
       <tbody><tr><td><%= l(:label_gk_gui_stuff_sg_example_events) %></td>
         <% modes.each do |text, v| %><td class="gk-gui-stuff-choice-col"><%= radio_button_tag('gk_gui_stuff_sg_choice_col', v, v == 'off', id: nil, 'aria-label': text) %></td><% end %></tr></tbody></table>
+  <% end %>
+  <%# the form page's parts (gk_gui_stuff_form_page_helper.rb): the box at the top, a table that says its number of
+      level columns, the fact cell and a choice that is switched off. Made-up rows; the choices can be tried and
+      nothing is saved. The first tile stands outside a form page's form, so the page's script (the rail, "var:", the
+      count by Spara) is not at work in it, and its note says so. The locked tile is a form page's form marked as an
+      example (gk_gui_stuff_form_page_data(example: true)), so the page's script is at work in it: the rows open and
+      lock with the box at the top, the line over the table has its words for a choice not saved, and a changed row
+      gets the rail, "var:" and is counted. The script never sends an example and never asks on leaving; its Spara
+      only shows (data-gk-gui-sg-noop) and says so on a click, and the form's method="dialog" keeps a send that no
+      script stopped on the page. The line of a choice not saved has the words of a real page ("When you save …"),
+      in the example's own text, and a note of its own says that the example does not save. The first note says what
+      is made up, what can be tried and that nothing is saved. The form says autocomplete="off" itself, as a real
+      form page's form writes it in its own form_tag, so that a browser never puts a choice back when the page is
+      read again %>
+  <% fp_levels = [[l(:label_gk_gui_stuff_sg_fp_inherit), 'inherit'], [l(:label_gk_gui_stuff_sg_off), 'off'], [l(:label_gk_gui_stuff_sg_optional), 'optional'],
+                  [l(:label_gk_gui_stuff_sg_required), 'required']] %>
+  <% fp_lead = [[l(:label_gk_gui_stuff_sg_fp_each), 'each'], [l(:label_gk_gui_stuff_sg_fp_all_off), 'off'], [l(:label_gk_gui_stuff_sg_fp_all_optional), 'optional'],
+                [l(:label_gk_gui_stuff_sg_fp_all_required), 'required']] %>
+  <% fp_rows = [[l(:label_gk_gui_stuff_sg_example_events), 'inherit', 'optional'], [l(:label_gk_gui_stuff_sg_example_disconnect), 'required', 'required'],
+                [l(:label_gk_gui_stuff_sg_example_action), 'off', 'optional']] %>
+  <% fp_note = content_tag(:p, l(:text_gk_gui_stuff_sg_fp_example), class: 'gk-gui-stuff-direct-note') %>
+  <% fp_word = ->(v) { fp_levels.to_h(&:reverse)[v] } %>
+  <% fp_table = lambda do |n, all, locked, follows = nil|
+       gk_gui_stuff_form_page_table(head: l(:label_gk_gui_stuff_sg_fp_row), levels: fp_levels.map(&:first), cols: 4, facts: [l(:label_gk_gui_stuff_sg_fp_now)]) do
+         safe_join([gk_gui_stuff_form_page_group_head(l(:label_gk_gui_stuff_sg_example_group), fp_rows.size.to_s, "gk-gui-stuff-sg-fp-body-#{n}", 6),
+                    content_tag(:tbody, safe_join(fp_rows.each_with_index.map do |(name, own, default), i|
+                      now = all || (own == 'inherit' ? default : own)
+                      cells = fp_levels.map do |word, v|
+                        mark = v == default ? gk_gui_stuff_form_page_default_mark : nil
+                        gk_gui_stuff_form_page_radio("gk_gui_stuff_sg_fp_#{n}_#{i}", v, own == v, label: "#{name}: #{word}", word: word, disabled: locked, follows_lead: follows, extra: mark)
+                      end
+                      # the place for "var:" beside the name, which the page's script fills on a changed row
+                      named = safe_join([content_tag(:span, name, class: 'gk-gui-stuff-form-page-name'),
+                                         content_tag(:span, '', class: 'gk-gui-stuff-form-page-was', hidden: true)], ' ')
+                      content_tag(:tr, safe_join([content_tag(:td, named, class: 'name'),
+                                                  gk_gui_stuff_form_page_fact(gk_gui_stuff_pill(fp_word.call(now), role: now == 'off' ? :muted : (now == 'required' ? :warning : :info)),
+                                                                              word: l(:label_gk_gui_stuff_sg_fp_now))] + cells),
+                                  class: 'gk-gui-stuff-form-page-row')
+                    end), id: "gk-gui-stuff-sg-fp-body-#{n}", class: 'gk-gui-stuff-form-page-group-body')])
+       end
+     end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fp_open), "gk_gui_stuff_form_page_lead(title, name:, choices: [[word, value]], selected:, help:); gk_gui_stuff_form_page_table(head:, levels:, cols: 4, facts: [word]) { … gk_gui_stuff_form_page_fact(content, word:) … }", mode: :nosave) do %>
+    <%= fp_note %>
+    <%= gk_gui_stuff_form_page_lead(l(:label_gk_gui_stuff_sg_fp_lead), name: 'gk_gui_stuff_sg_fp_lead_1', choices: fp_lead, selected: 'each', help: l(:text_gk_gui_stuff_sg_fp_lead)) %>
+    <%= fp_table.call(1, nil, false) %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_fp_locked), "form_tag(url, class: 'gk-gui-stuff-form-page', autocomplete: 'off', data: gk_gui_stuff_form_page_data(words: { modes: { value => word } })) { gk_gui_stuff_form_page_lead(…, name: 'all', locked: { value => line }, locked_unsaved: { value => line }); … gk_gui_stuff_form_page_radio(name, value, checked, label:, word:, disabled: locked, follows_lead: 'all') … }. Without the script: gk_gui_stuff_form_page_lead(…, locked: text); gk_gui_stuff_form_page_radio(…, disabled: true)", mode: :nosave) do %>
+    <%= content_tag(:p, l(:text_gk_gui_stuff_sg_fp_live_example), class: 'gk-gui-stuff-direct-note') %>
+    <%= content_tag(:p, l(:text_gk_gui_stuff_sg_fp_unsaved_note), class: 'gk-gui-stuff-direct-note') %>
+    <%# the short word of each mode that locks (Av, Valfritt, Krävs) for the line of a choice not saved, the box's own
+        word (Av överallt …) for the line of the saved one %>
+    <% fp_locks = { 'off' => [:label_gk_gui_stuff_sg_fp_all_off, :label_gk_gui_stuff_sg_off], 'optional' => [:label_gk_gui_stuff_sg_fp_all_optional, :label_gk_gui_stuff_sg_optional],
+                    'required' => [:label_gk_gui_stuff_sg_fp_all_required, :label_gk_gui_stuff_sg_required] } %>
+    <%# method="dialog" with no dialog around it: a send the scripts did not stop still goes nowhere %>
+    <%= content_tag(:form, id: 'gk-gui-stuff-sg-fp-form', class: 'gk-gui-stuff-form-page', method: 'dialog', autocomplete: 'off',
+                           data: gk_gui_stuff_form_page_data(example: true, words: { modes: fp_levels.to_h(&:reverse), on: '%{count}' })) do %>
+      <%= gk_gui_stuff_form_page_lead(l(:label_gk_gui_stuff_sg_fp_lead), name: 'gk_gui_stuff_sg_fp_lead_2', choices: fp_lead, selected: 'required', help: l(:text_gk_gui_stuff_sg_fp_lead),
+                                      locked: fp_locks.transform_values { |all, _| l(:text_gk_gui_stuff_sg_fp_locked, mode: l(all)) },
+                                      locked_unsaved: fp_locks.transform_values { |_, short| l(:text_gk_gui_stuff_sg_fp_locked_unsaved, mode: l(short)) }) %>
+      <%= fp_table.call(2, 'required', true, 'gk_gui_stuff_sg_fp_lead_2') %>
+      <p><%= button_tag(l(:button_save), type: 'submit', data: { gk_gui_sg_noop: '1' }) %></p>
+    <% end %>
   <% end %>
 </div>

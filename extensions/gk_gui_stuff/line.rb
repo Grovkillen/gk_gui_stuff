@@ -276,7 +276,7 @@ module GkGuiStuff
              elsif mode == 'choose'
                button.call('aria-pressed': s[:chosen] ? 'true' : 'false')
              elsif required
-               gk_gui_stuff_line_reason_fly(data, s, inner, go)
+               gk_gui_stuff_line_reason_popover(data, s, inner, go)
              else
                button.call
              end
@@ -286,18 +286,18 @@ module GkGuiStuff
                               'data-gk-gui-band': s[:band], 'data-gk-gui-line-id': id)
     end
 
-    # A drawn step that needs a reason: the step opens a fly in the role line-next with the box's words first, then
-    # the box's button and Avbryt, and the reason under them, as every box; drawn by hand with the fly's classes, since
+    # A drawn step that needs a reason: the step opens a popover in the role line-next with the box's words first, then
+    # the box's button and Avbryt, and the reason under them, as every box; drawn by hand with the popover's classes, since
     # the summary is the step. The script sends it (GkGui.line); the reason box opens from the panel without closing it.
-    def gk_gui_stuff_line_reason_fly(data, s, inner, go)
+    def gk_gui_stuff_line_reason_popover(data, s, inner, go)
       rid = "gk-gui-stuff-reason-#{@gk_gui_stuff_mount_n = (@gk_gui_stuff_mount_n || 0) + 1}"
       box = []
       box << content_tag(:p, s.dig(:reason_box, :text)) if s.dig(:reason_box, :text).present?
-      box << gk_gui_stuff_fly_buttons(s.dig(:reason_box, :button) || s[:label], name: data.dig(:save, :name), value: s[:id], keys: true)
+      box << gk_gui_stuff_popover_buttons(s.dig(:reason_box, :button) || s[:label], name: data.dig(:save, :name), value: s[:id], keys: true)
       box << gk_gui_stuff_reason_block(required: true, id: rid, name: 'reason')
-      content_tag(:details, content_tag(:summary, inner, class: 'gk-gui-stuff-line-face', 'aria-label': "#{go}…") +
-                            content_tag(:div, safe_join(box), class: 'gk-gui-stuff-fly-box'),
-                  class: "gk-gui-stuff-fly #{GkGuiStuff::Primitives.role_class('line-next')} gk-gui-stuff-fly-roled")
+      content_tag(:details, content_tag(:summary, inner, class: 'gk-gui-stuff-line-face', 'aria-label': "#{go}…", data: GkGuiStuff::Primitives::POPOVER_ANCHOR) +
+                            content_tag(:div, safe_join(box), class: 'gk-gui-stuff-popover-box'),
+                  class: "gk-gui-stuff-popover #{GkGuiStuff::Primitives.role_class('line-next')} gk-gui-stuff-popover-roled")
     end
 
     # The compact form: the band bar (the current segment says the status, the others their band), the

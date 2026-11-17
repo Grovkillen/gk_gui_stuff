@@ -1,5 +1,7 @@
 <%# core's buttons at rest and disabled (hover and focus are tried, never shown still), Save beside Cancel, core's
     delete link (to the guide's address, which stores nothing) and the sprite's icons %>
+<%# a tile without its own mode is Bara grafiskt: what it shows can be hovered over and tabbed to, a click leads nowhere %>
+<% @gk_gui_stuff_sg_mode = :graphic %>
 <div class="gk-gui-stuff-sg-tiles">
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_core_buttons), "button_tag(label), button_tag(label, disabled: true)") do %>
     <%= button_tag l(:button_save), type: 'button' %> <%= button_tag l(:button_apply), type: 'button', disabled: true %>

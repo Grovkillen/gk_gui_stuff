@@ -32,6 +32,9 @@ module GkGuiStuff
   # hidden text and the tooltip of formatted text. On a custom value it is written by the pass, after core's sanitize,
   # so that nothing takes it away. A link whose html options already name a target is left with it. Mail, a PDF and a
   # feed get no new tab, as in formatted text.
+  #
+  # rel and the help's header are a protection and hold whatever the gate says (Patches.protect!). The look, the place
+  # and the new tab with its hidden text are the interface: with a closed gate none of them is written or asked for.
   module ExternalRel
     ABSOLUTE = %r{\A\s*(?:(?:https?|ftps?):)?//}i
     REFERRER_POLICY = 'no-referrer'
@@ -231,9 +234,20 @@ module GkGuiStuff
       end
     end
 
-    # Prepended on ApplicationHelper, in every view and mail view
+    # Prepended on ApplicationHelper, in every view and mail view, whatever the gate says (Patches.protect!). With a
+    # closed gate only rel is written: the place, the look, the new tab and the hidden text are not asked for, so no
+    # register and no setting is read. A link whose address is not a written absolute one goes straight to core's
+    # link_to: nothing is asked and nothing is kept on the view for it
     module HelperPatch
       def link_to(*args, &block)
+        url = args[block ? 0 : 1]
+        return super unless url.is_a?(String) && url.match?(GkGuiStuff::ExternalRel::ABSOLUTE)
+
+        if gk_gui_stuff_rel_only?
+          rel = GkGuiStuff::ExternalRel.link_args(args, block) { gk_gui_stuff_rel_own_hosts }
+          return super(*rel, &block)
+        end
+
         out = GkGuiStuff::ExternalRel.link_args(args, block, place: -> { gk_gui_stuff_link_place(args, block) },
                                                              marked: gk_gui_stuff_link_marked,
                                                              new_tab: gk_gui_stuff_link_new_tab,
@@ -241,6 +255,12 @@ module GkGuiStuff
         return super(*out, &block) unless block && GkGuiStuff::ExternalRel.new_tab_opened?(out[1])
 
         super(*out) { |*a| gk_gui_stuff_new_tab_text(capture(*a, &block)) }
+      end
+
+      # Whether the gate is closed, asked once per view
+      def gk_gui_stuff_rel_only?
+        @gk_gui_stuff_rel_only = !GkGuiStuff.open? unless defined?(@gk_gui_stuff_rel_only)
+        @gk_gui_stuff_rel_only
       end
 
       # The text of a link that opens in a new tab: what the screen reader says stands after it, in the same span as in

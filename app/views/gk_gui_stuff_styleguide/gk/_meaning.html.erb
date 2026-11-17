@@ -20,7 +20,7 @@
       </tbody>
     </table>
   <% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_meaning_my), "view_my_account_preferences: link_to l(:button_gk_gui_stuff_meaning_reset), gk_gui_stuff_meaning_reset_path, method: :post") do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_meaning_my), "view_my_account_preferences: link_to l(:button_gk_gui_stuff_meaning_reset), gk_gui_stuff_meaning_reset_path, method: :post", mode: :graphic) do %>
     <div class="tabular"><p><label><%= l(:label_gk_gui_stuff_meaning_admin) %></label>
       <%= link_to sprite_icon('reload', l(:button_gk_gui_stuff_meaning_reset)), '#', class: 'icon icon-reload', data: { gk_gui_sg_noop: '1' } %></p></div>
   <% end %>

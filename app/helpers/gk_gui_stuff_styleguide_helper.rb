@@ -46,7 +46,7 @@ module GkGuiStuffStyleguideHelper
 
   # The short legend of an element's heading, as the flag's legend: first the facts given (the plugin, the number of
   # states), rows of text only; then the modes counted, one own element per mode in the mode's role with its count first
-  # ("1 Bara bild, 1 Går att prova"), what it means as the pennant's tooltip and, for a screen reader, after it. The
+  # ("1 Bara bild, 2 Bara grafiskt, 1 Går att prova"), what it means as the pennant's tooltip and, for a screen reader, after it. The
   # pointer on a mode's row frames the tiles' flags of that mode in the element (area: its steady anchor). The
   # element's heading in the page form and the library's panel head draw it
   def gk_gui_stuff_sg_mode_badges(modes, area:, facts: [])
@@ -74,11 +74,11 @@ module GkGuiStuffStyleguideHelper
   end
 
   # The note at the top of the guide, in both forms, folded from the start: GK GUI Stuff's group in the role
-  # info, its heading the fold button with the four flags as own elements with their words (a heading has no short
-  # form; a screen reader reads the line after them and the four flags when it is open) and one line of text. Open: every example has
+  # info, its heading the fold button with the five flags (one per mode) as own elements with their words (a heading has no short
+  # form; a screen reader reads the line after them and the five flags (one per mode) when it is open) and one line of text. Open: every example has
   # made-up values shaped after how the plugins use the element, nothing is saved on the server, the links and buttons
   # in the pictures lead nowhere but in the tiles that try the server, and some examples remember their state in this
-  # browser; then the four flags, each as the flag's own element with its words and what it means; last that hover and
+  # browser; then the five flags (one per mode), each as the flag's own element with its words and what it means; last that hover and
   # focus are not shown still. Never remembered, so that it stands folded on every visit
   def gk_gui_stuff_sg_dummy_note
     roles = GkGuiStuff::Styleguide::MODE_ROLES
@@ -99,8 +99,8 @@ module GkGuiStuffStyleguideHelper
     end
   end
 
-  # The page's own choices, for every element at once: Visa all kod, light or dark (when theme_engine's basic
-  # dark mode is on) and computer or phone. A bar that follows on scroll (the page's script holds it at the top of
+  # The page's own choices, for every element at once: Visa all kod, light or dark (when GK Core Stuff's
+  # dark mode is there) and computer or phone. A bar that follows on scroll (the page's script holds it at the top of
   # the window, under core's fixed header on a phone), in both forms. Visa all kod twice, one drawn at a time by the
   # stylesheet: the button with its words on a computer, and under 899 px GK GUI Stuff's icon button (core's
   # toggle-plus, toggle-minus while all the code is open, as core's own expand and collapse; the words as its tooltip
@@ -118,6 +118,30 @@ module GkGuiStuffStyleguideHelper
 
   # What every element's partial is given: the guide's save address and the one that fails, the made-up tag names,
   # a role's name, and the note that a module is off where an example needs it (@on, the controller's)
+  # The frame page's own mark on the root (data-gk-gui-stuff-sg-frame), in its head before the first paint
+  # (gk_gui_stuff_root_mark.js copies the script tag's mark onto the root): the guide's stylesheet keeps no room there
+  # for the band, the login warning or a jump (gk_gui_stuff_styleguide.css)
+  def gk_gui_stuff_sg_frame_mark
+    content_for(:header_tags, javascript_include_tag('gk_gui_stuff_root_mark', plugin: 'gk_gui_stuff', data: { gk_gui_stuff_sg_frame: '1' }))
+  end
+
+  # A module's words as its script reads them (GkGui.t: the key without gk_gui_stuff_), for an example that has the
+  # module's look whether the module is on or not (the list filter's example): the page's configuration carries them
+  # only for the modules that are on
+  def gk_gui_stuff_sg_module_words(key)
+    mod = GkGuiStuff::Registry.find(key)
+    Array(mod&.texts).to_h { |k| [k.to_s.sub('gk_gui_stuff_', ''), l(k)] }
+  end
+
+  # The scripts and stylesheets a module's example needs where the module is not loaded: the list filter's example
+  # (data-gk-gui-filter="example") has gk_gui_stuff_lists whether list_filter is on or not; the file comes once, with
+  # list_filter or select_search on it is the module's own (both have the same file)
+  def gk_gui_stuff_sg_example_assets
+    return ''.html_safe if (Array(@on) & %w[list_filter select_search]).any?
+
+    safe_join([javascript_include_tag('gk_gui_stuff_lists', plugin: 'gk_gui_stuff'), stylesheet_link_tag('gk_gui_stuff_lists', plugin: 'gk_gui_stuff')])
+  end
+
   def gk_gui_stuff_sg_locals
     on = @on || []
     { save: gk_gui_stuff_styleguide_save_path, fail: gk_gui_stuff_styleguide_save_path(fail: 1),
@@ -179,8 +203,8 @@ module GkGuiStuffStyleguideHelper
 
   # The element's choices, light or dark and computer or phone, shown only while the pointer or the focus is on the
   # element's heading (the stylesheet), and always in the library form's panel head. Light and dark is the whole page's (the dark mode is
-  # theme_engine's, set on the page's root), so every element's choice follows and the element stays in view; without
-  # dark (theme_engine not on) the choice is not drawn. Telefon draws the element's tiles in a frame 375 px wide (the
+  # GK Core Stuff's, its class set on the page's root), so every element's choice follows and the element stays in view; without
+  # GK Core Stuff's dark mode the choice is not drawn. Telefon draws the element's tiles in a phone's screen 390 px wide (the
   # guide's frame page); the page's own choice sets every element's, and an element may then choose its own. Both only
   # change the view: view segments that keep nothing (the page's light or dark is the page's own), pressed by the
   # guide's script
@@ -328,13 +352,28 @@ module GkGuiStuffStyleguideHelper
   end
 
   # Core's messages (render_flash_messages) with the words given instead of the request's flash, which is left as it
-  # is; core's own helper draws them, so that each series shows its own
+  # is; core's own helper draws them, so that each series shows its own.
+  # Core gives each message the id flash_<kind>, which is the page's own message's: an id stands once in a page, and
+  # a page can show several examples. An example is therefore drawn without the id and carries
+  # data-gk-gui-sg-flash="<kind>" instead. The id is left out where core hands it to content_tag (the tag whose id is
+  # flash_<kind> for a kind given here), so the drawn HTML is never read or rewritten; every other tag core draws on
+  # the way (the icon) passes as it is
   def gk_gui_stuff_sg_flash(messages)
     shown = ActionDispatch::Flash::FlashHash.new(messages.transform_keys(&:to_s))
+    kinds = shown.keys.to_h { |k| ["flash_#{k}", k] }
     define_singleton_method(:flash) { shown }
+    define_singleton_method(:content_tag) do |name, content = nil, options = nil, escape = true, &block|
+      given = block ? content : options
+      kind = given.is_a?(Hash) ? kinds[(given[:id] || given['id']).to_s] : nil
+      if kind
+        mine = given.except(:id, 'id').merge('data-gk-gui-sg-flash' => kind)
+        block ? (content = mine) : (options = mine)
+      end
+      super(name, content, options, escape, &block)
+    end
     render_flash_messages
   ensure
-    singleton_class.send(:remove_method, :flash) if singleton_class.instance_methods(false).include?(:flash)
+    %i[flash content_tag].each { |m| singleton_class.send(:remove_method, m) if singleton_class.instance_methods(false).include?(m) }
   end
 
   # The line's example (GkGuiStuff::Line): two halves, two lanes, all four states, a step with a required reason,

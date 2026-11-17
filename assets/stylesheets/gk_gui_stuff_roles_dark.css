@@ -1,0 +1,88 @@
+/* gk_gui_stuff: the colour roles' dark values. One block with no specificity, loaded after gk_gui_stuff_primitives.css,
+   whose root block has the light values with the same specificity, so this one wins by order where it applies and a
+   theme that sets a role still wins over both. The sheet is linked on every page and its selector alone decides: it
+   applies by the tone of the surface that is drawn (extensions/gk_gui_stuff/tone.rb), when data-gk-tone on html says
+   dark, or when GK Core Stuff's dark mode class is on html and the attribute is absent; a theme that says light keeps
+   the light values also under that class. A value is an Open Color level read from core's palette, with its hex as
+   the fallback, or a fixed colour of its own where no level has what the role needs; never a mix. The surfaces are
+   gray 9 and gray 8, the text gray 0, the strong roles the hue's level 3 or 4. A soft tone is dark and toned in its
+   own hue, so that a pill, an alert and a diff row are told by their ground as in the light: the hue's level 9
+   darkened towards gray 9, by 70 % where the light tone is the hue's level 1 and by 80 % where it is lighter than
+   that; the greys keep a grey level. The bands that say settled and closed are green in both tones: teal 9 and green
+   9 darkened until the light text holds on them. Every fixed colour was worked out beforehand and stands as a hex,
+   with a comment on its line that says the level it comes from and by how much it is darkened
+   (test/roles_dark_test.rb reads the comment and works the colour out again). The ink on a filled role (ui-on-fill)
+   is the dark surface, since the strong roles are light here. Only a ground that carries text is lowered: a line, an
+   edge or a mark with no text on it keeps a clear tone, so a role that is both has a sister role for the line
+   (<role>-line: the bands, whose line is the hue's level that holds 3:1). Text holds 4.5:1 on its ground, an edge and a
+   mark 3:1 against the surface (test/role_contrast_dark_test.rb). The roles that are not here keep their light value on
+   purpose or follow another role; test/roles_dark_test.rb lists them and binds this sheet to the root block and to
+   the registered roles. */
+:where(html[data-gk-tone="dark"], html.dark-mode:not([data-gk-tone])) {
+  /* categories of data: the hue's level 3 as text, edge and fill, on its own dark tone as the soft one; 11 and 12 are
+     the greys, 12 the lightest on a ground a step lighter */
+  --gk-role-category-1: var(--oc-blue-3, #74c0fc);     --gk-role-category-1-soft: #1e3850; /* gk-u U5: blue 9 darkened 70 % towards gray 9, carries blue 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-2: var(--oc-teal-3, #63e6be);     --gk-role-category-2-soft: #1a4038; /* gk-u U5: teal 9 darkened 70 % towards gray 9, carries teal 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-3: var(--oc-grape-3, #e599f7);    --gk-role-category-3-soft: #3f284c; /* gk-u U5: grape 9 darkened 70 % towards gray 9, carries grape 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-4: var(--oc-lime-3, #c0eb75);     --gk-role-category-4-soft: #334621; /* gk-u U5: lime 9 darkened 70 % towards gray 9, carries lime 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-5: var(--oc-pink-3, #faa2c1);     --gk-role-category-5-soft: #492334; /* gk-u U5: pink 9 darkened 70 % towards gray 9, carries pink 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-6: var(--oc-cyan-3, #66d9e8);     --gk-role-category-6-soft: #1a3c45; /* gk-u U5: cyan 9 darkened 70 % towards gray 9, carries cyan 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-7: var(--oc-violet-3, #b197fc);   --gk-role-category-7-soft: #342c58; /* gk-u U5: violet 9 darkened 70 % towards gray 9, carries violet 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-8: var(--oc-green-3, #8ce99a);    --gk-role-category-8-soft: #24432f; /* gk-u U5: green 9 darkened 70 % towards gray 9, carries green 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-9: var(--oc-indigo-3, #91a7ff);   --gk-role-category-9-soft: #273258; /* gk-u U5: indigo 9 darkened 70 % towards gray 9, carries indigo 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-10: var(--oc-yellow-3, #ffe066);  --gk-role-category-10-soft: #5c3e1d; /* gk-u U5: yellow 9 darkened 70 % towards gray 9, carries yellow 3 at 4.5:1; no Open Color level has it */
+  --gk-role-category-11: var(--oc-gray-5, #adb5bd);    --gk-role-category-11-soft: var(--oc-gray-8, #343a40);
+  --gk-role-category-12: var(--oc-gray-0, #f8f9fa);    --gk-role-category-12-soft: var(--oc-gray-7, #495057);
+  /* alert levels, lowest first; critical is the alarm filled, the dark ink on it, its soft tone the alarm's */
+  --gk-role-alert-tip: var(--oc-gray-4, #ced4da);        --gk-role-alert-tip-soft: var(--oc-gray-8, #343a40);
+  --gk-role-alert-info: var(--oc-blue-3, #74c0fc);       --gk-role-alert-info-soft: #1f3243; /* gk-u U5: blue 9 darkened 80 % towards gray 9, carries blue 3 at 4.5:1; no Open Color level has it */
+  --gk-role-alert-notice: var(--oc-green-4, #69db7c);    --gk-role-alert-notice-soft: #23392d; /* gk-u U5: green 9 darkened 80 % towards gray 9, carries green 4 at 4.5:1; no Open Color level has it */
+  --gk-role-alert-warning: var(--oc-orange-4, #ffa94d);  --gk-role-alert-warning-soft: #462c24; /* gk-u U5: orange 9 darkened 80 % towards gray 9, carries orange 4 at 4.5:1; no Open Color level has it */
+  --gk-role-alert-alarm: var(--oc-red-4, #ff8787);       --gk-role-alert-alarm-soft: #532729; /* gk-u U5: red 9 darkened 70 % towards gray 9, carries red 4 at 4.5:1; no Open Color level has it */
+  --gk-role-alert-critical: var(--oc-red-4, #ff8787);    --gk-role-alert-critical-soft: #532729; /* gk-u U5: red 9 darkened 70 % towards gray 9, carries red 4 at 4.5:1; no Open Color level has it */
+  /* the ground of a row with an error: the alarm's dark soft tone, which carries the light text, the muted text and a link */
+  --gk-role-alert-alarm-row: #532729; /* gk-u U5: red 9 darkened 70 % towards gray 9, carries the muted text at 4.5:1; no Open Color level has it */
+  /* the neutral interface: the surface, the ground a step off it, the squares under an example, the frame around
+     boxes, popovers and fields (3:1 against both grounds), a divider between rows, the code chip and what is possible
+     but not chosen */
+  --gk-role-ui-surface: var(--oc-gray-9, #212529);       --gk-role-ui-raised: var(--oc-gray-8, #343a40);
+  --gk-role-ui-canvas: var(--oc-gray-8, #343a40);        --gk-role-ui-divider: var(--oc-gray-7, #495057);
+  --gk-role-ui-frame: var(--oc-gray-6, #868e96);         --gk-role-ui-possible: var(--oc-gray-5, #adb5bd);
+  --gk-role-ui-code: var(--oc-gray-6, #868e96);          --gk-role-ui-code-soft: var(--oc-gray-8, #343a40);
+  /* a primitive that has no role or category: light, so that the dark ink on a fill holds on it and it holds as text,
+     edge and mark on both grounds; its soft tone the ground under it (a bar's track) */
+  --gk-role-ui-neutral: var(--oc-gray-4, #ced4da);         --gk-role-ui-neutral-soft: var(--oc-gray-7, #495057);
+  /* the neutral text, the secondary text, the muted text, a link inside the instance, and the ink on a filled role */
+  --gk-role-ui-text: var(--oc-gray-0, #f8f9fa);          --gk-role-ui-text-soft: var(--oc-gray-4, #ced4da);
+  --gk-role-ui-muted: var(--oc-gray-5, #adb5bd);         --gk-role-ui-link: var(--oc-blue-2, #a5d8ff);
+  --gk-role-ui-on-fill: var(--oc-gray-9, #212529);
+  /* a diff: what was added and what was taken away, as text on its own dark tone */
+  --gk-role-diff-added: var(--oc-green-3, #8ce99a);      --gk-role-diff-added-soft: #23392d; /* gk-u U5: green 9 darkened 80 % towards gray 9, carries green 3 at 4.5:1; no Open Color level has it */
+  --gk-role-diff-removed: var(--oc-red-3, #ffa8a8);      --gk-role-diff-removed-soft: #432629; /* gk-u U5: red 9 darkened 80 % towards gray 9, carries red 3 at 4.5:1; no Open Color level has it */
+  /* what only administrators see; on core's dark menus the admin role and the alarm as levels of their own */
+  --gk-role-ui-admin: var(--oc-violet-3, #b197fc);       --gk-role-ui-admin-soft: #2d2a48; /* gk-u U5: violet 9 darkened 80 % towards gray 9, carries violet 3 at 4.5:1; no Open Color level has it */
+  --gk-role-ui-admin-on-dark: var(--oc-violet-3, #b197fc);
+  --gk-role-alert-alarm-on-dark: var(--oc-red-5, #ff6b6b);
+  /* the rail of quick save at rest, and the saved green as text and as a fill under the dark ink */
+  --gk-role-save-direct: var(--oc-gray-6, #868e96);      --gk-role-save-saved-strong: var(--oc-green-4, #69db7c);
+  /* the line's bands, dark so that the light text can be read on them; settled and closed are green as in the light,
+     the first towards teal and the second green, each darker than the hue's level 9 */
+  --gk-role-band-incoming: var(--oc-gray-7, #495057);    --gk-role-band-active: var(--oc-blue-9, #1864ab);
+  --gk-role-band-settled: #0d6d51;                       --gk-role-band-closed: #29763a; /* gk-u U5: teal 9 and green 9 darkened 20 % towards gray 9, hold 4.5:1 under the light text; no Open Color level has them */
+  --gk-role-band-archived: var(--oc-gray-8, #343a40);
+  /* a band's line, which carries no text: not lowered as the band's ground is, but a clearer level of the same hue
+     that holds 3:1 against the surface and against the raised ground */
+  --gk-role-band-incoming-line: var(--oc-gray-5, #adb5bd);  --gk-role-band-active-line: var(--oc-blue-6, #228be6);
+  --gk-role-band-settled-line: var(--oc-teal-7, #0ca678);   --gk-role-band-closed-line: var(--oc-green-8, #2f9e44);
+  --gk-role-band-archived-line: var(--oc-gray-6, #868e96);
+  /* the line */
+  --gk-role-line-now: var(--oc-blue-3, #74c0fc);         --gk-role-line-now-soft: #1f3243; /* gk-u U5: blue 9 darkened 80 % towards gray 9, carries blue 3 at 4.5:1; no Open Color level has it */
+  --gk-role-line-next: var(--oc-blue-4, #4dabf7);        --gk-role-line-next-soft: #1f3243; /* gk-u U5: blue 9 darkened 80 % towards gray 9, carries blue 4 at 4.5:1; no Open Color level has it */
+  --gk-role-line-expected: var(--oc-violet-4, #9775fa);  --gk-role-line-stroke: var(--oc-gray-0, #f8f9fa);
+  /* what one has chosen, also a switch that is on; the sentence's logic */
+  --gk-role-ui-choice: var(--oc-blue-3, #74c0fc);        --gk-role-ui-choice-soft: #1f3243; /* gk-u U5: blue 9 darkened 80 % towards gray 9, carries blue 3 at 4.5:1; no Open Color level has it */
+  --gk-role-logic-and: var(--oc-gray-4, #ced4da);        --gk-role-logic-or: var(--oc-violet-3, #b197fc);
+  --gk-role-logic-not: var(--oc-red-4, #ff8787);
+  /* a link that leads out of the instance, with -soft for a card's head */
+  --gk-role-link-external: var(--oc-cyan-3, #66d9e8);    --gk-role-link-external-soft: #1d343b; /* gk-u U5: cyan 9 darkened 80 % towards gray 9, carries cyan 3 at 4.5:1; no Open Color level has it */
+}

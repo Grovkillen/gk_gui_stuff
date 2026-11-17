@@ -42,6 +42,10 @@ module GkGuiStuff
       # the sidebar's place and the header's height (Menu.layout_classes, gk_gui_stuff_uses.js)
       'layout_sidebar' => { applies: %w[script], footprint: { anchors: ['#sidebar'], pages: ALL } },
       'layout_header' => { applies: %w[script], footprint: { anchors: ['#header'], pages: ALL } },
+      # the light, dark or automatic button the script puts in the top menu (color_mode.rb); the choice it changes is
+      # GK Core Stuff's dark mode's own
+      'color_mode' => { applies: %w[server script], footprint: { anchors: ['#gk-gui-stuff-color-mode'], pages: ALL,
+                                                                 adds: [{ anchor: '#gk-gui-stuff-color-mode', label: 'label_gk_gui_stuff_mod_color_mode' }] } },
       # the card of a link inside the instance and the one of a link to another website (gk_gui_stuff_link_preview.js)
       'link_preview' => { applies: %w[script], footprint: { anchors: ['.gk-gui-stuff-preview'] } },
       'link_preview_external' => { applies: %w[script data], footprint: { anchors: ['.gk-gui-stuff-preview'] } },
@@ -50,7 +54,9 @@ module GkGuiStuff
       # arrows written in formatted text (Arrows::Processor)
       'arrows' => { applies: %w[server], footprint: { anchors: ['.wiki'] } },
       # the copy buttons and the code one clicks to copy (gk_gui_stuff_copy.js)
-      'mailto_copy' => { applies: %w[script], footprint: { anchors: ['.gk-gui-stuff-copy-btn'], elements: %w[copy] } },
+      'mailto_copy' => { applies: %w[script], footprint: { anchors: ['.gk-gui-stuff-copy-btn'], elements: %w[copy icon_button] } },
+      # the envelope with the issue's subject after a mail link on the issue page (gk_gui_stuff_copy.js, PageFacts issue_mail)
+      'mailto_issue' => { applies: %w[script], footprint: { anchors: ['.gk-gui-stuff-mail-issue'], elements: %w[icon_button], pages: ISSUE } },
       'inline_copy' => { applies: %w[script], footprint: { anchors: ['.wiki .gk-gui-stuff-copy-code'], elements: %w[copy] } },
       'code_copy' => { applies: %w[script], footprint: { anchors: ['.pre-wrapper .gk-gui-stuff-copy-pre'], elements: %w[copy] } },
       # the whisper for what Redmine's own buttons copy, and the whisper putting out Redmine's tooltip (gk_gui_stuff_copy.js, the kernel)
@@ -122,6 +128,10 @@ module GkGuiStuff
       'flash_timeout' => { applies: %w[script], footprint: { anchors: ['#content .flash.notice', '.gk-gui-stuff-flash'], elements: %w[core_flash] } },
       # the icon of core's messages lifted to the middle of the text (gk_gui_stuff_flash_icon.css)
       'flash_icon' => { applies: %w[script], footprint: { anchors: ['.flash'], elements: %w[core_flash], pages: ALL } },
+      # the text and icon of core's yellow boxes in GK's warning colour (gk_gui_stuff_warning_text.css); the box at an
+      # edit conflict (.conflict) changes too but is not named, since GK Records' list of core's purposeful classes
+      # does not hold it
+      'warning_text' => { applies: %w[script], footprint: { anchors: ['div.flash.warning', '.warning', '.nodata'], elements: %w[core_flash], pages: ALL } },
       # the outcome of a form that was sent, as a notice in the corner (gk_gui_stuff_uses.js)
       'outcome_notice' => { applies: %w[script], footprint: { anchors: ['.gk-gui-stuff-notices'], elements: %w[messages], pages: ALL } },
       # the corner on the issue page when someone else changed it (gk_gui_stuff_uses.js, GkGui.corner)

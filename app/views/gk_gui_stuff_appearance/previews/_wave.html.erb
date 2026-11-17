@@ -1,6 +1,5 @@
 <%# Visa for the wave: Redmine shows nothing; with the setting, the word that comes and goes over the page, a still
     picture of it, and the style guide's Prova beside it. row: the setting %>
-<% gk_gui_stuff_preview_stylesheet('gk_gui_stuff_modules') %>
 <% word = l(:gk_gui_stuff_wave_saved) %>
 <%= gk_gui_stuff_appearance_preview(row, off: content_tag(:span, l(:text_gk_gui_stuff_preview_none), class: 'gk-gui-stuff-form-page-quiet'),
                                          on: gk_gui_stuff_sg_still(:wave, word: word),

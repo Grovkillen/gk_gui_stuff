@@ -8,12 +8,12 @@
                           class: 'gk-gui-stuff-instance gk-gui-stuff-instance-test gk-gui-stuff-band-part gk-gui-stuff-band-instance', role: 'note') %>
 <% person_panel = safe_join([content_tag(:p, l(:label_gk_gui_stuff_sg_top_band_detail)),
                              content_tag(:div, safe_join([button_tag(l(:label_gk_gui_stuff_sg_top_band_change), type: 'button'),
-                                                          button_tag(l(:label_gk_gui_stuff_sg_top_band_done), type: 'button')]), class: 'gk-gui-stuff-fly-buttons')]) %>
+                                                          button_tag(l(:label_gk_gui_stuff_sg_top_band_done), type: 'button')]), class: 'gk-gui-stuff-popover-buttons')]) %>
 <% person = { key: 'sg.person', role: :info, icon: 'user', weight: :shared_computer, full: l(:label_gk_gui_stuff_sg_top_band_text),
               short: l(:label_gk_gui_stuff_sg_top_band_short), title: l(:label_gk_gui_stuff_sg_top_band_title), panel: person_panel } %>
 <% nobody = { key: 'sg.nobody', role: :quiet, icon: 'user', weight: :shared_computer, full: l(:label_gk_gui_stuff_sg_top_band_none_text),
               short: l(:label_gk_gui_stuff_sg_top_band_none_short),
-              panel: content_tag(:div, button_tag(l(:label_gk_gui_stuff_sg_top_band_who), type: 'button'), class: 'gk-gui-stuff-fly-buttons') } %>
+              panel: content_tag(:div, button_tag(l(:label_gk_gui_stuff_sg_top_band_who), type: 'button'), class: 'gk-gui-stuff-popover-buttons') } %>
 <% preview = gk_gui_stuff_band_preview_part(setting: l(:label_gk_gui_stuff_sg_top_band_setting), from: l(:label_gk_gui_stuff_sg_top_band_from),
                                             to: l(:label_gk_gui_stuff_sg_top_band_to), places: 14,
                                             marker: { scope: 'example', html: { data: { gk_gui_sg_marker_noop: '1' } } }) %>

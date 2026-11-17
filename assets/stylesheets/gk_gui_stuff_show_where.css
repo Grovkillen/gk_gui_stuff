@@ -22,7 +22,7 @@ button.gk-gui-stuff-where-arrow[data-gk-gui-where="here"] { padding-inline: 0.9e
 
 /* a step: the arrow, the cross at the end, the text and Nästa in one box */
 .gk-gui-stuff-where-step { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 0.4em; box-sizing: border-box; inline-size: 26em; padding: 0.5em 0.6em; border: 1px solid var(--gk-role-ui-effect);
-  border-radius: 0.5em; background: var(--gk-role-ui-surface); color: var(--oc-gray-9, #212529); box-shadow: 0 0.15em 0.45em color-mix(in srgb, var(--gk-role-ui-shadow) 18%, transparent); }
+  border-radius: 0.5em; background: var(--gk-role-ui-surface); color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); box-shadow: 0 0.15em 0.45em color-mix(in srgb, var(--gk-role-ui-shadow) 18%, transparent); }
 .gk-gui-stuff-where-step > button.gk-gui-stuff-where-arrow { justify-self: start; box-shadow: none; }
 .gk-gui-stuff-where-text { grid-column: 1 / -1; margin: 0; }
 button.gk-gui-stuff-where-close { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; min-block-size: 24px; min-inline-size: 24px; margin: 0; padding: 0; border: 0; background: transparent; color: inherit; cursor: pointer; }

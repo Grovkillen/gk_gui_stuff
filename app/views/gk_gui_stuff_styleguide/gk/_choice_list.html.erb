@@ -1,0 +1,33 @@
+<%# The choice list (gk_gui_stuff_choice_list): several choices with pills and a quiet hint after each, one choice with
+    a quiet text after each, and the list in core's form with its heading in the labels' column. The levels, the issues
+    and the numbers are made up. The choices can be tried, the whole row can be pressed, and nothing is saved %>
+<% @gk_gui_stuff_sg_mode = :nosave %>
+<% note = content_tag(:p, l(:text_gk_gui_stuff_sg_choice_list_example), class: 'gk-gui-stuff-direct-note') %>
+<% level = ->(n, role) { gk_gui_stuff_pill(l(:"label_gk_gui_stuff_sg_choice_list_level_#{n}"), role: role) } %>
+<% levels = lambda do
+     [{ value: 'unset', word: level.call(1, :muted), hint: l(:text_gk_gui_stuff_sg_choice_list_hint_always), checked: true, disabled: true },
+      { value: 'hypothesis', word: level.call(2, :saved), hint: l(:text_gk_gui_stuff_sg_choice_list_hint_optional_n, n: 3), checked: true, unchecked: '0' },
+      { value: 'preliminary', word: level.call(3, :warning), hint: l(:text_gk_gui_stuff_sg_choice_list_hint_optional), unchecked: '0' },
+      { value: 'checked', word: level.call(4, :info), hint: l(:text_gk_gui_stuff_sg_choice_list_hint_optional_n, n: 12), checked: true, unchecked: '0' },
+      { value: 'verified', word: level.call(5, :tip), hint: l(:text_gk_gui_stuff_sg_choice_list_hint_review), checked: true, disabled: true }]
+   end %>
+<% hits = (1..3).map { |n| { value: n, word: l(:"label_gk_gui_stuff_sg_choice_list_hit_#{n}"), hint: l(:"text_gk_gui_stuff_sg_choice_list_hit_hint_#{n}"), checked: n == 1 } } %>
+<div class="gk-gui-stuff-sg-tiles">
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_choice_list_many), "gk_gui_stuff_choice_list(name, rows, mode: :many, head:)") do %>
+    <%= note %>
+    <%= gk_gui_stuff_choice_list('sg_levels[]', levels.call, mode: :many, head: l(:label_gk_gui_stuff_sg_choice_list_levels), id: 'gk-gui-stuff-sg-choice-many') %>
+  <% end %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_choice_list_one), "gk_gui_stuff_choice_list(name, rows, mode: :one, label:)") do %>
+    <%= note %>
+    <%= gk_gui_stuff_choice_list('sg_hit', hits, mode: :one, label: l(:label_gk_gui_stuff_sg_choice_list_link_to), id: 'gk-gui-stuff-sg-choice-one') %>
+  <% end %>
+  <%# in core's form the list stands in a row of its own (a div, since a popover or a list cannot stand in core's p),
+      its heading in the labels' column and above the list on a narrow screen %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_choice_list_tabular), "div.gk-gui-stuff-tabular-row { gk_gui_stuff_choice_list(name, rows, mode: :many, head:) }", wide: true) do %>
+    <%= note %>
+    <div class="tabular">
+      <p><%= label_tag('gk-gui-stuff-sg-choice-name', l(:field_name)) %><%= text_field_tag(nil, l(:text_gk_gui_stuff_sg_choice_list_name), id: 'gk-gui-stuff-sg-choice-name', size: 20) %></p>
+      <div class="gk-gui-stuff-tabular-row"><%= gk_gui_stuff_choice_list('sg_levels_form[]', levels.call, mode: :many, head: l(:label_gk_gui_stuff_sg_choice_list_levels), id: 'gk-gui-stuff-sg-choice-form') %></div>
+    </div>
+  <% end %>
+</div>

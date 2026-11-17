@@ -19,8 +19,15 @@
                           part_buttons: [{ content: l(:label_gk_gui_stuff_sg_example_is_open), aria: { haspopup: 'true', expanded: 'false' },
                                            data: { gk_gui_sg_parent: { title: l(:field_status), text: l(:text_gk_gui_stuff_sg_layer) }.to_json } }]) %>
   <% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_script), "GkGui.layer.open({key, title, content, anchor, edge, parent, opener, width, onClose})", mode: :live) do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_script), "GkGui.layer.open({key, title, content, anchor, edge, parent, opener, width, above, onClose})", mode: :live) do %>
     <%= gk_gui_stuff_sg_still(:layer, title: l(:label_gk_gui_stuff_sg_layer), text: l(:text_gk_gui_stuff_sg_layer)) %>
     <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('layer', title: l(:label_gk_gui_stuff_sg_layer), text: l(:text_gk_gui_stuff_sg_layer)) %></p>
+  <% end %>
+  <%# above: the layer opened from inside an open popover stands over the popover (65 over 55); a Prova in the popover's box %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_above), "GkGui.layer.open({…, above: 'popover'}); GkGui.layer.open({…, above: element}); gk_gui_stuff_layer_button(label, above: :popover) { … }", mode: :live, id: 'sg-tile-layer-above') do %>
+    <%= gk_gui_stuff_popover(l(:label_gk_gui_stuff_sg_popover)) do %>
+      <p><%= l(:text_gk_gui_stuff_sg_above_popover) %></p>
+      <p class="gk-gui-stuff-sg-try"><%= gk_gui_stuff_sg_try('layer_above', title: l(:label_gk_gui_stuff_sg_above), text: l(:text_gk_gui_stuff_sg_above)) %></p>
+    <% end %>
   <% end %>
 </div>

@@ -23,26 +23,26 @@
 /* the shade at the fold: the block's own content fades out towards the cut (a mask, not a colour laid over it), so
    the line the cut goes through never shows half and nothing under the fade shows through, on whatever background,
    in every theme, light or dark; the bar under it marks the edge */
-.gk-gui-stuff-fold:not(.gk-gui-stuff-fold-closed) { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent);
-  mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent); }
+.gk-gui-stuff-fold:not(.gk-gui-stuff-fold-closed) { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent); /* gk-u U5: black here is the mask's opacity, not a colour */
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent); } /* gk-u U5: black here is the mask's opacity, not a colour */
 /* a block with its own frame or background (a code block): the mask would fade its frame and background too and leave
    a gap above the framed bar, so there the fade is laid inside the frame in the block's own background, which the
    script gives as --gk-gui-fold-bg; frame and background go on unbroken down to the bar */
 .gk-gui-stuff-fold.gk-gui-stuff-fold-framed:not(.gk-gui-stuff-fold-closed) { -webkit-mask-image: none; mask-image: none; }
 .gk-gui-stuff-fold.gk-gui-stuff-fold-framed:not(.gk-gui-stuff-fold-closed)::after { content: ""; position: absolute; inset-inline: 0; inset-block-end: 0;
-  block-size: 2.4em; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--gk-gui-fold-bg, transparent)); }
+  block-size: 2.4em; pointer-events: none; background: linear-gradient(to bottom, transparent, var(--gk-gui-fold-bg, transparent)); } /* gk-u U4: the fade takes the background of the block it folds */
 .gk-gui-stuff-fold-btn { display: block; margin-block: 4px 8px; padding-block: 2px; padding-inline: 8px; font-size: .9em; cursor: pointer;
-  background: transparent; border: 1px solid var(--oc-gray-4); border-radius: 3px; color: inherit; }
-.gk-gui-stuff-fold-btn:hover, .gk-gui-stuff-fold-btn:focus-visible { border-color: var(--oc-gray-6); }
+  background: transparent; border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); border-radius: 3px; color: inherit; }
+.gk-gui-stuff-fold-btn:hover, .gk-gui-stuff-fold-btn:focus-visible { border-color: var(--oc-gray-6, #868e96); } /* gk-u U3: the fold button's hover frame, stronger than ui-frame, has no role */
 .gk-gui-stuff-fold-row { display: none !important; }
 /* the button as a bar on the block's lower edge */
 .gk-gui-stuff-fold-host { margin-block-end: 0 !important; border-end-start-radius: 0 !important; border-end-end-radius: 0 !important; }
 .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar { display: block; box-sizing: border-box; inline-size: -moz-available; inline-size: -webkit-fill-available; inline-size: stretch; margin-block-start: 0; padding-block: 3px; text-align: center;
-  border: 0; border-block-start: 1px dashed var(--oc-gray-4); border-radius: 0 0 4px 4px; background: rgba(var(--oc-black-rgb),.03); }
-.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar-framed { border: 1px solid var(--oc-gray-4); border-block-start-style: dashed; }
+  border: 0; border-block-start: 1px dashed var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); border-radius: 0 0 4px 4px; background: color-mix(in srgb, var(--gk-role-ui-shadow, var(--oc-black, #000)) 3%, transparent); }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar-framed { border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); border-block-start-style: dashed; }
 .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar::before { content: "\25BE\00A0"; }
 .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar[aria-expanded="true"]::before { content: "\25B4\00A0"; }
-.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:hover, .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:focus-visible { background: rgba(var(--oc-black-rgb),.08); }
+.gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:hover, .gk-gui-stuff-fold-btn.gk-gui-stuff-fold-bar:focus-visible { background: color-mix(in srgb, var(--gk-role-ui-shadow, var(--oc-black, #000)) 8%, transparent); }
 /* the fold list's slot (GkGui.fold.slot, data-gk-gui-fold-slot-for): first on the bar and beside its button, never in it,
    so that a press there does not fold. The bar keeps its whole width and the slot's height, and its word stays in the
    middle. Only a bar with something in its slot has this. */
@@ -50,15 +50,29 @@
 .gk-gui-stuff-fold-list > .gk-gui-stuff-fold-btn { margin: 0; min-block-size: 26px; padding-inline: calc(24px + 0.5em); }
 .gk-gui-stuff-fold-slot { position: absolute; inset-block: 0; inset-inline-start: 0.25em; display: flex; align-items: center; gap: 0.25em; }
 
-.gk-gui-stuff-copy-btn { margin-inline-start: 4px; padding: 0 4px; border: 0; background: transparent; cursor: pointer; color: inherit; opacity: .55; font-size: .95em; }
-.gk-gui-stuff-copy-btn:hover, .gk-gui-stuff-copy-btn:focus-visible { opacity: 1; }
+/* mailto_copy and mailto_issue: the icon buttons after a mail link, in one piece that never breaks away from the address.
+   In running text the icon button follows the font: a hit area of 1.25em around a 1em icon, its middle on the middle
+   of the text's small letters (vertical-align: middle), so that it makes the line no higher. Muted at rest, the text's
+   colour under the pointer and in focus, as GK Core Stuff's envelope in the link. GK Core Stuff's envelope stands the
+   same way where the tools follow it, and gives way to the envelope with the subject where that one is there.
+   Kept together with the address: the icon buttons are atomic boxes, and the place between the link and them is ruled
+   by the parent's white-space, so nowrap on the piece alone would let it go to the next line. A word joiner (U+2060,
+   no width, not read, not copied) first in the piece forbids that break. GK Core Stuff's envelope stays an empty
+   inline box, which gives no place to break after the last letter; it only moves to the middle of the line. */
+.gk-gui-stuff-mail-tools { white-space: nowrap; margin-inline-start: 0.15em; }
+.gk-gui-stuff-mail-tools::before { content: "\2060"; }
+.gk-gui-stuff-mail-tools > :is(a, button).gk-gui-stuff-icon-button { inline-size: 1.25em; block-size: 1.25em; vertical-align: middle; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); }
+.gk-gui-stuff-mail-tools > :is(a, button).gk-gui-stuff-icon-button:is(:hover, :focus-visible) { color: inherit; }
+.gk-gui-stuff-mail-tools > .gk-gui-stuff-icon-button svg { display: block; inline-size: 1em; block-size: 1em; }
+div.wiki a.email.gk-gui-stuff-mail-tools-on::after { vertical-align: middle; }
+div.wiki a.email.gk-gui-stuff-mail-issue-on::after { content: none; }
 /* core's copy button on a code block: always there, not only under the pointer */
 div.pre-wrapper a.copy-pre-content-link.gk-gui-stuff-copy-pre { visibility: visible !important; opacity: .6 !important; display: inline-block !important; cursor: pointer; z-index: 2; }
 div.pre-wrapper:hover a.copy-pre-content-link.gk-gui-stuff-copy-pre, div.pre-wrapper a.copy-pre-content-link.gk-gui-stuff-copy-pre:focus-visible { opacity: 1 !important; }
 .gk-gui-stuff-copy-code { cursor: copy; }
-.gk-gui-stuff-copy-code:hover, .gk-gui-stuff-copy-code:focus-visible { outline: 1px dashed var(--oc-gray-6); outline-offset: 1px; }
+.gk-gui-stuff-copy-code:hover, .gk-gui-stuff-copy-code:focus-visible { outline: 1px dashed var(--oc-gray-6, #868e96); outline-offset: 1px; } /* gk-u U3: the copy link's hover frame, stronger than ui-frame, has no role */
 
-.gk-gui-stuff-week { margin-inline-start: 6px; color: var(--oc-gray-6); font-size: .9em; white-space: nowrap; }
+.gk-gui-stuff-week { margin-inline-start: 6px; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); font-size: .9em; white-space: nowrap; }
 .gk-gui-stuff-quick-done { margin-inline-start: 6px; }
 .gk-gui-stuff-parent { margin-block: 0 8px; background-color: var(--gk-role-ui-parent-row, transparent); }
 
@@ -66,25 +80,28 @@ div.pre-wrapper:hover a.copy-pre-content-link.gk-gui-stuff-copy-pre, div.pre-wra
 /* core lays the top menu's lists out in a row: this one is a column, one page per line, and scrolls when long */
 #top-menu ul.gk-gui-stuff-history-list { position: absolute; inset-block-start: 100%; inset-inline-start: 0; z-index: 900; display: block; inline-size: max-content;
   min-inline-size: 280px; max-inline-size: min(460px, calc(100vw - 24px)); max-block-size: 70vh; overflow-y: auto; margin: 0; padding-block: 4px; padding-inline: 0;
-  list-style: none; background: var(--oc-white); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4)); box-shadow: 0 2px 6px rgba(var(--oc-black-rgb),.2); }
+  list-style: none; background: var(--gk-role-ui-surface, var(--oc-white, #fff)); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); box-shadow: 0 2px 6px color-mix(in srgb, var(--gk-role-ui-shadow, var(--oc-black, #000)) 20%, transparent); }
 #top-menu ul.gk-gui-stuff-history-list[hidden] { display: none; }
 #top-menu ul.gk-gui-stuff-history-list > li { float: none; display: block; inline-size: auto; margin: 0; padding: 0; }
-#top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a { display: block; padding-block: 5px; padding-inline: 12px; color: var(--oc-gray-9); font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a:hover, #top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a:focus { background: var(--oc-blue-0); color: var(--oc-gray-9); text-decoration: none; }
-.gk-gui-stuff-history-empty { padding-block: 4px; padding-inline: 10px; color: var(--oc-gray-6); }
+#top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a { display: block; padding-block: 5px; padding-inline: 12px; color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); font-weight: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a:hover, #top-menu #gk-gui-stuff-history ul.gk-gui-stuff-history-list a:focus { background: var(--gk-role-ui-choice-soft, var(--oc-blue-0, #e7f5ff)); color: var(--gk-role-ui-text, var(--oc-gray-9, #212529)); text-decoration: none; }
+.gk-gui-stuff-history-empty { padding-block: 4px; padding-inline: 10px; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); }
 
-.gk-gui-stuff-footer-text { text-align: center; padding-block: 6px; color: var(--oc-gray-6); font-size: .9em; }
+.gk-gui-stuff-footer-text { text-align: center; padding-block: 6px; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); font-size: .9em; }
 
-.gk-gui-stuff-lw-banner { position: relative; background: var(--oc-yellow-1); color: var(--oc-pink-9); border-block-end: 1px solid var(--oc-yellow-3); padding-block: 8px; padding-inline: 14px 40px; }
+.gk-gui-stuff-lw-banner { position: relative; background: var(--oc-yellow-1, #fff3bf); color: var(--oc-pink-9, #a61e4d); border-block-end: 1px solid var(--oc-yellow-3, #ffe066); padding-block: 8px; padding-inline: 14px 40px; } /* gk-u U3: the login warning's own signal colours */
 .gk-gui-stuff-lw-close { position: absolute; inset-inline-end: 8px; inset-block-start: 4px; border: 0; background: transparent; font-size: 1.3em; cursor: pointer; color: inherit; line-height: 1; }
-.gk-gui-stuff-lw-ring { outline: 2px solid var(--oc-yellow-7); outline-offset: -2px; border-radius: 3px; }
+.gk-gui-stuff-lw-ring { outline: 2px solid var(--oc-yellow-7, #f59f00); outline-offset: -2px; border-radius: 3px; } /* gk-u U3: the login warning's own signal colours */
 /* phone: the banner fixed above core's fixed header (under the instance band where it is), and the header with the
    page moves down by its height */
 .gk-gui-stuff-lw-banner.gk-gui-stuff-lw-phone { position: fixed; inset-block-start: var(--gk-gui-stuff-band-h, 0px); inset-inline: 0; z-index: 10000; }
 html.gk-gui-stuff-lw-phone-on #header { inset-block-start: calc(var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
 html.gk-gui-stuff-lw-phone-on #main { padding-block-start: calc(64px + var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
 html.gk-gui-stuff-lw-phone-on div#sticky-issue-header { inset-block-start: calc(64px + var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
-@keyframes gk-gui-stuff-lw-pulse { 0% { box-shadow: 0 0 0 0 rgba(var(--oc-yellow-7-rgb),.8); } 100% { box-shadow: 0 0 0 12px rgba(var(--oc-yellow-7-rgb),0); } }
+/* the banner over core's anchor room (core's scroll-margin for its header and the sticky issue header), with the band
+   where it is, so that a jump to a note lands below it */
+html.gk-gui-stuff-lw-phone-on { scroll-padding-block-start: calc(var(--gk-gui-stuff-band-h, 0px) + var(--gk-gui-stuff-lw-h, 0px)); }
+@keyframes gk-gui-stuff-lw-pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--oc-yellow-7, #f59f00) 80%, transparent); } 100% { box-shadow: 0 0 0 12px transparent; } } /* gk-u U3: the login warning's own signal colours */
 .gk-gui-stuff-lw-pulse { animation: gk-gui-stuff-lw-pulse 1.2s ease-out 3; }
 .gk-gui-stuff-lw-pulse.gk-gui-stuff-lw-endless { animation-iteration-count: infinite; }
 .gk-gui-stuff-lw-arrow { position: absolute; inset-block-start: 0; font-size: 16px; line-height: 20px; opacity: 0; transform: rotate(var(--gk-gui-stuff-lw-angle, -90deg)); }
@@ -103,7 +120,7 @@ html.gk-gui-stuff-lw-phone-on div#sticky-issue-header { inset-block-start: calc(
   .gk-gui-stuff-fold::after { content: none !important; }
   .gk-gui-stuff-fold-row { display: revert !important; }
   .gk-gui-stuff-fold-slot { display: none !important; }
-  .gk-gui-stuff-fold-btn, .gk-gui-stuff-copy-btn, .gk-gui-stuff-copy-pre, .gk-gui-stuff-week, .gk-gui-stuff-quick-done, .gk-gui-stuff-history, .gk-gui-stuff-lw, .gk-gui-stuff-notice { display: none !important; }
+  .gk-gui-stuff-fold-btn, .gk-gui-stuff-mail-tools, .gk-gui-stuff-copy-btn, .gk-gui-stuff-copy-pre, .gk-gui-stuff-week, .gk-gui-stuff-quick-done, .gk-gui-stuff-history, .gk-gui-stuff-lw, .gk-gui-stuff-notice { display: none !important; }
 }
 
 /* flash_timeout: the countdown circle and the cross on core's green message */
@@ -131,17 +148,17 @@ div.flash .gk-gui-stuff-flash-tools svg.icon-svg { margin-inline: 0; }
 .gk-gui-stuff-flash-mark .gk-gui-stuff-icon { vertical-align: -0.1em; }
 /* user_status: the dot after a person's name; the colours are roles from Open Color (compat fills them in for 6.x) */
 .gk-gui-stuff-status { cursor: pointer; display: inline-block; inline-size: 0.55em; block-size: 0.55em; margin-block: 0; margin-inline: 0.3em 0.2em; border-radius: 50%; vertical-align: 0.1em;
-  background: var(--oc-gray-5, #adb5bd); box-shadow: 0 0 0 1px rgba(var(--oc-white-rgb), 0.8); }
-.gk-gui-stuff-status-active { background: var(--oc-green-6, #40c057); }
-.gk-gui-stuff-status-idle { background: var(--oc-yellow-6, #fab005); }
-.gk-gui-stuff-status-away { background: var(--oc-gray-5, #adb5bd); }
-.gk-gui-stuff-status-absent { background: var(--oc-violet-5, #845ef7); }
-.gk-gui-stuff-status-busy { background: var(--oc-red-6, #fa5252); }
+  background: var(--oc-gray-5, #adb5bd); box-shadow: 0 0 0 1px color-mix(in srgb, var(--gk-role-ui-surface, var(--oc-white, #fff)) 80%, transparent); } /* gk-u U3: the user status dots' own colours */
+.gk-gui-stuff-status-active { background: var(--oc-green-6, #40c057); } /* gk-u U3: the user status dots' own colours */
+.gk-gui-stuff-status-idle { background: var(--oc-yellow-6, #fab005); } /* gk-u U3: the user status dots' own colours */
+.gk-gui-stuff-status-away { background: var(--oc-gray-5, #adb5bd); } /* gk-u U3: the user status dots' own colours */
+.gk-gui-stuff-status-absent { background: var(--oc-violet-5, #845ef7); } /* gk-u U3: the user status dots' own colours */
+.gk-gui-stuff-status-busy { background: var(--oc-red-6, #fa5252); } /* gk-u U3: the user status dots' own colours */
 
 /* image_crop: the stage where a square part of a picture is chosen */
 .gk-gui-stuff-crop-stage { margin: 0.5em 0; }
-.gk-gui-stuff-crop-stage canvas { display: block; max-inline-size: 100%; background: var(--oc-gray-1, #f1f3f5); border: 1px solid var(--oc-gray-4, #ced4da); cursor: move; touch-action: none; }
-.gk-gui-stuff-crop-stage canvas:focus-visible { outline: 2px solid var(--oc-blue-6, #228be6); outline-offset: 2px; }
+.gk-gui-stuff-crop-stage canvas { display: block; max-inline-size: 100%; background: var(--gk-role-ui-raised, var(--oc-gray-1, #f1f3f5)); border: 1px solid var(--gk-role-ui-frame, var(--oc-gray-4, #ced4da)); cursor: move; touch-action: none; }
+.gk-gui-stuff-crop-stage canvas:focus-visible { outline: 2px solid var(--gk-role-ui-choice, var(--oc-blue-6, #228be6)); outline-offset: 2px; }
 .gk-gui-stuff-crop-stage input[type=range] { display: block; inline-size: 320px; max-inline-size: 100%; margin-block: 0.4em; margin-inline: 0; }
 
 /* openers: the button beside a field's text version; the content in the surface fills it */

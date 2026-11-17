@@ -1,10 +1,22 @@
 <%= gk_gui_stuff_direct_note %>
 <% @gk_gui_stuff_sg_mode = :server %>
 <div class="gk-gui-stuff-sg-tiles">
+  <%# the bar's four states as pictures: the switch can be hovered over and tabbed to, a click leads nowhere (Bara
+      grafiskt). No word stands in the row; saved has the whisper Sparat drawn still right under the row, where the
+      live one stands under the control that was pressed %>
   <% %w[direct changed saved failed].each do |st| %>
-    <%= gk_gui_stuff_sg_row(l(:"label_gk_gui_stuff_sg_rail_#{st}"), "data-gk-gui-save=\"#{st}\"", mode: :still) do %>
-      <div class="gk-gui-stuff-rail" data-gk-gui-save="<%= st %>"><%= l(:label_gk_gui_stuff_sg_example_events) %> <%= gk_gui_stuff_switch("sg_static_#{st}", st != 'failed', label: l(:label_gk_gui_stuff_sg_example_events)) %><span class="gk-gui-stuff-rail-bar"></span><span class="gk-gui-stuff-save-status<%= ' gk-gui-stuff-save-status-on' unless st == 'direct' %>"><%= { 'changed' => l(:text_gk_gui_stuff_saving), 'saved' => l(:text_gk_gui_stuff_saved), 'failed' => l(:text_gk_gui_stuff_not_saved) }[st] %></span></div>
+    <%= gk_gui_stuff_sg_row(l(:"label_gk_gui_stuff_sg_rail_#{st}"), "data-gk-gui-save=\"#{st}\"", mode: :graphic) do %>
+      <div class="gk-gui-stuff-rail" data-gk-gui-save="<%= st %>"><%= l(:label_gk_gui_stuff_sg_example_events) %> <%= gk_gui_stuff_switch("sg_static_#{st}", st != 'failed', label: l(:label_gk_gui_stuff_sg_example_events)) %><span class="gk-gui-stuff-rail-bar"></span></div>
+      <% if st == 'saved' %><%= gk_gui_stuff_sg_still(:whisper, text: l(:text_gk_gui_stuff_form_saved)) %><% end %>
     <% end %>
+  <% end %>
+  <%# a row a script builds is made a rail with the same marking (GkGui.save.rail); Prova plays a made-up answer in
+      both forms the rail reads, nothing is sent (gk_gui_stuff_styleguide.js builds the row) %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_save_rail), "GkGui.save.rail(el, url, { method, fields, reason }) -> { send(data), set(state, word) }; { ok, errors } / { rows: [{ ok, errors }, …] }",
+                         wide: true, mode: :nosave, id: 'sg-tile-save-rail') do %>
+    <div data-gk-gui-sg-save-rail="<%= l(:label_gk_gui_stuff_sg_example_events) %>"></div>
+    <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_save_rail_example) %></p>
+    <p class="gk-gui-stuff-sg-try"><%= safe_join(%w[ok rows row_failed].map { |a| link_to(l(:"label_gk_gui_stuff_sg_save_rail_#{a}"), '#', data: { gk_gui_sg_try: 'save_rail', gk_gui_sg_answer: a }) }, ' | ') %></p>
   <% end %>
   <%# the sweep beside the bar's states: a picture of a row and Prova with a made-up answer; nothing goes to the server %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_rail_sweep), "Administration > Appearance: gui_stuff.save_sweep; GkGui.save.rehearse(rail, { answer:, delay:, control:, sweep:, flip: })", wide: true, mode: :nosave, id: 'sg-tile-rail-sweep') do %>
@@ -12,6 +24,18 @@
   <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_segment), "gk_gui_stuff_segment(name, choices, selected)") do %>
     <%= gk_gui_stuff_rail(url: save) do %><%= gk_gui_stuff_segment('view', [[l(:label_list), 'list'], [l(:label_gk_gui_stuff_sg_grid), 'grid'], [l(:label_gk_gui_stuff_sg_cards), 'cards']], 'list') %><% end %>
+  <% end %>
+  <%# the cycle button: one press moves to the next mode and saves it at once, the whisper says the new mode; on a row
+      with room the mode also stands in words; a save that fails puts the mode back and a notice says so. The modes are
+      the light, dark or automatic button's three (ColorMode.modes: its words, GK Icons' icons where they are there and
+      the signs without them), starting on automatic as for whoever has not chosen; the example has no id of that
+      button, so it never changes the page's mode, and the guide's address stores nothing %>
+  <% cycle = GkGuiStuff::ColorMode.modes %>
+  <% [[:label_gk_gui_stuff_sg_cycle_button, save, false], [:label_gk_gui_stuff_sg_cycle_button_row, save, true], [:label_gk_gui_stuff_sg_cycle_button_failed, fail, false]].each do |name, url, row| %>
+    <%= gk_gui_stuff_sg_row(l(name), "gk_gui_stuff_cycle_button(name, modes, current, url:, label:, row:)") do %>
+      <%= gk_gui_stuff_cycle_button('sg_example_mode', cycle, 'auto', url: url, label: l(:label_gk_gui_stuff_color_mode), row: row) %>
+      <p class="gk-gui-stuff-direct-note"><%= l(:text_gk_gui_stuff_sg_cycle_button_example) %></p>
+    <% end %>
   <% end %>
   <%# beside the segment that saves: the view segment, which only changes the view, has no rail and never saves; the
       browser remembers the choice, so the example reacts in the page only %>
@@ -22,6 +46,14 @@
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_view_segment_three), "gk_gui_stuff_view_segment(name, choices, selected, label:, remember: false)", mode: :nosave) do %>
     <%= gk_gui_stuff_view_segment('sg_example_view_three', [[l(:label_list), 'list'], [l(:label_gk_gui_stuff_sg_grid), 'grid'], [l(:label_gk_gui_stuff_sg_cards), 'cards']], 'list',
                                  label: l(:label_gk_gui_stuff_lib_view), remember: false) %>
+  <% end %>
+  <%# up to ten choices; the week's days from core's own words (numbers where they are missing), so that the row wraps
+      on a phone %>
+  <% days = ::I18n.t('date.day_names') %>
+  <% days = (1..7).map(&:to_s) unless days.is_a?(Array) && days.size == 7 %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_view_segment_many), "gk_gui_stuff_view_segment(name, choices, selected, label:, remember: false)", mode: :nosave) do %>
+    <%= gk_gui_stuff_view_segment('sg_example_view_many', days.each_with_index.map { |d, i| [d, i.to_s] }, '1',
+                                 label: l(:label_gk_gui_stuff_sg_view_segment_days), remember: false) %>
   <% end %>
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_icon_toggle), "gk_gui_stuff_icon_toggle(name, pressed, icon:, label:)") do %>
     <%= gk_gui_stuff_rail(url: save) do %><%= gk_gui_stuff_icon_toggle('watch', true, icon: 'fav', label: l(:button_watch)) %> <%= l(:button_watch) %><% end %>
@@ -50,8 +82,8 @@
   <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_order_direct), "gk_gui_stuff_order(name, url:) { gk_gui_stuff_order_item(id, label:) { gk_gui_stuff_handle … } }") do %>
     <%= order_list.call(url: save) %>
   <% end %>
-  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_order_wait_save), "form_tag(url, data: gk_gui_stuff_form_changes) { gk_gui_stuff_order(name, applies: :save) { … } }") do %>
-    <%= form_tag(save, data: gk_gui_stuff_form_changes, id: 'gk-gui-stuff-sg-order-form') do %>
+  <%= gk_gui_stuff_sg_row(l(:label_gk_gui_stuff_sg_order_wait_save), "form_tag(url, autocomplete: 'off', data: gk_gui_stuff_form_changes) { gk_gui_stuff_order(name, applies: :save) { … } }") do %>
+    <%= form_tag(save, autocomplete: 'off', data: gk_gui_stuff_form_changes, id: 'gk-gui-stuff-sg-order-form') do %>
       <%= order_list.call(applies: :save) %>
       <p><%= submit_tag l(:button_save), name: nil %></p>
     <% end %>

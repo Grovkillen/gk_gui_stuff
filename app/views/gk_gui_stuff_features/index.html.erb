@@ -3,7 +3,8 @@
     under Av and På, the quiet "förval" under the default's, and under its name what it affects (Påverkar, from its
     footprint, no line when nothing is described). The fill link Allt av stands in core's div.contextual
     beside the heading; the bar at the bottom has the count, Ångra alla and Spara with the reason of the place
-    gui_stuff.feature_switch, with the pen also while the place asks for none, as on Utseende. %>
+    gui_stuff.feature_switch (while that place is off, the same box with the changes and no field for a reason, as on
+    Utseende). %>
 <% gk_gui_stuff_form_page_assets %>
 <% form_id = 'gk-gui-stuff-features-form' %>
 <% if @register && @groups.present? %>
@@ -22,7 +23,7 @@
   <% fills = { 'all_off' => @register.declared.keys.to_h { |k| ["features[#{k}]", '0'] } } %>
   <% names = @register.declared.transform_values(&:label) %>
   <%= form_tag gk_gui_stuff_features_path, method: :patch, id: form_id, class: 'gk-gui-stuff-form-page',
-               data: gk_gui_stuff_form_page_data(fills: fills, words: { modes: words }) do %>
+               autocomplete: 'off', data: gk_gui_stuff_form_page_data(fills: fills, words: { modes: words }) do %>
     <%= gk_gui_stuff_form_page_top %>
     <%# In core's div.autoscroll: a table wider than the window scrolls instead of squeezing its columns %>
     <div class="autoscroll gk-gui-stuff-form-page-scroll">
@@ -59,7 +60,7 @@
               </td>
               <% [false, true].each do |state| %>
                 <% word = words[state ? '1' : '0'] %>
-                <% mark = f.default == state ? content_tag(:span, l(:text_gk_gui_stuff_default_mark), class: 'gk-gui-stuff-form-page-default') : nil %>
+                <% mark = f.default == state ? gk_gui_stuff_form_page_default_mark : nil %>
                 <%= gk_gui_stuff_form_page_radio("features[#{f.key}]", state ? '1' : '0', on == state, label: "#{f.label}: #{word}", word: word, extra: mark) %>
               <% end %>
             <% end %>
@@ -68,7 +69,7 @@
       <% end %>
     </table>
     </div>
-    <%= gk_gui_stuff_form_page_bar(GkGuiStuffFeaturesController::PLACE, floor: 'optional') %>
+    <%= gk_gui_stuff_form_page_bar(GkGuiStuffFeaturesController::PLACE) %>
   <% end %>
 <% end %>
 <% html_title l(:label_gk_gui_stuff_features) %>

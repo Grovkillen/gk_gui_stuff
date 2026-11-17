@@ -1,8 +1,8 @@
 /* gk_gui_stuff: the form pages Administration > Utseende and Administration > Funktioner, and My account > Appearance
    (gk_gui_stuff_form_page_helper.rb, gk_gui_stuff_form_page.js). Core's table.list, radio buttons, buttons and
-   fields; the primitives' rail, fly, reason button and count text. Here only the page's own arrangement: the top row,
-   the radio columns, the quiet lines in a name cell, a dimmed row, the values under a row and the bar that stays at
-   the bottom. Colours are roles. */
+   fields; the primitives' rail, popover, reason button and count text. Here only the page's own arrangement: the top row,
+   the radio columns, the fact cells, the box at the top, the quiet lines in a name cell, a dimmed row, the values
+   under a row and the bar that stays at the bottom. Colours are roles. */
 
 /* the top row: that nothing applies before the save, and the search; on a computer's width the search stands at the
    start, and the fill links and the line at the end (below 899 px the fill links are core's div.contextual) */
@@ -29,11 +29,15 @@ table.list.gk-gui-stuff-form-page-table td { vertical-align: top; }
 table.list.gk-gui-stuff-form-page-table td.name { text-align: start; }
 table.list.gk-gui-stuff-form-page-table td.gk-gui-stuff-choice-col input[type="radio"] { margin-block-start: 4px; }
 td.gk-gui-stuff-form-page-in-core { text-align: start; font-size: 0.9em; }
+/* a fact cell (gk_gui_stuff_form_page_fact): what the row says and nobody changes here, from the start edge under its
+   heading; its column's word stands in the cell only when the row stacks, since the heading says it */
+table.list.gk-gui-stuff-form-page-table :is(th.gk-gui-stuff-form-page-fact-col, td.gk-gui-stuff-form-page-fact) { text-align: start; }
+.gk-gui-stuff-form-page-fact-word { display: none; }
 .gk-gui-stuff-form-page-row[hidden], .gk-gui-stuff-form-page-group[hidden], .gk-gui-stuff-form-page-group-body[hidden] { display: none; }
 /* a group's heading row: its fold button and count at the start, over every column */
 table.list.gk-gui-stuff-form-page-table tbody.gk-gui-stuff-form-page-group th { text-align: start; }
 .gk-gui-stuff-form-page-name { font-weight: bold; }
-.gk-gui-stuff-form-page-row details.gk-gui-stuff-fly { vertical-align: baseline; margin-inline-start: 4px; }
+.gk-gui-stuff-form-page-row details.gk-gui-stuff-popover { vertical-align: baseline; margin-inline-start: 4px; }
 .gk-gui-stuff-form-page-was { margin-inline-start: 6px; font-size: 0.85em; color: var(--gk-role-ui-muted); }
 .gk-gui-stuff-form-page-help, .gk-gui-stuff-form-page-related, .gk-gui-stuff-form-page-needs, .gk-gui-stuff-form-page-last { display: block; margin-block-start: 2px; }
 .gk-gui-stuff-form-page-help { font-size: 0.9em; color: var(--gk-role-ui-muted); }
@@ -46,10 +50,29 @@ table.list.gk-gui-stuff-form-page-table tbody.gk-gui-stuff-form-page-group th { 
 .gk-gui-stuff-form-page-last > a { flex: none; white-space: nowrap; }
 .gk-gui-stuff-form-page-default { display: block; font-size: 0.8em; color: var(--gk-role-ui-muted); }
 /* a row whose plugin is missing, or that Redmine has built in with no setting of its own to link to: dimmed, never
-   hidden; Visa and its fly stay whole, since a dimmed cell would hold the fly in its own layer */
+   hidden; Visa and its popover stay whole, since a dimmed cell would hold the popover in its own layer */
 /* the flag "built into Redmine" says why the row is dimmed, so it keeps its full colour and is read */
-tr.gk-gui-stuff-form-page-dimmed > td > :not(details.gk-gui-stuff-fly, .gk-gui-stuff-form-page-in-core-flag) { opacity: 0.6; }
+tr.gk-gui-stuff-form-page-dimmed > td > :not(details.gk-gui-stuff-popover, .gk-gui-stuff-form-page-in-core-flag) { opacity: 0.6; }
 .gk-gui-stuff-form-page-steps { margin-block: 0.3em; padding-inline-start: 1.4em; }
+
+/* the box at the top of the form (gk_gui_stuff_form_page_lead): one choice that holds for everything under it, in a
+   frame of its own, its name and what it does on one line and its choices in a row under them, each a radio button
+   with its own word. It is a row of the form: the primitives' rail stands at its end while its choice is changed.
+   locked: the line under it that says why the rows cannot be changed, with the edge of the role warning */
+.gk-gui-stuff-form-page-lead { margin-block-end: 10px; padding-block: 8px; padding-inline: 10px; border: 1px solid var(--gk-role-ui-frame);
+  border-radius: 4px; background: var(--gk-role-ui-surface); }
+.gk-gui-stuff-form-page-lead-head { display: flex; flex-wrap: wrap; gap: 0.2em 0.6em; align-items: baseline; }
+.gk-gui-stuff-form-page-lead-head > .gk-gui-stuff-form-page-was { margin-inline-start: 0; }
+.gk-gui-stuff-form-page-lead-help { font-size: 0.9em; color: var(--gk-role-ui-muted); }
+.gk-gui-stuff-form-page-lead-choices { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-block-start: 6px; }
+.gk-gui-stuff-form-page-lead-choices > label.gk-gui-stuff-form-page-choice { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.gk-gui-stuff-form-page-lead-choices input[type="radio"] { margin: 0; }
+.gk-gui-stuff-form-page-lead-locked { margin-block: 0 10px; padding-block: 4px; padding-inline: 10px;
+  border-inline-start: 3px solid var(--gk-role-alert-warning); background: var(--gk-role-alert-warning-soft); }
+/* the line that follows the box's choice: gone while no choice locks, and of its parts only the one of the choice
+   that holds. Its place (.gk-gui-stuff-form-page-lead-status, data-gk-gui-lock-lines) is always in the page and
+   takes no room of its own, so that what comes into it is said to the one who listens */
+.gk-gui-stuff-form-page-lead-locked[hidden], .gk-gui-stuff-form-page-lead-locked > [hidden] { display: none; }
 
 /* the values under a row, shown while it is not off; a table value in a fold with its summary */
 .gk-gui-stuff-form-page-values[hidden] { display: none; }
@@ -75,8 +98,8 @@ details.gk-gui-stuff-form-page-details > summary { cursor: pointer; }
 .gk-gui-stuff-form-page-grid-wide > .gk-gui-stuff-form-page-check { flex-wrap: wrap; min-width: 0; }
 
 /* the bar at the bottom of the form, in sight from the start: at the start as core's buttons, Spara and then Ångra alla,
-   and the count after them, so that they never move when it comes. Under the open fly (55) and the layer (60); on a wide
-   screen a fly from the bar opens upwards and towards the end, since there is no room below it, and is never higher than
+   and the count after them, so that they never move when it comes. Under the open popover (55) and the layer (60); on a wide
+   screen a popover from the bar opens upwards and towards the end, since there is no room below it, and is never higher than
    the window, since the bar it hangs on stays where it is (narrower, the primitives make it a sheet at the bottom). The
    bar's line is the one line under the list, also while it stands stuck over a long list, so the table has no end line
    of its own and no distance to the bar.
@@ -95,20 +118,22 @@ table.list.gk-gui-stuff-form-page-table { border-block-end: 0; margin-block-end:
    cut to one row is lower than an open box, which was cut at the list's lower edge and scrolled inside it. While a box
    is open the list clips nothing, as the style guide's canvas. That goes for core's table.list inside it too, whose own
    overflow: hidden cut the box at the table's lower edge and let a click scroll the table inside itself */
-.autoscroll.gk-gui-stuff-form-page-scroll:has(details.gk-gui-stuff-fly[open]) { overflow: visible; }
-table.list.gk-gui-stuff-form-page-table:has(details.gk-gui-stuff-fly[open]) { overflow: visible; }
+.autoscroll.gk-gui-stuff-form-page-scroll:has(details.gk-gui-stuff-popover[open]) { overflow: visible; }
+table.list.gk-gui-stuff-form-page-table:has(details.gk-gui-stuff-popover[open]) { overflow: visible; }
 .gk-gui-stuff-form-page-bar { position: sticky; inset-block-end: 0; z-index: 36; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   justify-content: flex-start; margin-block-start: 0; padding-block: 8px; padding-inline: 10px;
   border-block-start: 1px solid var(--gk-role-ui-frame); background: var(--gk-role-ui-surface); }
 .gk-gui-stuff-form-page-bar > .gk-gui-stuff-form-status { margin-inline-start: 0; }
 @media (min-width: 900px) {
-  .gk-gui-stuff-form-page-bar details.gk-gui-stuff-fly > .gk-gui-stuff-fly-box { inset-block-start: auto; inset-block-end: calc(100% - 1px);
+  .gk-gui-stuff-form-page-bar details.gk-gui-stuff-popover > .gk-gui-stuff-popover-box { inset-block-start: auto; inset-block-end: calc(100% - 1px);
     max-block-size: calc(100vh - 5em); overflow-y: auto; }
-  /* the primitives turn a box short of room to the other side (gk-gui-stuff-fly-end); that stays theirs */
-  .gk-gui-stuff-form-page-bar details.gk-gui-stuff-fly:not(.gk-gui-stuff-fly-end) > .gk-gui-stuff-fly-box { inset-inline-start: 0; inset-inline-end: auto;
+  /* the primitives turn a box short of room to the other side (gk-gui-stuff-popover-end); that stays theirs */
+  .gk-gui-stuff-form-page-bar details.gk-gui-stuff-popover:not(.gk-gui-stuff-popover-end) > .gk-gui-stuff-popover-box { inset-inline-start: 0; inset-inline-end: auto;
     border-start-start-radius: 4px; border-end-start-radius: 0; }
 }
-.gk-gui-stuff-form-page-change { display: block; }
+/* the reason of a row that always asks, in the box of a bar whose place is off: there only while such a row asks */
+.gk-gui-stuff-form-page-sharp-reason { display: block; }
+.gk-gui-stuff-form-page-sharp-reason[hidden] { display: none; }
 
 /* My account > Appearance: a row per setting, the name at the start and its control at the end */
 .gk-gui-stuff-form-page-my h3 { margin-block: 12px 2px; border-block-end: 1px solid var(--gk-role-ui-divider); }
@@ -119,8 +144,10 @@ table.list.gk-gui-stuff-form-page-table:has(details.gk-gui-stuff-fly[open]) { ov
 .gk-gui-stuff-form-page-my-control { flex: none; display: inline-flex; gap: 6px; align-items: center; }
 .gk-gui-stuff-form-page-my-table { flex: 1 1 100%; flex-wrap: wrap; }
 
-/* a level's word in the label of its radio button: shown only when the row stacks, since the column's heading says it */
-.gk-gui-stuff-form-page-choice-word { display: none; }
+/* a level's word in the label of its radio button: shown only when the row stacks, since the column's heading says it;
+   so also the lock of a choice that stands and cannot be changed, which on a wide screen is the switched off radio
+   button itself */
+.gk-gui-stuff-form-page-choice-word, .gk-gui-stuff-form-page-choice-lock { display: none; }
 
 /* Below 899 px the form never scrolls sideways. Each row stacks: the name and all that belongs to it on top, the
    levels under it as buttons in full width with their words (the same radio buttons, laid out anew), "applies to all"
@@ -132,12 +159,21 @@ table.list.gk-gui-stuff-form-page-table:has(details.gk-gui-stuff-fly[open]) { ov
   .gk-gui-stuff-form-page-list textarea { max-inline-size: 100%; box-sizing: border-box; }
   table.list.gk-gui-stuff-form-page-table { --gk-gui-stuff-form-page-cols: 3; display: block; inline-size: 100%; border: 0; }
   table.list.gk-gui-stuff-form-page-table.gk-gui-stuff-features { --gk-gui-stuff-form-page-cols: 2; }
+  /* the page says its number of level columns (cols:): two or four stand two and two, three in one row */
+  table.list.gk-gui-stuff-form-page-table:is(.gk-gui-stuff-form-page-cols-2, .gk-gui-stuff-form-page-cols-4) { --gk-gui-stuff-form-page-cols: 2; }
   table.list.gk-gui-stuff-form-page-table > :is(colgroup, thead) { display: none; }
   table.list.gk-gui-stuff-form-page-table > tbody:not([hidden]) { display: block; }
   table.list.gk-gui-stuff-form-page-table > tbody > tr:not([hidden]) { display: grid; grid-template-columns: repeat(var(--gk-gui-stuff-form-page-cols), minmax(0, 1fr));
     gap: 6px; padding-block: 8px; padding-inline: 4px; border-block-start: 1px solid var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6)); }
   table.list.gk-gui-stuff-form-page-table > tbody > tr > :is(td, th) { display: block; min-inline-size: 0; padding: 0; border: 0; overflow-wrap: anywhere; }
   table.list.gk-gui-stuff-form-page-table > tbody > tr > :is(th, td.name, td.gk-gui-stuff-form-page-in-core) { grid-column: 1 / -1; }
+  /* a fact cell: a line of its own under the name, its column's word before it */
+  table.list.gk-gui-stuff-form-page-table > tbody > tr > td.gk-gui-stuff-form-page-fact { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 0.4em;
+    align-items: center; }
+  .gk-gui-stuff-form-page-fact-word { display: inline; font-size: 0.9em; color: var(--gk-role-ui-muted); }
+  /* the box at the top: its choices two and two, as buttons in full width (the label is the row's own button) */
+  .gk-gui-stuff-form-page-lead-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+  .gk-gui-stuff-form-page-lead-choices > label.gk-gui-stuff-form-page-choice { display: flex; }
   /* the rail of an unsaved row stands at the end, as on a computer, apart from the lists' marks at the start */
   form[data-gk-gui-save-form] table.list.gk-gui-stuff-form-page-table > tbody > tr.gk-gui-stuff-field-changed { padding-inline-end: 10px;
     box-shadow: inset -3px 0 0 var(--gk-role-save-changed); }
@@ -150,6 +186,25 @@ table.list.gk-gui-stuff-form-page-table:has(details.gk-gui-stuff-fly[open]) { ov
     background: var(--gk-role-ui-choice-soft, var(--oc-blue-0, #e7f5ff)); }
   label.gk-gui-stuff-form-page-choice:has(input:focus-visible) { outline: 2px solid var(--gk-role-ui-choice, var(--oc-blue-8, #1971c2)); outline-offset: 1px; }
   label.gk-gui-stuff-form-page-choice:has(input:disabled) { cursor: default; }
+  /* a choice that cannot be made here (disabled:): every level stays a button, with a dashed frame, the quiet ground
+     and muted text, and without the round button, which is still there for the one who listens. The one that stands
+     has a whole frame, bold text and the lock in the round button's place. None of them has the frame or the ground
+     of a choice. It follows the button's own state, so also the script's locking before anything is saved */
+  label.gk-gui-stuff-form-page-choice:has(input:disabled) { position: relative; border-style: dashed;
+    border-color: var(--gk-role-ui-divider, var(--oc-gray-3, #dee2e6)); background: var(--gk-role-ui-raised, var(--oc-gray-1, #f1f3f5));
+    color: var(--gk-role-ui-muted, #666c72); }
+  label.gk-gui-stuff-form-page-choice:has(input:disabled:checked) { border-style: solid; border-color: var(--gk-role-ui-muted, #666c72);
+    background: var(--gk-role-ui-neutral-soft, var(--oc-gray-2, #e9ecef)); color: var(--gk-role-ui-text-soft, var(--oc-gray-7, #495057)); font-weight: bold; }
+  label.gk-gui-stuff-form-page-choice:has(input:disabled) > input[type="radio"] { position: absolute; inline-size: 1px; block-size: 1px; margin: 0; opacity: 0;
+    pointer-events: none; }
+  /* the lock stands in the text's first line, so that a long word keeps the button's whole width on its own line
+     and is not broken in the middle; the button is a block with its lines in the middle */
+  label.gk-gui-stuff-form-page-choice:has(input:disabled:checked) { display: block; align-content: center; text-align: center; }
+  /* the lock is as high as the text's line and stands at the line's top with the icon in its middle, so that the
+     icon's middle is the middle of the first line of the word, as the round button's is in a choice that can be made */
+  label.gk-gui-stuff-form-page-choice:has(input:disabled:checked) > .gk-gui-stuff-form-page-choice-lock { display: inline-flex; align-items: center;
+    block-size: 1.4em; block-size: 1lh; margin-inline-end: 6px; vertical-align: top; }
+  label.gk-gui-stuff-form-page-choice:has(input:disabled:checked) > .gk-gui-stuff-form-page-choice-lock > svg { margin-block: 0; }
   .gk-gui-stuff-form-page-choice-word { display: inline; }
   /* "applies to all" fills its cell, which the grid makes as high as the buttons beside it */
   table.list.gk-gui-stuff-form-page-table > tbody > tr > td.gk-gui-stuff-form-page-for-all { display: flex; }
