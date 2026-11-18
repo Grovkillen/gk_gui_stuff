@@ -182,6 +182,7 @@ sv:
   label_gk_gui_stuff_help_wiki_project: "Wikins projekt"
   label_gk_gui_stuff_help_wiki_page: "Wikisida"
   text_gk_gui_stuff_help_wiki_page: "Tom: wikins startsida."
+  label_gk_gui_stuff_help_wiki_start: "wikins startsida"
   label_gk_gui_stuff_mod_flash_timeout: "Redmines gröna ruta försvinner själv"
   text_gk_gui_stuff_mod_flash_timeout: "Uppdatering lyckades och liknande försvinner efter en tid, med en cirkel som räknar ned (klick pausar) och ett kryss. Fel och varningar står alltid kvar."
   label_gk_gui_stuff_mod_help_link: "Hjälpens mål"
@@ -478,6 +479,13 @@ sv:
   gk_gui_stuff_personal: "Mina sidor"
   # The person's own placement of the buttons
   label_gk_gui_stuff_my_placement_default: "Enligt systeminställningen (%{which})"
+  label_gk_gui_stuff_placement_by_system: "Enligt systeminställningen"
+  # The instance's own placement of the buttons: empty follows the plugin that owns the button
+  label_gk_gui_stuff_plugin_placement_default: "Enligt pluginets förval (%{which})"
+  label_gk_gui_stuff_placement_by_plugin: "Enligt pluginets förval"
+  # Core's own buttons on the instance's row: no plugin owns them, so empty follows Redmine's own drawing
+  label_gk_gui_stuff_core_placement_default: "Enligt Redmines förval (%{which})"
+  label_gk_gui_stuff_placement_by_core: "Enligt Redmines förval"
   label_gk_gui_stuff_layout_sidebar: "Sidofältet"
   label_gk_gui_stuff_layout_header: "Sidhuvudet"
   label_gk_gui_stuff_layout_header_tall: "Som vanligt"
@@ -883,6 +891,7 @@ sv:
   label_gk_gui_stuff_role_divider: "Streck mellan rader"
   label_gk_gui_stuff_role_shadow: "Skugga"
   label_gk_gui_stuff_role_code: "Kodtext"
+  label_gk_gui_stuff_role_code_frame: "Ram kring kod i löptext, under pekaren och fokus"
   label_gk_gui_stuff_role_possible: "Möjligt, inte valt"
   label_gk_gui_stuff_role_effect: "Där en ändring syns"
   text_gk_gui_stuff_pill_type: "Typ: %{name}"

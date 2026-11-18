@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require_relative 'table_cells' # the words of the table values' cells, given at the registration
+
 module GkGuiStuff
   # gui_stuff's appearance settings in records' register (GkRecords::AppearanceSettings): every module of the Registry
   # but actions_menu (always on), the settings that are not modules (the account menu's colours, the boxes' alignment,
@@ -134,11 +136,12 @@ module GkGuiStuff
                                                         choices: choices('label_gk_gui_stuff_custom_mark', CustomMark::STYLES)) },
         'login_warning' => { 'login_warning_animate' => value('lw_animate', :flag, true),
                              'login_warning_endless' => value('lw_endless', :flag, false) },
-        # the three ways Help can lead, one table: kind (core, url or wiki), url, wiki_project, wiki_page
-        'help_link' => { 'help_link' => value('help_kind', :table, { 'kind' => 'core' }, choices: 'help_link') },
-        'declutter' => { 'declutter' => value('declutter', :table, {}, choices: 'declutter') },
-        'quick_done' => { 'quick_done_status' => value('quick_done_status', :table, {}, choices: 'quick_done_status') },
-        'admin_groups' => { 'admin_rows' => value('ag_rows', :table, {}, choices: 'admin_rows') }
+        # the three ways Help can lead, one table: kind (core, url or wiki), url, wiki_project, wiki_page. Each table says
+        # what counts as empty in its cells and gives their words (TableCells), which an older GK Records passes over
+        'help_link' => { 'help_link' => value('help_kind', :table, { 'kind' => 'core' }, choices: 'help_link', **TableCells.options('help_link')) },
+        'declutter' => { 'declutter' => value('declutter', :table, {}, choices: 'declutter', **TableCells.options('declutter')) },
+        'quick_done' => { 'quick_done_status' => value('quick_done_status', :table, {}, choices: 'quick_done_status', **TableCells.options('quick_done_status')) },
+        'admin_groups' => { 'admin_rows' => value('ag_rows', :table, {}, choices: 'admin_rows', **TableCells.options('admin_rows')) }
       }.merge(defined?(External) ? { 'link_preview_external' => external_values } : {})
     end
 
@@ -224,13 +227,14 @@ module GkGuiStuff
       # the pages someone not logged in sees too
       own.call(FlagIcons::SETTING, modes: %w[off forced], anonymous: true, preview: preview_of(FlagIcons::SETTING),
                                    needs: -> { defined?(::GkIcons) ? true : false }, needs_plugin: 'gk_icons',
-                                   values: { FlagIcons::VALUE => value('flag_icons', :table, {}, choices: 'flag_icons') })
+                                   values: { FlagIcons::VALUE => value('flag_icons', :table, {}, choices: 'flag_icons', **TableCells.options('flag_icons')) })
       own.call('personal_count', person: :select, person_off: true, preview: preview_of('personal_count'),
                                  values: { 'shown_as' => { kind: :choice, default: 'waiting', person: true, label: :label_gk_gui_stuff_count_shown_as,
                                                            choices: choices('label_gk_gui_stuff_count_shown_as', %w[waiting split zero]) } })
       own.call('placements', person: :table,
                              values: { 'placements' => { kind: :table, default: {}, person: true, choices: 'placements',
-                                                         label: :label_gk_gui_stuff_placements, help: :text_gk_gui_stuff_placements } })
+                                                         label: :label_gk_gui_stuff_placements, help: :text_gk_gui_stuff_placements,
+                                                         **TableCells.options('placements') } })
       %w[tabs issue other].each do |area|
         own.call("icons_#{area}", person: :segment,
                                   values: { 'mode' => { kind: :choice, default: 'icon', person: true, label: :"label_gk_gui_stuff_icons_#{area}",

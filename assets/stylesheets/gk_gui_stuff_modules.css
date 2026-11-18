@@ -70,7 +70,7 @@ div.wiki a.email.gk-gui-stuff-mail-issue-on::after { content: none; }
 div.pre-wrapper a.copy-pre-content-link.gk-gui-stuff-copy-pre { visibility: visible !important; opacity: .6 !important; display: inline-block !important; cursor: pointer; z-index: 2; }
 div.pre-wrapper:hover a.copy-pre-content-link.gk-gui-stuff-copy-pre, div.pre-wrapper a.copy-pre-content-link.gk-gui-stuff-copy-pre:focus-visible { opacity: 1 !important; }
 .gk-gui-stuff-copy-code { cursor: copy; }
-.gk-gui-stuff-copy-code:hover, .gk-gui-stuff-copy-code:focus-visible { outline: 1px dashed var(--oc-gray-6, #868e96); outline-offset: 1px; } /* gk-u U3: the copy link's hover frame, stronger than ui-frame, has no role */
+.gk-gui-stuff-copy-code:hover, .gk-gui-stuff-copy-code:focus-visible { outline: 1px dashed var(--gk-role-ui-code-frame, var(--oc-gray-7, #495057)); outline-offset: 1px; }
 
 .gk-gui-stuff-week { margin-inline-start: 6px; color: var(--gk-role-ui-muted, var(--oc-gray-6, #868e96)); font-size: .9em; white-space: nowrap; }
 .gk-gui-stuff-quick-done { margin-inline-start: 6px; }

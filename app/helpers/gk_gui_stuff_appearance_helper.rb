@@ -75,13 +75,17 @@ module GkGuiStuffAppearanceHelper
   end
 
   # A value that is a table: a fold with its summary, closed from the start (the script opens it when something in it
-  # changes); the partial under gk_gui_stuff_appearance/values draws the table
+  # changes); the partial under gk_gui_stuff_appearance/values draws the table, its cells named and their choices
+  # worded by the same book as the event log's (cells, GkGuiStuff::TableCells)
   def gk_gui_stuff_value_table(row, value, current, name, disabled)
     h = current.is_a?(Hash) ? current : {}
-    body = render(partial: "gk_gui_stuff_appearance/values/#{value.choices}", locals: { name: name, value: h, row: row, disabled: disabled, person: !name.start_with?("values[#{row.key}]") })
+    person = !name.start_with?("values[#{row.key}]")
+    cells = GkGuiStuff::TableCells.book(value.choices, person: person) || {}
+    body = render(partial: "gk_gui_stuff_appearance/values/#{value.choices}", locals: { name: name, value: h, row: row, disabled: disabled, person: person, cells: cells })
     summary = content_tag(:summary, safe_join([value.label, content_tag(:span, gk_gui_stuff_table_summary(value.choices, h),
                                                                          class: 'gk-gui-stuff-form-page-quiet')], ' '))
-    # the value's label and its kind as its own marks: the box of Spara says only that a table changed
+    # the value's label and its kind as its own marks; each field in it carries its cell's (data-gk-gui-cell-label,
+    # data-gk-gui-cell-empty), so that the box of Spara says a row per cell as the log does
     content_tag(:details, summary + content_tag(:div, body, class: 'gk-gui-stuff-form-page-details-body'), class: 'gk-gui-stuff-form-page-details',
                                                                                                       data: { gk_gui_value_label: value.label, gk_gui_value_kind: 'table' })
   end

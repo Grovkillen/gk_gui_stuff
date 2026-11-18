@@ -41,8 +41,12 @@
             <%= gk_gui_stuff_affects(reg, row.key) %>
             <span class="gk-gui-stuff-form-page-quiet"><%= l(table ? :text_gk_gui_stuff_optional_in_instance_own : :text_gk_gui_stuff_optional_in_instance) %></span></span>
           <% if table %>
+            <%# the person's own cells only: a cell the person never chose stands on its empty choice, which shows the
+                administrator's, so that a save neither copies the administrator's table nor writes a row for it %>
+            <% own = choice[:values][v.name] %>
+            <% own = own.is_a?(Hash) ? (reg.coerce(v, own) || {}) : {} %>
             <span class="gk-gui-stuff-form-page-my-control gk-gui-stuff-form-page-my-table">
-              <%= gk_gui_stuff_value_field(row, v, reg.person_value(row.key, v.name, user), scope: 'values') %>
+              <%= gk_gui_stuff_value_field(row, v, own, scope: 'values') %>
               <%= gk_gui_stuff_row_save_button %></span>
           <% elsif v && (%w[segment select].include?(row.person) || (v.kind == 'choice' && GkGuiStuff::ColorMode.segment_row?(row.key))) %>
             <% list = v.choice_list.map { |c| c.is_a?(Array) ? c : [c, c] } %>

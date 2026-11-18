@@ -168,8 +168,10 @@ class GkGuiStuffAppearanceController < ApplicationController
 
         now = @register.value(row.key, v.name)
         if v.kind == 'table'
-          wanted = compact(raw)
-          h[v.name] = wanted unless wanted == compact(now)
+          wanted = compact(raw, v)
+          # a cell the page does not draw (a button that is gone) stays as it stood, as records keeps it
+          wanted = @register.keep_gone(v, now, wanted) if @register.respond_to?(:keep_gone)
+          h[v.name] = wanted unless wanted == compact(now, v)
         else
           c = @register.coerce(v, raw)
           raise GkRecords::AppearanceSettings::Invalid.new(row.key, v.name) if c.nil?
@@ -182,8 +184,11 @@ class GkGuiStuffAppearanceController < ApplicationController
     [modes, values]
   end
 
-  # A table value without its empty parts: a part left blank, or a box not ticked, is the same as none
-  def compact(h)
+  # A table value without its empty parts: a part left blank, or a box not ticked, is the same as none. records'
+  # table_compact is the one rule, with what the value counts as empty; the same rule here with an older records
+  def compact(h, v = nil)
+    return @register.table_compact(v, h) if v && @register.respond_to?(:table_compact)
+
     h = h.to_unsafe_h if h.respond_to?(:to_unsafe_h)
     return {} unless h.is_a?(Hash)
 

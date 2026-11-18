@@ -1,9 +1,10 @@
 <%# The parts of core's pages that declutter hides: a check box per part. name: the value's field name, value: the
-    stored table %>
+    stored table, cells: the cells' words (TableCells), the same as the event log's %>
+<% cells = local_assigns[:cells] || {} %>
 <div class="gk-gui-stuff-form-page-grid">
 <% GkGuiStuff::Declutter::TARGETS.each_key do |key| %>
   <span class="gk-gui-stuff-form-page-check"><%= hidden_field_tag "#{name}[#{key}]", '0', id: nil, disabled: disabled %>
-    <%= check_box_tag "#{name}[#{key}]", '1', value[key].to_s == '1', id: "gk-gui-stuff-dc-#{key}", disabled: disabled %>
+    <%= check_box_tag "#{name}[#{key}]", '1', value[key].to_s == '1', id: "gk-gui-stuff-dc-#{key}", disabled: disabled, data: GkGuiStuff::TableCells.marks(cells, key) %>
     <label for="gk-gui-stuff-dc-<%= key %>"><%= l(:"label_gk_gui_stuff_dc_#{key}") %></label></span>
 <% end %>
 </div>

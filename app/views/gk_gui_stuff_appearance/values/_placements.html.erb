@@ -1,25 +1,30 @@
 <%# The buttons' placement: each button the plugins put on a page out among the page's links, out with its icon only or
     in the three-dot menu, and core's own buttons as Redmine draws them, with icon and text or with the icon only. Empty
-    follows the default: the plugin's for the administrator, the administrator's for a person (person: true). name: the
-    value's field name, value: the stored table %>
+    follows the default: the plugin's for the administrator (Redmine's own for core's buttons), the administrator's for
+    a person (person: true). name: the
+    value's field name, value: the stored table, cells: the cells' words (TableCells), the same as the event log's. A stored
+    placement the page no longer offers stays chosen, so that a save leaves it as it stood %>
 <% menu = GkGuiStuff::Menu %>
+<% cells = local_assigns[:cells] || {} %>
 <table class="list gk-gui-stuff-placements">
   <thead><tr><th><%= l(:label_gk_gui_stuff_button) %></th><th><%= l(:label_gk_gui_stuff_where_shown) %></th><th><%= l(:label_gk_gui_stuff_placement) %></th></tr></thead>
   <tbody>
   <% menu.all.values.sort_by { |r| [r.contexts.first.to_s, r.order] }.each do |r| %>
-    <% label = r.name ? l(r.name) : (r.label.respond_to?(:call) ? r.key : l(r.label, count: 'N', project: '')) %>
+    <% label = (cells[r.key.to_s] || {})[:label] || GkGuiStuff::TableCells.button_label(r) %>
     <% default = person ? menu.placement(r, area: menu.area_of(r.contexts)) : r.placement %>
     <tr><td class="name"><%= sprite_icon(r.icon) if r.icon.is_a?(String) %> <%= label %></td>
       <td class="text where_shown"><%= r.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
-      <td class="placement"><%= select_tag "#{name}[#{r.key}]", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}")), '']] +
-            menu::PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] }, value[r.key].to_s), id: nil, disabled: disabled, 'aria-label': label %></td></tr>
+      <td class="placement"><%= select_tag "#{name}[#{r.key}]", options_for_select(GkGuiStuff::TableCells.options_for(cells[r.key.to_s] || { choices: menu::PLACEMENTS }, value[r.key],
+            l(person ? :label_gk_gui_stuff_my_placement_default : :label_gk_gui_stuff_plugin_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}"))), value[r.key].to_s),
+            id: nil, disabled: disabled, 'aria-label': label, data: GkGuiStuff::TableCells.marks(cells, r.key) %></td></tr>
   <% end %>
   <% menu::CORE_BUTTONS.each do |b| %>
     <% default = person ? menu.core_placement(b, area: menu.area_of(b.contexts)) : 'core' %>
     <tr><td class="name"><%= sprite_icon(b.icon) %> <%= menu.core_label(b) %></td>
       <td class="text where_shown"><%= b.contexts.map { |c| l(:"label_gk_gui_stuff_page_#{c}", default: c) }.join(', ') %></td>
-      <td class="placement"><%= select_tag "#{name}[#{b.key}]", options_for_select([[l(:label_gk_gui_stuff_my_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}")), '']] +
-            menu::CORE_PLACEMENTS.map { |p| [l(:"label_gk_gui_stuff_placement_#{p}"), p] }, value[b.key].to_s), id: nil, disabled: disabled, 'aria-label': menu.core_label(b) %></td></tr>
+      <td class="placement"><%= select_tag "#{name}[#{b.key}]", options_for_select(GkGuiStuff::TableCells.options_for(cells[b.key] || { choices: menu::CORE_PLACEMENTS }, value[b.key],
+            l(person ? :label_gk_gui_stuff_my_placement_default : :label_gk_gui_stuff_core_placement_default, which: l(:"label_gk_gui_stuff_placement_#{default}"))), value[b.key].to_s),
+            id: nil, disabled: disabled, 'aria-label': menu.core_label(b), data: GkGuiStuff::TableCells.marks(cells, b.key) %></td></tr>
   <% end %>
   </tbody>
 </table>

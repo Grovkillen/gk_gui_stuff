@@ -1,9 +1,12 @@
 <%# quick_done: the status each tracker's issues get from the button, or none. name: the value's field name, value: the
-    stored table %>
+    stored table, cells: the cells' words (TableCells), the same as the event log's. A stored status the tracker no
+    longer offers stays chosen, by its name, so that a save leaves it as it stood %>
+<% cells = local_assigns[:cells] || {} %>
 <div class="gk-gui-stuff-form-page-grid gk-gui-stuff-form-page-grid-wide">
 <% Tracker.sorted.each do |tr| %>
+  <% e = cells[tr.id.to_s] || { choices: tr.issue_statuses.map { |s| s.id.to_s }, words: tr.issue_statuses.to_h { |s| [s.id.to_s, s.name + (s.is_closed? ? " (#{l(:label_closed_issues)})" : '')] } } %>
   <span class="gk-gui-stuff-form-page-check"><label for="gk-gui-stuff-qd-<%= tr.id %>"><%= tr.name %></label>
-    <%= select_tag "#{name}[#{tr.id}]", options_for_select([[l(:label_gk_gui_stuff_quick_done_no_status), '']] + tr.issue_statuses.map { |s| [s.name + (s.is_closed? ? " (#{l(:label_closed_issues)})" : ''), s.id.to_s] }, value[tr.id.to_s].to_s),
-                   id: "gk-gui-stuff-qd-#{tr.id}", disabled: disabled %></span>
+    <%= select_tag "#{name}[#{tr.id}]", options_for_select(GkGuiStuff::TableCells.options_for(e, value[tr.id.to_s], l(:label_gk_gui_stuff_quick_done_no_status)), value[tr.id.to_s].to_s),
+                   id: "gk-gui-stuff-qd-#{tr.id}", disabled: disabled, data: GkGuiStuff::TableCells.marks(cells, tr.id) %></span>
 <% end %>
 </div>

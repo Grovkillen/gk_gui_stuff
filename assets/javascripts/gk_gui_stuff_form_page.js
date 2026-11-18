@@ -71,7 +71,14 @@
     var r = levelRadios(row).filter(function (x) { return x.value === value; })[0];
     return (r && r.getAttribute('data-gk-gui-word')) || modes[value] || '';
   }
-  function changed(f) { return !!f._gkGuiChanged; }
+  // a table's cell counts as GK Records keeps it: without the spaces around it, nothing and what counts as empty alike,
+  // so that a space in an empty cell or after a text is no change, as it is no event
+  function cellKept(v) { var s = String(v == null ? '' : v).trim(); return s === '0' ? '' : s; }
+  function changed(f) {
+    if (!f._gkGuiChanged) return false;
+    if (!f.hasAttribute('data-gk-gui-cell-label') || f.type === 'checkbox' || f.type === 'radio' || f.type === 'select-multiple') return true;
+    return cellKept(f.dataset.gkGuiFirst) !== cellKept(f.value);
+  }
   function rowChanged(row) { return Array.prototype.some.call(row.querySelectorAll(FIELDS), changed); }
   function onNow(row) { var v = levelNow(row); return !!v && !isOff(v); }
   function warned(row) { return row.hasAttribute('data-gk-gui-warning'); }
@@ -329,9 +336,13 @@
   // what changed in a row's values, one row of the list per value: the setting's name and the value's label
   // (words.value_label), and what stood and what stands in the value's own words: a select's option, Ja or Nej for a
   // flag, a choice's word (data-gk-gui-word), a number or a text as it is. A list (data-gk-gui-value-kind list) says
-  // the entries taken out and those put in; a table (data-gk-gui-value-kind table) says only that it changed. A
-  // value's block is found by its own mark
-  // (data-gk-gui-value-label), never by its text
+  // the entries taken out (the minus sign before each) and those put in (+ before each), the sign carrying the meaning. A table
+  // (data-gk-gui-value-kind table) says a row per cell that changed, as the event log does: each field carries its
+  // cell's name (data-gk-gui-cell-label, added to the label unless it is the value's own) and the page's word for its
+  // empty choice (data-gk-gui-cell-empty, said for an empty cell in place of the empty option's text); a cell touched
+  // and set back, or changed only in what counts as empty, is no row. A table whose fields carry no cell marks says only
+  // that it changed. A value's block is found by its own mark (data-gk-gui-value-label), never by its text
+  var MINUS = '\u2212';
   Page.prototype.valueRows = function (row, name) {
     var w = this.words, out = [], seen = {}, blocks = [];
     var vals = row.querySelector('.gk-gui-stuff-form-page-values');
@@ -341,41 +352,58 @@
       return o ? o.textContent.trim() : v;
     }
     // a value that was or is empty is said as core's "(ingen)" (words.none), as the event log says it, so that the
-    // box shows both sides of the change
-    function say(v) { var s = String(v == null ? '' : v).trim(); return s || w.none || ''; }
+    // box shows both sides of the change; a table's cell by the page's word for its empty choice
+    function say(v, empty) { var s = String(v == null ? '' : v).trim(); return s || (empty != null ? empty : (w.none || '')); }
     function word(r) { return r ? (r.getAttribute('data-gk-gui-word') || r.value) : ''; }
+    function blank(v) { var s = String(v == null ? '' : v).trim(); return s === '' || s === '0'; }
     vals.querySelectorAll(FIELDS).forEach(function (f) {
       if (!changed(f)) return;
       var block = f.closest('[data-gk-gui-value-label]');
       if (!block || !vals.contains(block)) return;
-      var label = fill(w.value_label, { name: name, value: block.getAttribute('data-gk-gui-value-label') });
+      var own = block.getAttribute('data-gk-gui-value-label');
+      var label = fill(w.value_label, { name: name, value: own });
       var kind = block.getAttribute('data-gk-gui-value-kind');
       if (kind === 'list' && f.tagName === 'TEXTAREA') {
         // a list: the entries taken out struck through, those put in after the arrow, each once in its order
         var lines = function (s) { return String(s || '').split(/\r?\n/).map(function (x) { return x.trim(); }).filter(Boolean); };
         var before = lines(f.dataset.gkGuiFirst), after = lines(f.value);
         var gone = before.filter(function (x) { return after.indexOf(x) < 0; }), come = after.filter(function (x) { return before.indexOf(x) < 0; });
-        out.push(gone.length || come.length ? { label: label, from: gone.join(', '), to: come.join(', ') } : { label: label, value: w.values_changed || '' });
+        var sign = function (s, list) { return list.map(function (x) { return s + ' ' + x; }).join(', '); };
+        out.push(gone.length || come.length ? { label: label, from: sign(MINUS, gone), to: sign('+', come) } : { label: label, value: w.values_changed || '' });
         return;
       }
-      if (kind) {
+      var cell = kind === 'table' ? f.getAttribute('data-gk-gui-cell-label') : null;
+      if (kind && cell == null) {
         if (blocks.indexOf(block) < 0) { blocks.push(block); out.push({ label: label, value: w.values_changed || '' }); }
         return;
+      }
+      var empty = null;
+      if (cell != null) {
+        empty = f.getAttribute('data-gk-gui-cell-empty') || '';
+        if (cell && cell !== own) label = label + ' \u203a ' + cell;
+      }
+      // a table's cell: what stood and what stands, a row only when they differ once what counts as empty is left out
+      function push(from, to, wasBlank, nowBlank) {
+        if (cell != null && (wasBlank && nowBlank || from === to)) return;
+        out.push({ label: label, from: from, to: to });
       }
       if (f.type === 'radio') {
         if (seen[f.name]) return;
         seen[f.name] = true;
         var group = Array.prototype.filter.call(block.querySelectorAll('input[type=radio]'), function (r) { return r.name === f.name; });
         var was = group.filter(function (r) { return r.dataset.gkGuiFirst === 'true'; })[0], now = group.filter(function (r) { return r.checked; })[0];
-        if (was !== now) out.push({ label: label, from: say(word(was)), to: say(word(now)) });
+        if (was !== now) push(say(word(was), empty), say(word(now), empty), !was, !now);
         return;
       }
       if (f.type === 'checkbox') {
-        out.push({ label: label, from: f.dataset.gkGuiFirst === 'true' ? w.yes : w.no, to: f.checked ? w.yes : w.no });
+        push(f.dataset.gkGuiFirst === 'true' ? w.yes : w.no, f.checked ? w.yes : w.no, false, false);
       } else if (f.tagName === 'SELECT') {
-        out.push({ label: label, from: say(optionText(f, f.dataset.gkGuiFirst)), to: say(optionText(f, f.value)) });
+        var first = f.dataset.gkGuiFirst;
+        // an empty cell is the page's word for the empty choice, not the empty option's text
+        var shown = function (v) { return cell != null && blank(v) ? '' : optionText(f, v); };
+        push(say(shown(first), empty), say(shown(f.value), empty), cell != null && blank(first), cell != null && blank(f.value));
       } else {
-        out.push({ label: label, from: say(f.dataset.gkGuiFirst), to: say(f.value) });
+        push(say(f.dataset.gkGuiFirst, empty), say(f.value, empty), cell != null && blank(f.dataset.gkGuiFirst), cell != null && blank(f.value));
       }
     });
     return out;

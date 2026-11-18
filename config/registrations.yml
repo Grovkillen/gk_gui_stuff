@@ -56,6 +56,7 @@ color_roles:            # theme_engine and the palette give the colour (--gk-rol
   - {key: divider, group: ui, label: label_gk_gui_stuff_role_divider}
   - {key: shadow, group: ui, label: label_gk_gui_stuff_role_shadow}
   - {key: code, group: ui, label: label_gk_gui_stuff_role_code}
+  - {key: code-frame, group: ui, label: label_gk_gui_stuff_role_code_frame}  # the dashed frame around code in running text under the pointer and the focus; no -soft
   - {key: possible, group: ui, label: label_gk_gui_stuff_role_possible}      # the dashed pill: possible, not chosen
   - {key: effect, group: ui, label: label_gk_gui_stuff_role_effect}          # where a change shows (the marker, the flags new, changed, gone); with -soft, info by default
   - {key: text, group: ui, label: label_gk_gui_stuff_role_text}              # the body text; its -soft is the secondary text (a hint, a sub-line), a tone of text and never a background

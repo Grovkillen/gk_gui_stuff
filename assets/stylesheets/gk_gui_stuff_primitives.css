@@ -40,11 +40,13 @@
   --gk-role-alert-alarm-row: var(--oc-red-0, #fff5f5);
   /* the neutral interface: the surface of a box, the frame around boxes, popovers and fields, a divider between rows,
      the shadow's base colour (each rule mixes it to its own strength), code text as a chip (its edge and, -soft, its
-     background) and what is possible but not chosen (the dashed pill); their defaults are the values the rules had
-     before */
+     background), the dashed frame around code in running text under the pointer and the keyboard's focus (code-frame,
+     no -soft, 3:1 against the surface) and what is possible but not chosen (the dashed pill); their defaults are the
+     values the rules had before */
   --gk-role-ui-surface: var(--oc-white, #fff);           --gk-role-ui-divider: var(--oc-gray-3, #dee2e6);
   --gk-role-ui-frame: var(--oc-gray-4, #ced4da);         --gk-role-ui-shadow: var(--oc-black, #000);
   --gk-role-ui-code: var(--oc-gray-4, #ced4da);          --gk-role-ui-code-soft: var(--oc-gray-1, #f1f3f5);
+  --gk-role-ui-code-frame: var(--oc-gray-7, #495057);
   --gk-role-ui-possible: var(--oc-gray-6, #868e96);
   /* the squares of the chequered ground under an example (the library, the style guide); no -soft */
   --gk-role-ui-canvas: var(--oc-gray-2, #e9ecef);

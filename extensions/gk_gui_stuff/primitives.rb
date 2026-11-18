@@ -32,10 +32,11 @@ module GkGuiStuff
     # secondary text (a tone of text, never a background); raised: a ground a step off the surface; link: a link inside
     # the instance; on-fill: text and marks on a filled role; canvas: the squares of the chequered ground under an
     # example; neutral: a primitive that has no role or category (a chosen pill's fill, the dot, the ring, a bar), with
-    # -soft the ground under it. diff: what a diff added and took away, each with -soft. band: each band and its line
+    # -soft the ground under it; code-frame: the dashed frame around code in running text under the pointer and the
+    # focus, no -soft. diff: what a diff added and took away, each with -soft. band: each band and its line
     # (<band>-line), no -soft
     ROLES = { 'category' => CATEGORIES.map(&:to_s), 'alert' => ALERTS + %w[alarm-on-dark alarm-row],
-              'ui' => %w[admin admin-on-dark muted muted-fill choice surface frame divider shadow code possible effect text raised link on-fill canvas neutral],
+              'ui' => %w[admin admin-on-dark muted muted-fill choice surface frame divider shadow code code-frame possible effect text raised link on-fill canvas neutral],
               'save' => SAVE_STATES + %w[saved-strong], 'logic' => %w[and or not], 'band' => BANDS + BAND_LINES, 'line' => LINE_ROLES, 'link' => %w[external],
               'diff' => %w[added removed] }.freeze
     SOFT = { 'category' => true, 'alert' => ALERTS, 'ui' => %w[admin choice code effect text neutral], 'link' => %w[external], 'diff' => true }.freeze

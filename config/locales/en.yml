@@ -182,6 +182,7 @@ en:
   label_gk_gui_stuff_help_wiki_project: "The wiki's project"
   label_gk_gui_stuff_help_wiki_page: "Wiki page"
   text_gk_gui_stuff_help_wiki_page: "Empty: the wiki's start page."
+  label_gk_gui_stuff_help_wiki_start: "the wiki's start page"
   label_gk_gui_stuff_mod_flash_timeout: "Redmine's green box goes away by itself"
   text_gk_gui_stuff_mod_flash_timeout: "Successful update and the like go away after a time, with a circle counting down (a click pauses) and a cross. Errors and warnings always stay."
   label_gk_gui_stuff_mod_help_link: "Where help leads"
@@ -478,6 +479,13 @@ en:
   gk_gui_stuff_personal: "My pages"
   # The person's own placement of the buttons
   label_gk_gui_stuff_my_placement_default: "By the system setting (%{which})"
+  label_gk_gui_stuff_placement_by_system: "By the system setting"
+  # The instance's own placement of the buttons: empty follows the plugin that owns the button
+  label_gk_gui_stuff_plugin_placement_default: "By the plugin's default (%{which})"
+  label_gk_gui_stuff_placement_by_plugin: "By the plugin's default"
+  # Core's own buttons on the instance's row: no plugin owns them, so empty follows Redmine's own drawing
+  label_gk_gui_stuff_core_placement_default: "By Redmine's default (%{which})"
+  label_gk_gui_stuff_placement_by_core: "By Redmine's default"
   label_gk_gui_stuff_layout_sidebar: "Sidebar"
   label_gk_gui_stuff_layout_header: "Header"
   label_gk_gui_stuff_layout_header_tall: "As usual"
@@ -883,6 +891,7 @@ en:
   label_gk_gui_stuff_role_divider: "Line between rows"
   label_gk_gui_stuff_role_shadow: "Shadow"
   label_gk_gui_stuff_role_code: "Code text"
+  label_gk_gui_stuff_role_code_frame: "Frame around code in running text, under the pointer and focus"
   label_gk_gui_stuff_role_possible: "Possible, not chosen"
   label_gk_gui_stuff_role_effect: "Where a change shows"
   text_gk_gui_stuff_pill_type: "Type: %{name}"

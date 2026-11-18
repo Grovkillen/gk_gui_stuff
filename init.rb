@@ -19,6 +19,7 @@ require_relative 'extensions/gk_gui_stuff/external_rel'
 # The wiki macro {{gk_link_preview(url)}}
 require_relative 'extensions/gk_gui_stuff/external_macro'
 require_relative 'extensions/gk_gui_stuff/appearance' # The appearance settings in records' register
+require_relative 'extensions/gk_gui_stuff/table_cells' # The words of the table values' cells, for the register and the tables
 require_relative 'extensions/gk_gui_stuff/footprints' # What each of them changes on the pages, as data for the register
 require_relative 'extensions/gk_gui_stuff/choices_box' # The box of choices above a list's rows
 require_relative 'extensions/gk_gui_stuff/elements'
@@ -57,7 +58,7 @@ Redmine::Plugin.register :gk_gui_stuff do
   name        'GK GUI Stuff'
   author      'Jimmy Westberg'
   description 'Collection of small, switchable UI modules'
-  version     '1.05.000'
+  version     '1.06.000'
   requires_redmine version_or_higher: '6.0.0'
 
   # Every menu entry is there only with GK Compat (gate.rb)

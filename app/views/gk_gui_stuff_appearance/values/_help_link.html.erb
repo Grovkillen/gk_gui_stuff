@@ -1,25 +1,30 @@
 <%# help_link: the three ways Help can lead (Redmine's own guide, an address, a wiki page here) as core's radio buttons,
     with the address, the wiki's project and its page under them. name: the value's field name, value: the stored
-    table (kind, url, wiki_project, wiki_page) %>
+    table (kind, url, wiki_project, wiki_page), cells: the cells' words (TableCells), the same as the event log's. A
+    stored project the page no longer offers (archived, or without its wiki) stays chosen, by its name %>
+<% cells = local_assigns[:cells] || {} %>
+<% c = GkGuiStuff::TableCells %>
 <% kind = %w[core url wiki].include?(value['kind'].to_s) ? value['kind'].to_s : 'core' %>
 <div class="gk-gui-stuff-form-page-value" role="radiogroup" aria-label="<%= l(:label_gk_gui_stuff_help_kind) %>">
   <span class="gk-gui-stuff-form-page-value-label"><%= l(:label_gk_gui_stuff_help_kind) %>:</span>
   <% %w[core url wiki].each do |k| %>
-    <label class="inline"><%= radio_button_tag "#{name}[kind]", k, kind == k, id: nil, disabled: disabled %> <%= l(:"label_gk_gui_stuff_help_kind_#{k}") %></label>
+    <label class="inline"><%= radio_button_tag "#{name}[kind]", k, kind == k, id: nil, disabled: disabled,
+                                               data: c.marks(cells, 'kind').merge(gk_gui_word: l(:"label_gk_gui_stuff_help_kind_#{k}")) %> <%= l(:"label_gk_gui_stuff_help_kind_#{k}") %></label>
   <% end %>
 </div>
 <div class="gk-gui-stuff-form-page-value">
   <label for="gk-gui-stuff-help-url"><%= l(:label_gk_gui_stuff_help_url) %></label>
-  <%= text_field_tag "#{name}[url]", value['url'].to_s, size: 50, maxlength: 500, id: 'gk-gui-stuff-help-url', disabled: disabled %>
+  <%= text_field_tag "#{name}[url]", value['url'].to_s, size: 50, maxlength: 500, id: 'gk-gui-stuff-help-url', disabled: disabled, data: c.marks(cells, 'url') %>
   <span class="gk-gui-stuff-form-page-quiet"><%= l(:text_gk_gui_stuff_help_url) %></span>
 </div>
 <div class="gk-gui-stuff-form-page-value">
   <label for="gk-gui-stuff-help-wiki-project"><%= l(:label_gk_gui_stuff_help_wiki_project) %></label>
-  <%= select_tag "#{name}[wiki_project]", options_for_select([['', '']] + Project.active.has_module(:wiki).order(:name).map { |p| [p.name, p.identifier] }, value['wiki_project'].to_s),
-                 id: 'gk-gui-stuff-help-wiki-project', disabled: disabled %>
+  <% project = cells['wiki_project'] || { choices: Project.active.has_module(:wiki).order(:name).map(&:identifier), words: Project.active.has_module(:wiki).to_h { |p| [p.identifier, p.name] } } %>
+  <%= select_tag "#{name}[wiki_project]", options_for_select(c.options_for(project, value['wiki_project'], ''), value['wiki_project'].to_s),
+                 id: 'gk-gui-stuff-help-wiki-project', disabled: disabled, data: c.marks(cells, 'wiki_project') %>
 </div>
 <div class="gk-gui-stuff-form-page-value">
   <label for="gk-gui-stuff-help-wiki-page"><%= l(:label_gk_gui_stuff_help_wiki_page) %></label>
-  <%= text_field_tag "#{name}[wiki_page]", value['wiki_page'].to_s, size: 30, maxlength: 200, id: 'gk-gui-stuff-help-wiki-page', disabled: disabled %>
+  <%= text_field_tag "#{name}[wiki_page]", value['wiki_page'].to_s, size: 30, maxlength: 200, id: 'gk-gui-stuff-help-wiki-page', disabled: disabled, data: c.marks(cells, 'wiki_page') %>
   <span class="gk-gui-stuff-form-page-quiet"><%= l(:text_gk_gui_stuff_help_wiki_page) %></span>
 </div>

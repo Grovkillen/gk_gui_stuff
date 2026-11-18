@@ -44,11 +44,12 @@
   --gk-role-alert-alarm-row: #532729; /* gk-u U5: red 9 darkened 70 % towards gray 9, carries the muted text at 4.5:1; no Open Color level has it */
   /* the neutral interface: the surface, the ground a step off it, the squares under an example, the frame around
      boxes, popovers and fields (3:1 against both grounds), a divider between rows, the code chip and what is possible
-     but not chosen */
+     but not chosen; the frame around code in running text keeps the level it had, which holds 3:1 on the dark surface */
   --gk-role-ui-surface: var(--oc-gray-9, #212529);       --gk-role-ui-raised: var(--oc-gray-8, #343a40);
   --gk-role-ui-canvas: var(--oc-gray-8, #343a40);        --gk-role-ui-divider: var(--oc-gray-7, #495057);
   --gk-role-ui-frame: var(--oc-gray-6, #868e96);         --gk-role-ui-possible: var(--oc-gray-5, #adb5bd);
   --gk-role-ui-code: var(--oc-gray-6, #868e96);          --gk-role-ui-code-soft: var(--oc-gray-8, #343a40);
+  --gk-role-ui-code-frame: var(--oc-gray-6, #868e96);
   /* a primitive that has no role or category: light, so that the dark ink on a fill holds on it and it holds as text,
      edge and mark on both grounds; its soft tone the ground under it (a bar's track) */
   --gk-role-ui-neutral: var(--oc-gray-4, #ced4da);         --gk-role-ui-neutral-soft: var(--oc-gray-7, #495057);

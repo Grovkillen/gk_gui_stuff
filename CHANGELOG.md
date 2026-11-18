@@ -2,6 +2,23 @@
 
 All notable changes to GK GUI Stuff are documented in this file.
 
+## 1.06.000 (2026-11-17)
+
+### Changed
+
+* Save's popover lists a table value's changes cell by cell, in the same words and counted the same way as the event log. A cell changed and set back, changed only in spaces or changed between empty values is no row and asks for no reason.
+* The table values (button placements, where help leads, the status of Save as done, declutter, administration rows, flag icons) give GK Records the names and words of their cells, and draw their choices from the same words. A stored value the page no longer offers stays chosen.
+* The help link names a wiki project by its name, also an archived one.
+* The instance's row of button placements reads "By the plugin's default" for the empty choice, on Appearance and in the event log. A person's row still reads "By the system setting".
+* An empty table cell without a word of its own (the address, the wiki project, an own group name, a name, a flag icon) reads in GK Records' word "empty". This plugin's own word for it is removed.
+* The dashed frame around code in running text, under the pointer and the keyboard's focus, has its own colour role, `--gk-role-ui-code-frame`. It defaults to the colour it had before, in light and dark mode, and holds 3:1 against the surface. It is declared, registered and shown in the style guide's roles like the other roles.
+* Redmine's own buttons on the instance's row of button placements read "By Redmine's default" for the empty choice, on Appearance and in the event log. The plugins' buttons still read "By the plugin's default", and a person's row "By the system setting".
+* The dashed frame around code in running text is one step darker in light mode (`--gk-role-ui-code-frame` defaults to Open Color gray 7), so that it holds 3:1 against both the white surface and Redmine's grey ground. Dark mode is unchanged.
+
+### Fixed
+
+* A person's own table of placements starts from the person's own choices. A first save no longer copies the administrator's placements or logs a row for every untouched button.
+
 ## 1.05.000 (2026-11-16)
 
 ### Added

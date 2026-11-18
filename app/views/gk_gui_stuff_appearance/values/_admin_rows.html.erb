@@ -1,7 +1,8 @@
 <%# admin_groups: each administration row's group tags and its own word in the language at hand; the words in other
     languages are kept as they are (fields' Översättningar has them). name: the value's field name, value: the stored
-    table %>
+    table, cells: the cells' words (TableCells), the same as the event log's %>
 <% ag = GkGuiStuff::AdminGroups %>
+<% cells = local_assigns[:cells] || {} %>
 <p class="gk-gui-stuff-form-page-quiet"><%= l(:text_gk_gui_stuff_ag_rows, groups: (ag::GROUPS + [ag::OTHER]).map { |k| ag.label(k) }.join(', ')) %></p>
 <table class="list gk-gui-stuff-ag-settings">
   <thead><tr><th><%= l(:label_gk_gui_stuff_ag_row) %></th><th><%= l(:label_gk_gui_stuff_ag_group_now) %></th><th><%= l(:label_gk_gui_stuff_ag_tags) %></th><th><%= l(:label_gk_gui_stuff_ag_caption) %></th></tr></thead>
@@ -15,9 +16,11 @@
       <td class="name"><%= core_word %></td>
       <td class="group"><%= content_tag('span', ag.label(ag.group(item_name)), class: "gk-gui-stuff-ag-group gk-gui-stuff-ag-group-#{ag.group(item_name)}") %></td>
       <td class="tags"><%= text_field_tag "#{name}[#{item_name}][tags]", r['tags'].to_s, size: 24, id: nil, disabled: disabled,
-                             placeholder: ag.default_tags(item_name).map { |t| ag.label(ag.key_for(t)) }.join(', '), 'aria-label': "#{core_word}: #{l(:label_gk_gui_stuff_ag_tags)}" %></td>
+                             placeholder: ag.default_tags(item_name).map { |t| ag.label(ag.key_for(t)) }.join(', '), 'aria-label': "#{core_word}: #{l(:label_gk_gui_stuff_ag_tags)}",
+                             data: GkGuiStuff::TableCells.marks(cells, item_name, 'tags') %></td>
       <td class="caption"><%= text_field_tag "#{name}[#{item_name}][caption][#{current_language}]", own[current_language.to_s].to_s, size: 24, id: nil, disabled: disabled,
-                             placeholder: l(:"gk_gui_stuff_ag_caption_#{item_name}", default: core_word), 'aria-label': "#{core_word}: #{l(:label_gk_gui_stuff_ag_caption)}" %>
+                             placeholder: l(:"gk_gui_stuff_ag_caption_#{item_name}", default: core_word), 'aria-label': "#{core_word}: #{l(:label_gk_gui_stuff_ag_caption)}",
+                             data: GkGuiStuff::TableCells.marks(cells, item_name, 'caption', current_language) %>
         <% own.except(current_language.to_s).each do |lang, text| %><%= hidden_field_tag "#{name}[#{item_name}][caption][#{lang}]", text, id: nil, disabled: disabled %><% end %></td>
     </tr>
   <% end %>
